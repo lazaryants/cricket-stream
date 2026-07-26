@@ -1,5 +1,7 @@
 from datetime import datetime
 from uuid import UUID
+from app.models.base import BaseModel
+from app.models.enums import StreamStatus
 
 from sqlalchemy import (
     String,
@@ -13,9 +15,6 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship
 )
-
-from app.models.base import BaseModel
-from app.models.enums import StreamStatus
 
 
 class StreamSession(BaseModel):

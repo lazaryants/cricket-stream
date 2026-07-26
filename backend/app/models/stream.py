@@ -76,5 +76,6 @@ class Stream(BaseModel):
 
     sessions = relationship(
         "StreamSession",
-        back_populates="stream"
+        back_populates="stream",
+        cascade="all, delete-orphan",
     )
