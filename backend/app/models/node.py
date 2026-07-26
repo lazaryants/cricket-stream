@@ -7,7 +7,14 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import relationship
+
 from app.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from app.models.stream import Stream
 
 class Node(BaseModel):
     __tablename__ = "nodes"
@@ -40,3 +47,6 @@ class Node(BaseModel):
         nullable=False,
     )
 
+    streams: Mapped[list["Stream"]] = relationship(
+        back_populates="node"
+    )

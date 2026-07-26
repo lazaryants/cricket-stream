@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from app.api.v1 import nodes
+from app.api.v1 import streams
+from app.api.v1 import sessions
 from app.core.config import settings
 
 app = FastAPI(
@@ -8,7 +10,17 @@ app = FastAPI(
 )
 
 app.include_router(
+    streams.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
     nodes.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    sessions.router,
     prefix="/api/v1",
 )
 
