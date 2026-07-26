@@ -1,16 +1,15 @@
 from fastapi import FastAPI
-
+from app.core.config import settings
 
 app = FastAPI(
-    title="Cricket Stream Platform",
-    version="0.1.0",
+    title=settings.app_name,
+    version=settings.app_version,
 )
 
-
 @app.get("/api/v1/health")
-async def health_check():
+async def health():
     return {
         "status": "ok",
-        "service": "cricket-stream-backend",
-        "version": "0.1.0",
+        "service": settings.app_name,
+        "version": settings.app_version,
     }

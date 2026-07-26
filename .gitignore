@@ -37,3 +37,17 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment
+backend/.env
+
+# Python
+backend/.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
