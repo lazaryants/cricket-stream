@@ -5,19 +5,26 @@ from typing import Any
 
 class StreamMetricsStore:
     def __init__(self):
-        self._metrics: dict[int, dict[str, Any]] = {}
+        self._metrics: dict[
+            int,
+            dict[str, Any],
+        ] = {}
 
     def initialize(
         self,
         stream_id: int,
         pid: int,
     ) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(
+            timezone.utc
+        )
 
         self._metrics[stream_id] = {
             "stream_id": stream_id,
             "pid": pid,
             "running": True,
+
+            # FFmpeg progress
             "frame": 0,
             "fps": 0.0,
             "bitrate": None,
@@ -31,10 +38,28 @@ class StreamMetricsStore:
             "dup_frames": 0,
             "drop_frames": 0,
             "progress": "starting",
+
+            # Input video
+            "video_codec": None,
+            "video_profile": None,
+            "pixel_format": None,
+            "width": None,
+            "height": None,
+            "resolution": None,
+            "source_fps": None,
+
+            # Input audio
+            "audio_codec": None,
+            "sample_rate": None,
+            "audio_channels": None,
+            "channel_layout": None,
+
+            # Runtime
             "started_at": now,
             "updated_at": now,
             "stopped_at": None,
             "exit_code": None,
+            "uptime_seconds": 0.0,
         }
 
     def update(
@@ -47,19 +72,24 @@ class StreamMetricsStore:
                 "stream_id": stream_id,
             }
 
-        self._metrics[stream_id].update(
-            values
-        )
+        self._metrics[
+            stream_id
+        ].update(values)
+
         self._metrics[stream_id][
             "updated_at"
-        ] = datetime.now(timezone.utc)
+        ] = datetime.now(
+            timezone.utc
+        )
 
     def mark_stopped(
         self,
         stream_id: int,
         exit_code: int | None,
     ) -> None:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(
+            timezone.utc
+        )
 
         self.update(
             stream_id,
@@ -91,11 +121,16 @@ class StreamMetricsStore:
         if metrics is None:
             return None
 
-        return deepcopy(metrics)
+        return deepcopy(
+            metrics
+        )
 
     def get_all(
         self,
-    ) -> dict[int, dict[str, Any]]:
+    ) -> dict[
+        int,
+        dict[str, Any],
+    ]:
         return deepcopy(
             self._metrics
         )
