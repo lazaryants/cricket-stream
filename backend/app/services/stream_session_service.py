@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.engine.manager import stream_manager
+from app.engine.metrics import metrics_store
 from app.models.enums import (
     StreamSessionStatus,
     StreamStatus,
@@ -282,4 +283,7 @@ class StreamSessionService:
             "manager_status": manager_status,
             "process_id": process_id,
             "process_alive": process_alive,
+            "metrics": metrics_store.get(
+                stream_id
+            ),
         }

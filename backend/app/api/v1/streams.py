@@ -148,6 +148,7 @@ async def get_stream_status(
         ),
         "enabled": stream.enabled,
         "auto_start": stream.auto_start,
+        "metrics": runtime["metrics"],
         "latest_session": session_data,
     }
 
