@@ -1,43 +1,55 @@
-from contextlib import asynccontextmanager
 import asyncio
+from contextlib import (
+    asynccontextmanager,
+)
+from contextlib import suppress
 
 from fastapi import FastAPI
 
 from app.api.v1 import nodes
-from app.api.v1 import streams
 from app.api.v1 import sessions
-
+from app.api.v1 import sources
+from app.api.v1 import streams
 from app.core.config import settings
-
 from app.engine.lifecycle import (
+    monitor_streams,
     restore_streams,
     shutdown_streams,
-    monitor_streams,
 )
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-
+async def lifespan(
+    app: FastAPI,
+):
     print(
-        "[LIFECYCLE] Backend starting"
+        "[LIFECYCLE] Backend starting",
+        flush=True,
     )
 
     await restore_streams()
 
     monitor_task = asyncio.create_task(
-        monitor_streams()
+        monitor_streams(),
+        name="stream-supervisor",
     )
 
-    yield
+    try:
+        yield
+    finally:
+        print(
+            "[LIFECYCLE] Backend stopping",
+            flush=True,
+        )
 
-    print(
-        "[LIFECYCLE] Backend stopping"
-    )
+        monitor_task.cancel()
 
-    monitor_task.cancel()
+        with suppress(
+            asyncio.CancelledError
+        ):
+            await monitor_task
 
-    await shutdown_streams()
+        await shutdown_streams()
 
 
 app = FastAPI(
@@ -49,6 +61,11 @@ app = FastAPI(
 
 app.include_router(
     streams.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    sources.router,
     prefix="/api/v1",
 )
 
@@ -65,7 +82,6 @@ app.include_router(
 
 @app.get("/api/v1/health")
 async def health():
-
     return {
         "status": "ok",
         "service": settings.app_name,
