@@ -14,11 +14,15 @@ engine = create_async_engine(
 )
 
 
-SessionLocal = async_sessionmaker(
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     expire_on_commit=False,
     class_=AsyncSession,
 )
+
+
+# Backward compatibility
+SessionLocal = AsyncSessionLocal
 
 
 class Base(DeclarativeBase):

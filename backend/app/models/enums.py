@@ -9,22 +9,23 @@ class ProviderType(str, Enum):
     CUSTOM = "custom"
     UNKNOWN = "unknown"
 
-
 class StreamStatus(str, Enum):
     DRAFT = "draft"
     READY = "ready"
     STARTING = "starting"
     RUNNING = "running"
+    RESTARTING = "restarting"
     STOPPING = "stopping"
     STOPPED = "stopped"
     ERROR = "error"
 
-
-class SessionStatus(str, Enum):
-    STARTING = "starting"
-    RUNNING = "running"
-    STOPPED = "stopped"
-    FAILED = "failed"
+class StreamSessionStatus(str, Enum):
+    draft = "draft"
+    starting = "starting"
+    running = "running"
+    stopping = "stopping"
+    stopped = "stopped"
+    error = "error"
 
 
 class EventType(str, Enum):
