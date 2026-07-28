@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 from app.api.v1 import nodes
 from app.api.v1 import sessions
+from app.api.v1 import auth
 from app.api.v1 import sources
 from app.api.v1 import streams
 from app.core.config import settings
@@ -59,6 +60,10 @@ app = FastAPI(
 )
 
 
+app.include_router(
+    auth.router,
+    prefix="/api/v1",
+)
 app.include_router(
     streams.router,
     prefix="/api/v1",
