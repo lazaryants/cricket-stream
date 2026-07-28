@@ -9,6 +9,7 @@ class ProviderType(str, Enum):
     CUSTOM = "custom"
     UNKNOWN = "unknown"
 
+
 class StreamStatus(str, Enum):
     DRAFT = "draft"
     READY = "ready"
@@ -19,6 +20,7 @@ class StreamStatus(str, Enum):
     STOPPED = "stopped"
     ERROR = "error"
 
+
 class StreamSessionStatus(str, Enum):
     draft = "draft"
     starting = "starting"
@@ -26,6 +28,12 @@ class StreamSessionStatus(str, Enum):
     stopping = "stopping"
     stopped = "stopped"
     error = "error"
+
+
+class UserRole(str, Enum):
+    VIEWER = "viewer"
+    OPERATOR = "operator"
+    ADMIN = "admin"
 
 
 class EventType(str, Enum):
