@@ -1,18 +1,34 @@
+from typing import Any
+
 from fastapi import (
     APIRouter,
+    Body,
     Depends,
     HTTPException,
+    Response,
+    status,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+)
 
+from app.core.auth_dependencies import (
+    require_admin,
+    require_operator,
+    require_viewer,
+)
 from app.core.dependencies import get_db
 from app.engine.manager import stream_manager
 from app.models.enums import (
     StreamSessionStatus,
+    UserRole,
 )
+from app.models.user import User
 from app.schemas.stream import (
+    StreamAdminUpdate,
     StreamCreate,
-    StreamResponse,
+    StreamOperatorUpdate,
 )
 from app.services.stream_service import (
     StreamService,
@@ -28,55 +44,286 @@ router = APIRouter(
 )
 
 
-@router.get(
-    "",
-    response_model=list[StreamResponse],
-)
+def validation_http_exception(
+    exc: ValidationError,
+) -> HTTPException:
+    return HTTPException(
+        status_code=(
+            status.HTTP_422_UNPROCESSABLE_ENTITY
+        ),
+        detail=exc.errors(),
+    )
+
+
+@router.get("")
 async def list_streams(
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_viewer
+    ),
 ):
-    return await StreamService.get_all(
+    streams = await StreamService.get_all(
         db
+    )
+
+    return (
+        StreamService
+        .serialize_many_for_user(
+            streams,
+            current_user,
+        )
     )
 
 
 @router.post(
     "",
-    response_model=StreamResponse,
+    status_code=(
+        status.HTTP_201_CREATED
+    ),
 )
 async def create_stream(
     data: StreamCreate,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_admin
+    ),
 ):
-    return await StreamService.create(
+    stream = await StreamService.create(
         db,
         data,
+    )
+
+    return (
+        StreamService.serialize_for_user(
+            stream,
+            current_user,
+        )
     )
 
 
 @router.get(
     "/{stream_id}",
-    response_model=StreamResponse,
 )
 async def get_stream(
     stream_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_viewer
+    ),
 ):
-    service = StreamSessionService(
-        db
-    )
-
-    stream = await service.get_stream(
-        stream_id
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
     )
 
     if stream is None:
         raise HTTPException(
-            status_code=404,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail="Stream not found",
         )
 
-    return stream
+    return (
+        StreamService.serialize_for_user(
+            stream,
+            current_user,
+        )
+    )
+
+
+@router.patch(
+    "/{stream_id}",
+)
+async def update_stream(
+    stream_id: int,
+    payload: dict[str, Any] = Body(
+        ...
+    ),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_operator
+    ),
+):
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
+    )
+
+    if stream is None:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="Stream not found",
+        )
+
+    try:
+        if (
+            current_user.is_superuser
+            or current_user.role
+            == UserRole.ADMIN
+        ):
+            update_data = (
+                StreamAdminUpdate
+                .model_validate(
+                    payload
+                )
+            )
+        else:
+            update_data = (
+                StreamOperatorUpdate
+                .model_validate(
+                    payload
+                )
+            )
+
+    except ValidationError as exc:
+        raise validation_http_exception(
+            exc
+        ) from exc
+
+    values = update_data.model_dump(
+        exclude_unset=True
+    )
+
+    if not values:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_422_UNPROCESSABLE_ENTITY
+            ),
+            detail=(
+                "No update fields supplied"
+            ),
+        )
+
+    # Не разрешаем менять конфигурацию
+    # активного процесса. Сначала поток
+    # необходимо остановить.
+    runtime_service = (
+        StreamSessionService(
+            db
+        )
+    )
+
+    running_session = (
+        await runtime_service
+        .get_running_session(
+            stream_id
+        )
+    )
+
+    process_alive = False
+
+    if running_session is not None:
+        process_alive = (
+            stream_manager.pid_alive(
+                running_session.process_id
+            )
+        )
+
+    if process_alive:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
+            detail=(
+                "Stop the stream before "
+                "changing its configuration"
+            ),
+        )
+
+    stream = await StreamService.update(
+        db,
+        stream,
+        values,
+    )
+
+    return (
+        StreamService.serialize_for_user(
+            stream,
+            current_user,
+        )
+    )
+
+
+@router.delete(
+    "/{stream_id}",
+    status_code=(
+        status.HTTP_204_NO_CONTENT
+    ),
+)
+async def delete_stream(
+    stream_id: int,
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_admin
+    ),
+):
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
+    )
+
+    if stream is None:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="Stream not found",
+        )
+
+    session_service = (
+        StreamSessionService(
+            db
+        )
+    )
+
+    running_session = (
+        await session_service
+        .get_running_session(
+            stream_id
+        )
+    )
+
+    if running_session is not None:
+        process_alive = (
+            stream_manager.pid_alive(
+                running_session.process_id
+            )
+        )
+
+        if process_alive:
+            raise HTTPException(
+                status_code=(
+                    status.HTTP_409_CONFLICT
+                ),
+                detail=(
+                    "Stop the stream before "
+                    "deleting it"
+                ),
+            )
+
+    await StreamService.delete(
+        db,
+        stream,
+    )
+
+    return Response(
+        status_code=(
+            status.HTTP_204_NO_CONTENT
+        )
+    )
 
 
 @router.get(
@@ -84,19 +331,28 @@ async def get_stream(
 )
 async def get_stream_status(
     stream_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_viewer
+    ),
 ):
     service = StreamSessionService(
         db
     )
 
-    runtime = await service.get_runtime_status(
-        stream_id
+    runtime = (
+        await service.get_runtime_status(
+            stream_id
+        )
     )
 
     if runtime is None:
         raise HTTPException(
-            status_code=404,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail="Stream not found",
         )
 
@@ -108,8 +364,12 @@ async def get_stream_status(
     if session is not None:
         session_data = {
             "id": session.id,
-            "uuid": str(session.uuid),
-            "status": session.status.value,
+            "uuid": str(
+                session.uuid
+            ),
+            "status": (
+                session.status.value
+            ),
             "process_id": (
                 session.process_id
             ),
@@ -132,8 +392,13 @@ async def get_stream_status(
 
     return {
         "stream_id": stream.id,
-        "uuid": str(stream.uuid),
+        "uuid": str(
+            stream.uuid
+        ),
         "name": stream.name,
+        "provider": (
+            stream.provider.value
+        ),
         "database_status": (
             stream.status.value
         ),
@@ -147,7 +412,9 @@ async def get_stream_status(
             runtime["process_id"]
         ),
         "enabled": stream.enabled,
-        "auto_start": stream.auto_start,
+        "auto_start": (
+            stream.auto_start
+        ),
         "metrics": runtime["metrics"],
         "latest_session": session_data,
     }
@@ -158,7 +425,12 @@ async def get_stream_status(
 )
 async def start_stream(
     stream_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_operator
+    ),
 ):
     service = StreamSessionService(
         db
@@ -170,18 +442,24 @@ async def start_stream(
 
     if stream is None:
         raise HTTPException(
-            status_code=404,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail="Stream not found",
         )
 
     if not stream.enabled:
         raise HTTPException(
-            status_code=409,
+            status_code=(
+                status.HTTP_409_CONFLICT
+            ),
             detail="Stream is disabled",
         )
 
-    running = await service.get_running_session(
-        stream_id
+    running = (
+        await service.get_running_session(
+            stream_id
+        )
     )
 
     if running:
@@ -193,13 +471,18 @@ async def start_stream(
 
         if process_alive:
             raise HTTPException(
-                status_code=409,
-                detail="Stream already running",
+                status_code=(
+                    status.HTTP_409_CONFLICT
+                ),
+                detail=(
+                    "Stream already running"
+                ),
             )
 
         running.status = (
             StreamSessionStatus.error
         )
+
         running.error_message = (
             "Running session had no live "
             "FFmpeg process"
@@ -211,9 +494,11 @@ async def start_stream(
         stream_id
     )
 
-    session = await service.start_stream_session(
-        session,
-        stream,
+    session = (
+        await service.start_stream_session(
+            session,
+            stream,
+        )
     )
 
     if (
@@ -221,7 +506,9 @@ async def start_stream(
         == StreamSessionStatus.error
     ):
         raise HTTPException(
-            status_code=500,
+            status_code=(
+                status.HTTP_500_INTERNAL_SERVER_ERROR
+            ),
             detail={
                 "message": (
                     "Failed to start stream"
@@ -244,13 +531,17 @@ async def start_stream(
     }
 
 
-
 @router.post(
     "/{stream_id}/stop",
 )
 async def stop_stream(
     stream_id: int,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_operator
+    ),
 ):
     service = StreamSessionService(
         db
@@ -262,22 +553,32 @@ async def stop_stream(
 
     if stream is None:
         raise HTTPException(
-            status_code=404,
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
             detail="Stream not found",
         )
 
-    session = await service.get_running_session(
-        stream_id
+    session = (
+        await service.get_running_session(
+            stream_id
+        )
     )
 
     if session is None:
         raise HTTPException(
-            status_code=404,
-            detail="Running session not found",
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail=(
+                "Running session not found"
+            ),
         )
 
-    session = await service.stop_stream_session(
-        session
+    session = (
+        await service.stop_stream_session(
+            session
+        )
     )
 
     if (
@@ -285,7 +586,9 @@ async def stop_stream(
         == StreamSessionStatus.error
     ):
         raise HTTPException(
-            status_code=500,
+            status_code=(
+                status.HTTP_500_INTERNAL_SERVER_ERROR
+            ),
             detail={
                 "message": (
                     "Failed to stop stream"

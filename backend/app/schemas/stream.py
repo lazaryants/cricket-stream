@@ -1,51 +1,182 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 
-from app.models.enums import ProviderType, StreamStatus
+from app.models.enums import (
+    ProviderType,
+    StreamStatus,
+)
 
 
-class StreamBase(BaseModel):
-    name: str
+class StreamCreate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    name: str = Field(
+        min_length=1,
+        max_length=200,
+    )
+
     description: str | None = None
 
     provider: ProviderType
 
-    source_url: str
-    destination_rtmp_url: str
+    source_url: str = Field(
+        min_length=1,
+    )
 
-    node_id: int
+    destination_rtmp_url: str = Field(
+        min_length=1,
+    )
+
+    node_id: int = Field(
+        ge=1,
+    )
 
     enabled: bool = True
+
     auto_start: bool = False
 
 
-class StreamCreate(StreamBase):
-    pass
+class StreamOperatorUpdate(BaseModel):
+    """
+    Operator может менять параметры источника,
+    но не адрес назначения и не node_id.
+    """
 
+    model_config = ConfigDict(
+        extra="forbid",
+    )
 
-class StreamUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=200,
+    )
+
     description: str | None = None
 
-    source_url: str | None = None
-    destination_rtmp_url: str | None = None
+    provider: ProviderType | None = None
+
+    source_url: str | None = Field(
+        default=None,
+        min_length=1,
+    )
 
     enabled: bool | None = None
+
     auto_start: bool | None = None
 
 
-class StreamResponse(StreamBase):
+class StreamAdminUpdate(BaseModel):
+    """
+    Admin может менять все параметры потока.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=200,
+    )
+
+    description: str | None = None
+
+    provider: ProviderType | None = None
+
+    source_url: str | None = Field(
+        default=None,
+        min_length=1,
+    )
+
+    destination_rtmp_url: str | None = Field(
+        default=None,
+        min_length=1,
+    )
+
+    node_id: int | None = Field(
+        default=None,
+        ge=1,
+    )
+
+    enabled: bool | None = None
+
+    auto_start: bool | None = None
+
+
+class StreamBaseResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
     id: int
     uuid: UUID
 
+    name: str
+    description: str | None
+
+    provider: ProviderType
+    node_id: int
+
+    enabled: bool
+    auto_start: bool
+
     status: StreamStatus
+
+    source_configured: bool
+    destination_configured: bool
 
     created_at: datetime
     updated_at: datetime
 
 
-    model_config = {
-        "from_attributes": True
-    }
+class StreamViewerResponse(
+    StreamBaseResponse
+):
+    """
+    Viewer не получает ни source_url,
+    ни destination_rtmp_url.
+    """
+
+    pass
+
+
+class StreamOperatorResponse(
+    StreamBaseResponse
+):
+    """
+    Operator видит обе ссылки, но право
+    изменения destination проверяется
+    отдельной update-схемой.
+    """
+
+    source_url: str
+    destination_rtmp_url: str
+
+
+class StreamAdminResponse(
+    StreamOperatorResponse
+):
+    """
+    Сейчас набор видимых полей совпадает
+    с operator, но права изменения отличаются.
+    """
+
+    pass
+
+
+# Сохраняем прежнее имя для совместимости
+# с другими модулями проекта и OpenAPI.
+class StreamResponse(
+    StreamAdminResponse
+):
+    pass
