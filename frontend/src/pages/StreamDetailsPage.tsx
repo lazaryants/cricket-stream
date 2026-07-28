@@ -49,6 +49,9 @@ import { MetricItem }
 import { StreamStatusChip }
   from "../components/StreamStatusChip";
 
+import { StreamControlPanel }
+  from "../features/streams/StreamControlPanel";
+
 import type {
   StreamMetrics,
 } from "../types/stream";
@@ -418,6 +421,14 @@ export default function StreamDetailsPage() {
                 />
               </Stack>
             </Stack>
+
+            <StreamControlPanel
+              streamId={stream.id}
+              enabled={stream.enabled}
+              processAlive={
+                runtime.process_alive
+              }
+            />
 
             <Box
               sx={{
