@@ -210,46 +210,102 @@ async def update_stream(
             ),
         )
 
-    # Не разрешаем менять конфигурацию
-    # активного процесса. Сначала поток
-    # необходимо остановить.
-    runtime_service = (
-        StreamSessionService(
-            db
+    # Frontend может прислать всю форму,
+    # включая поля, значения которых фактически
+    # не изменились. Такие поля не должны
+    # заставлять останавливать живой поток.
+    changed_values = {}
+
+    for field_name, new_value in values.items():
+        current_value = getattr(
+            stream,
+            field_name,
         )
-    )
 
-    running_session = (
-        await runtime_service
-        .get_running_session(
-            stream_id
+        # Enum сравниваем по его значению.
+        current_comparable = getattr(
+            current_value,
+            "value",
+            current_value,
         )
-    )
 
-    process_alive = False
+        new_comparable = getattr(
+            new_value,
+            "value",
+            new_value,
+        )
 
-    if running_session is not None:
-        process_alive = (
-            stream_manager.pid_alive(
-                running_session.process_id
+        if current_comparable != new_comparable:
+            changed_values[
+                field_name
+            ] = new_value
+
+    # Ничего реально не изменилось:
+    # возвращаем текущую карточку без UPDATE.
+    if not changed_values:
+        return (
+            StreamService.serialize_for_user(
+                stream,
+                current_user,
             )
         )
 
-    if process_alive:
-        raise HTTPException(
-            status_code=(
-                status.HTTP_409_CONFLICT
-            ),
-            detail=(
-                "Stop the stream before "
-                "changing its configuration"
-            ),
+    # Эти поля меняют только метаданные
+    # карточки и не затрагивают работающий
+    # Streamlink/FFmpeg pipeline.
+    live_update_fields = {
+        "name",
+        "description",
+        "show_on_dashboard",
+    }
+
+    technical_fields = (
+        set(changed_values)
+        - live_update_fields
+    )
+
+    # Источник, назначение и параметры запуска
+    # можно менять только после остановки
+    # реально живого процесса.
+    if technical_fields:
+        runtime_service = (
+            StreamSessionService(
+                db
+            )
         )
+
+        running_session = (
+            await runtime_service
+            .get_running_session(
+                stream_id
+            )
+        )
+
+        process_alive = False
+
+        if running_session is not None:
+            process_alive = (
+                stream_manager.pid_alive(
+                    running_session.process_id
+                )
+            )
+
+        if process_alive:
+            raise HTTPException(
+                status_code=(
+                    status.HTTP_409_CONFLICT
+                ),
+                detail=(
+                    "Stop the stream before "
+                    "changing its technical "
+                    "configuration"
+                ),
+            )
 
     stream = await StreamService.update(
         db,
         stream,
-        values,
+        changed_values,
     )
 
     return (
@@ -478,6 +534,9 @@ async def get_stream_status(
         "enabled": stream.enabled,
         "auto_start": (
             stream.auto_start
+        ),
+        "show_on_dashboard": (
+            stream.show_on_dashboard
         ),
         "metrics": runtime["metrics"],
         "latest_session": session_data,

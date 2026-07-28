@@ -115,6 +115,9 @@ class StreamService:
             "auto_start": (
                 stream.auto_start
             ),
+            "show_on_dashboard": (
+                stream.show_on_dashboard
+            ),
             "status": stream.status,
             "source_configured": bool(
                 stream.source_url

@@ -40,14 +40,14 @@ class StreamCreate(BaseModel):
     )
 
     enabled: bool = True
-
     auto_start: bool = False
+    show_on_dashboard: bool = True
 
 
 class StreamOperatorUpdate(BaseModel):
     """
-    Operator может менять параметры источника,
-    но не адрес назначения и не node_id.
+    Operator может менять источник и параметры
+    отображения, но не RTMP-назначение и node_id.
     """
 
     model_config = ConfigDict(
@@ -69,9 +69,14 @@ class StreamOperatorUpdate(BaseModel):
         min_length=1,
     )
 
+    # Оставляем существующие права operator.
+    # Технические поля всё равно потребуют
+    # остановки живого процесса.
     enabled: bool | None = None
-
     auto_start: bool | None = None
+
+    # Можно менять без остановки.
+    show_on_dashboard: bool | None = None
 
 
 class StreamAdminUpdate(BaseModel):
@@ -109,8 +114,8 @@ class StreamAdminUpdate(BaseModel):
     )
 
     enabled: bool | None = None
-
     auto_start: bool | None = None
+    show_on_dashboard: bool | None = None
 
 
 class StreamBaseResponse(BaseModel):
@@ -129,6 +134,7 @@ class StreamBaseResponse(BaseModel):
 
     enabled: bool
     auto_start: bool
+    show_on_dashboard: bool
 
     status: StreamStatus
 
@@ -167,15 +173,14 @@ class StreamAdminResponse(
     StreamOperatorResponse
 ):
     """
-    Сейчас набор видимых полей совпадает
-    с operator, но права изменения отличаются.
+    Набор видимых полей совпадает с operator,
+    но права изменения отличаются.
     """
 
     pass
 
 
-# Сохраняем прежнее имя для совместимости
-# с другими модулями проекта и OpenAPI.
+# Сохраняем прежнее имя для совместимости.
 class StreamResponse(
     StreamAdminResponse
 ):

@@ -64,6 +64,12 @@ class Stream(BaseModel):
         nullable=False,
     )
 
+    show_on_dashboard: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+
     status: Mapped[StreamStatus] = mapped_column(
         Enum(StreamStatus),
         default=StreamStatus.DRAFT,
