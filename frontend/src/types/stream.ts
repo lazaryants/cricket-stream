@@ -28,6 +28,7 @@ export interface StreamItem {
 
   enabled: boolean;
   auto_start: boolean;
+  show_on_dashboard: boolean;
   status: StreamStatus;
 
   source_configured: boolean;
@@ -49,6 +50,7 @@ export interface StreamCreateRequest {
   node_id: number;
   enabled: boolean;
   auto_start: boolean;
+  show_on_dashboard: boolean;
 }
 
 export interface StreamAdminUpdateRequest {
@@ -60,6 +62,7 @@ export interface StreamAdminUpdateRequest {
   node_id?: number;
   enabled?: boolean;
   auto_start?: boolean;
+  show_on_dashboard?: boolean;
 }
 
 export interface StreamOperatorUpdateRequest {
@@ -67,6 +70,7 @@ export interface StreamOperatorUpdateRequest {
   description?: string | null;
   provider?: ProviderType;
   source_url?: string;
+  show_on_dashboard?: boolean;
 }
 
 export type StreamUpdateRequest =
@@ -158,6 +162,7 @@ export interface StreamRuntimeStatus {
 
   enabled: boolean;
   auto_start: boolean;
+  show_on_dashboard: boolean;
 
   metrics: StreamMetrics | null;
   latest_session: LatestSession | null;

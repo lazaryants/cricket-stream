@@ -67,8 +67,14 @@ export default function DashboardPage() {
       true,
   });
 
-  const streams =
+  const allStreams =
     streamsQuery.data ?? [];
+
+  const streams =
+    allStreams.filter(
+      (stream) =>
+        stream.show_on_dashboard,
+    );
 
   const statusQueries = useQueries({
     queries: streams.map(

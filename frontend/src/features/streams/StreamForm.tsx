@@ -153,6 +153,11 @@ export function StreamForm({
   ] = useState(false);
 
   const [
+    showOnDashboard,
+    setShowOnDashboard,
+  ] = useState(true);
+
+  const [
     errorMessage,
     setErrorMessage,
   ] = useState<string | null>(
@@ -180,6 +185,9 @@ export function StreamForm({
     );
     setEnabled(stream.enabled);
     setAutoStart(stream.auto_start);
+    setShowOnDashboard(
+      stream.show_on_dashboard,
+    );
   }, [stream]);
 
   async function handleSubmit(
@@ -247,6 +255,8 @@ export function StreamForm({
           enabled,
           auto_start:
             autoStart,
+          show_on_dashboard:
+            showOnDashboard,
         });
 
         return;
@@ -283,6 +293,8 @@ export function StreamForm({
           enabled,
           auto_start:
             autoStart,
+          show_on_dashboard:
+            showOnDashboard,
         });
 
         return;
@@ -296,6 +308,8 @@ export function StreamForm({
         provider,
         source_url:
           cleanedSource,
+        show_on_dashboard:
+          showOnDashboard,
       });
     } catch (error) {
       setErrorMessage(
@@ -413,6 +427,25 @@ export function StreamForm({
             disabled={isSubmitting}
             placeholder={
               "https://www.twitch.tv/..."
+            }
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={
+                  showOnDashboard
+                }
+                onChange={(event) => {
+                  setShowOnDashboard(
+                    event.target.checked,
+                  );
+                }}
+                disabled={isSubmitting}
+              />
+            }
+            label={
+              "Показывать на Dashboard"
             }
           />
 
