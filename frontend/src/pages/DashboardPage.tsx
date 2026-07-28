@@ -30,6 +30,9 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
+import { Link }
+  from "react-router";
+
 import {
   getStreams,
   getStreamStatus,
@@ -313,6 +316,18 @@ export default function DashboardPage() {
                     }`
                   }
                 />
+              )}
+
+              {(user.role === "admin"
+                || user.is_superuser
+              ) && (
+                <Button
+                  component={Link}
+                  to="/streams/new"
+                  variant="contained"
+                >
+                  Новая трансляция
+                </Button>
               )}
 
               <Tooltip title="Обновить всё">

@@ -1,0 +1,527 @@
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+
+import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+
+import axios from "axios";
+
+import type {
+  ProviderType,
+  StreamCreateRequest,
+  StreamItem,
+  StreamUpdateRequest,
+} from "../../types/stream";
+
+
+interface StreamFormProps {
+  mode: "create" | "edit";
+  stream?: StreamItem;
+  isAdmin: boolean;
+  isSubmitting: boolean;
+
+  onSubmit(
+    data:
+      | StreamCreateRequest
+      | StreamUpdateRequest,
+  ): Promise<void>;
+}
+
+
+const providers: Array<{
+  value: ProviderType;
+  label: string;
+}> = [
+  {
+    value: "youtube",
+    label: "YouTube",
+  },
+  {
+    value: "twitch",
+    label: "Twitch",
+  },
+  {
+    value: "kick",
+    label: "Kick",
+  },
+  {
+    value: "vimeo",
+    label: "Vimeo",
+  },
+  {
+    value: "custom",
+    label: "Прямая ссылка",
+  },
+  {
+    value: "unknown",
+    label: "Неизвестный",
+  },
+];
+
+
+function getErrorMessage(
+  error: unknown,
+): string {
+  if (axios.isAxiosError(error)) {
+    const detail =
+      error.response?.data?.detail;
+
+    if (typeof detail === "string") {
+      return detail;
+    }
+
+    if (
+      typeof detail === "object"
+      && detail !== null
+      && "message" in detail
+      && typeof detail.message === "string"
+    ) {
+      return detail.message;
+    }
+  }
+
+  return (
+    "Не удалось сохранить карточку."
+  );
+}
+
+
+export function StreamForm({
+  mode,
+  stream,
+  isAdmin,
+  isSubmitting,
+  onSubmit,
+}: StreamFormProps) {
+  const [
+    name,
+    setName,
+  ] = useState("");
+
+  const [
+    description,
+    setDescription,
+  ] = useState("");
+
+  const [
+    provider,
+    setProvider,
+  ] = useState<ProviderType>(
+    "custom",
+  );
+
+  const [
+    sourceUrl,
+    setSourceUrl,
+  ] = useState("");
+
+  const [
+    destinationUrl,
+    setDestinationUrl,
+  ] = useState("");
+
+  const [
+    nodeId,
+    setNodeId,
+  ] = useState("1");
+
+  const [
+    enabled,
+    setEnabled,
+  ] = useState(true);
+
+  const [
+    autoStart,
+    setAutoStart,
+  ] = useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!stream) {
+      return;
+    }
+
+    setName(stream.name);
+    setDescription(
+      stream.description ?? "",
+    );
+    setProvider(stream.provider);
+    setSourceUrl(
+      stream.source_url ?? "",
+    );
+    setDestinationUrl(
+      stream.destination_rtmp_url ?? "",
+    );
+    setNodeId(
+      String(stream.node_id),
+    );
+    setEnabled(stream.enabled);
+    setAutoStart(stream.auto_start);
+  }, [stream]);
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+    setErrorMessage(null);
+
+    const cleanedName =
+      name.trim();
+
+    const cleanedSource =
+      sourceUrl.trim();
+
+    if (!cleanedName) {
+      setErrorMessage(
+        "Укажите название потока.",
+      );
+      return;
+    }
+
+    if (!cleanedSource) {
+      setErrorMessage(
+        "Укажите исходную ссылку.",
+      );
+      return;
+    }
+
+    try {
+      if (mode === "create") {
+        const parsedNodeId =
+          Number(nodeId);
+
+        if (
+          !Number.isInteger(
+            parsedNodeId,
+          )
+          || parsedNodeId <= 0
+        ) {
+          setErrorMessage(
+            "Некорректный ID узла.",
+          );
+          return;
+        }
+
+        if (!destinationUrl.trim()) {
+          setErrorMessage(
+            "Укажите RTMP назначение.",
+          );
+          return;
+        }
+
+        await onSubmit({
+          name: cleanedName,
+          description:
+            description.trim()
+              || null,
+          provider,
+          source_url:
+            cleanedSource,
+          destination_rtmp_url:
+            destinationUrl.trim(),
+          node_id:
+            parsedNodeId,
+          enabled,
+          auto_start:
+            autoStart,
+        });
+
+        return;
+      }
+
+      if (isAdmin) {
+        const parsedNodeId =
+          Number(nodeId);
+
+        if (
+          !Number.isInteger(
+            parsedNodeId,
+          )
+          || parsedNodeId <= 0
+        ) {
+          setErrorMessage(
+            "Некорректный ID узла.",
+          );
+          return;
+        }
+
+        await onSubmit({
+          name: cleanedName,
+          description:
+            description.trim()
+              || null,
+          provider,
+          source_url:
+            cleanedSource,
+          destination_rtmp_url:
+            destinationUrl.trim(),
+          node_id:
+            parsedNodeId,
+          enabled,
+          auto_start:
+            autoStart,
+        });
+
+        return;
+      }
+
+      await onSubmit({
+        name: cleanedName,
+        description:
+          description.trim()
+            || null,
+        provider,
+        source_url:
+          cleanedSource,
+      });
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error),
+      );
+    }
+  }
+
+  return (
+    <Card>
+      <CardContent>
+        <Stack
+          component="form"
+          spacing={3}
+          onSubmit={handleSubmit}
+        >
+          <Typography variant="h6">
+            {mode === "create"
+              ? "Новая трансляция"
+              : "Настройки трансляции"}
+          </Typography>
+
+          {errorMessage && (
+            <Alert severity="error">
+              {errorMessage}
+            </Alert>
+          )}
+
+          {mode === "edit"
+            && stream?.status
+              === "running"
+            && (
+              <Alert severity="warning">
+                Перед изменением настроек
+                остановите трансляцию.
+              </Alert>
+            )}
+
+          {!isAdmin && (
+            <Alert severity="info">
+              Оператор может изменить
+              источник, provider, название
+              и описание. RTMP назначение
+              изменяет только администратор.
+            </Alert>
+          )}
+
+          <TextField
+            label="Название"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            required
+            fullWidth
+            disabled={isSubmitting}
+          />
+
+          <TextField
+            label="Описание"
+            value={description}
+            onChange={(event) => {
+              setDescription(
+                event.target.value,
+              );
+            }}
+            multiline
+            minRows={2}
+            fullWidth
+            disabled={isSubmitting}
+          />
+
+          <FormControl
+            fullWidth
+            disabled={isSubmitting}
+          >
+            <InputLabel id="provider-label">
+              Provider
+            </InputLabel>
+
+            <Select
+              labelId="provider-label"
+              label="Provider"
+              value={provider}
+              onChange={(event) => {
+                setProvider(
+                  event.target
+                    .value as ProviderType,
+                );
+              }}
+            >
+              {providers.map(
+                (item) => (
+                  <MenuItem
+                    key={item.value}
+                    value={item.value}
+                  >
+                    {item.label}
+                  </MenuItem>
+                ),
+              )}
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Исходная ссылка"
+            value={sourceUrl}
+            onChange={(event) => {
+              setSourceUrl(
+                event.target.value,
+              );
+            }}
+            required
+            fullWidth
+            disabled={isSubmitting}
+            placeholder={
+              "https://www.twitch.tv/..."
+            }
+          />
+
+          {isAdmin && (
+            <>
+              <TextField
+                label="RTMP назначение"
+                value={destinationUrl}
+                onChange={(event) => {
+                  setDestinationUrl(
+                    event.target.value,
+                  );
+                }}
+                required
+                fullWidth
+                disabled={isSubmitting}
+                placeholder={
+                  "rtmp://server/app/key"
+                }
+              />
+
+              <TextField
+                label="ID узла"
+                value={nodeId}
+                onChange={(event) => {
+                  setNodeId(
+                    event.target.value,
+                  );
+                }}
+                type="number"
+                required
+                fullWidth
+                disabled={isSubmitting}
+                slotProps={{
+                  htmlInput: {
+                    min: 1,
+                    step: 1,
+                  },
+                }}
+              />
+
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={1}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={enabled}
+                      onChange={(event) => {
+                        setEnabled(
+                          event.target
+                            .checked,
+                        );
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  }
+                  label="Поток включён"
+                />
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={autoStart}
+                      onChange={(event) => {
+                        setAutoStart(
+                          event.target
+                            .checked,
+                        );
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  }
+                  label="Автозапуск"
+                />
+              </Stack>
+            </>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={isSubmitting}
+            startIcon={
+              isSubmitting
+                ? (
+                  <CircularProgress
+                    size={18}
+                    color="inherit"
+                  />
+                )
+                : undefined
+            }
+          >
+            {isSubmitting
+              ? "Сохранение…"
+              : (
+                mode === "create"
+                  ? "Создать"
+                  : "Сохранить"
+              )}
+          </Button>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}

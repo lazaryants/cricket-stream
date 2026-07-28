@@ -1,7 +1,9 @@
 import type {
   StreamActionResponse,
+  StreamCreateRequest,
   StreamItem,
   StreamRuntimeStatus,
+  StreamUpdateRequest,
 } from "../types/stream";
 
 import { http } from "./http";
@@ -25,6 +27,39 @@ export async function getStream(
     );
 
   return response.data;
+}
+
+export async function createStream(
+  data: StreamCreateRequest,
+): Promise<StreamItem> {
+  const response =
+    await http.post<StreamItem>(
+      "/streams",
+      data,
+    );
+
+  return response.data;
+}
+
+export async function updateStream(
+  streamId: number,
+  data: StreamUpdateRequest,
+): Promise<StreamItem> {
+  const response =
+    await http.patch<StreamItem>(
+      `/streams/${streamId}`,
+      data,
+    );
+
+  return response.data;
+}
+
+export async function deleteStream(
+  streamId: number,
+): Promise<void> {
+  await http.delete(
+    `/streams/${streamId}`,
+  );
 }
 
 export async function getStreamStatus(

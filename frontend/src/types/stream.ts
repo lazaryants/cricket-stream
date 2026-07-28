@@ -36,18 +36,46 @@ export interface StreamItem {
   created_at: string;
   updated_at: string;
 
-  /*
-   * Backend полностью исключает эти поля
-   * для viewer. Поэтому они optional.
-   */
   source_url?: string;
   destination_rtmp_url?: string;
 }
 
+export interface StreamCreateRequest {
+  name: string;
+  description: string | null;
+  provider: ProviderType;
+  source_url: string;
+  destination_rtmp_url: string;
+  node_id: number;
+  enabled: boolean;
+  auto_start: boolean;
+}
+
+export interface StreamAdminUpdateRequest {
+  name?: string;
+  description?: string | null;
+  provider?: ProviderType;
+  source_url?: string;
+  destination_rtmp_url?: string;
+  node_id?: number;
+  enabled?: boolean;
+  auto_start?: boolean;
+}
+
+export interface StreamOperatorUpdateRequest {
+  name?: string;
+  description?: string | null;
+  provider?: ProviderType;
+  source_url?: string;
+}
+
+export type StreamUpdateRequest =
+  | StreamAdminUpdateRequest
+  | StreamOperatorUpdateRequest;
+
 export interface StreamMetrics {
   stream_id: number;
   pid: number | null;
-
   running: boolean;
 
   frame: number;
@@ -123,11 +151,7 @@ export interface StreamRuntimeStatus {
   provider: ProviderType;
 
   database_status: StreamStatus;
-  manager_status:
-    | "running"
-    | "dead"
-    | "unknown"
-    | string;
+  manager_status: string;
 
   process_alive: boolean;
   process_id: number | string | null;
