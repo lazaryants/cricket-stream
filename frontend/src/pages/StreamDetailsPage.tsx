@@ -454,6 +454,9 @@ export default function StreamDetailsPage() {
               processAlive={
                 runtime.process_alive
               }
+              databaseStatus={
+                runtime.database_status
+              }
             />
 
             <Box

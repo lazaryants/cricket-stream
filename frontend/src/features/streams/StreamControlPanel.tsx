@@ -31,11 +31,16 @@ import {
 import { useAuth }
   from "../../auth/useAuth";
 
+import type {
+  StreamStatus,
+} from "../../types/stream";
+
 
 interface StreamControlPanelProps {
   streamId: number;
   enabled: boolean;
   processAlive: boolean;
+  databaseStatus: StreamStatus;
 }
 
 
@@ -80,6 +85,7 @@ export function StreamControlPanel({
   streamId,
   enabled,
   processAlive,
+  databaseStatus,
 }: StreamControlPanelProps) {
   const auth = useAuth();
 
@@ -98,12 +104,30 @@ export function StreamControlPanel({
     || auth.user?.role === "admin"
     || auth.user?.is_superuser;
 
+  /*
+   * Stop должен быть доступен не только
+   * при живом FFmpeg, но и когда supervisor
+   * пытается восстановить завершившийся
+   * источник.
+   */
+  const stopAllowedStatuses:
+    StreamStatus[] = [
+      "starting",
+      "running",
+      "restarting",
+      "stopping",
+    ];
+
+  const canStop =
+    processAlive
+    || stopAllowedStatuses.includes(
+      databaseStatus
+    );
+
   async function refreshStreamData() {
     await Promise.all([
       queryClient.invalidateQueries({
-        queryKey: [
-          "streams",
-        ],
+        queryKey: ["streams"],
       }),
 
       queryClient.invalidateQueries({
@@ -123,6 +147,13 @@ export function StreamControlPanel({
       queryClient.invalidateQueries({
         queryKey: [
           "stream-sessions",
+          streamId,
+        ],
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          "stream-preview",
           streamId,
         ],
       }),
@@ -177,6 +208,13 @@ export function StreamControlPanel({
     startMutation.isPending
     || stopMutation.isPending;
 
+  const isRestarting =
+    databaseStatus === "restarting"
+    || (
+      databaseStatus === "running"
+      && !processAlive
+    );
+
   return (
     <Card>
       <CardContent>
@@ -193,6 +231,15 @@ export function StreamControlPanel({
               }}
             >
               {actionError}
+            </Alert>
+          )}
+
+          {isRestarting && (
+            <Alert severity="warning">
+              Источник недоступен. Supervisor
+              пытается восстановить трансляцию.
+              Нажмите «Остановить попытки»,
+              если эфир уже завершён.
             </Alert>
           )}
 
@@ -227,7 +274,7 @@ export function StreamControlPanel({
               }
               disabled={
                 actionPending
-                || processAlive
+                || canStop
                 || !enabled
               }
               onClick={() => {
@@ -253,13 +300,15 @@ export function StreamControlPanel({
               }
               disabled={
                 actionPending
-                || !processAlive
+                || !canStop
               }
               onClick={() => {
                 stopMutation.mutate();
               }}
             >
-              Остановить
+              {isRestarting
+                ? "Остановить попытки"
+                : "Остановить"}
             </Button>
           </Stack>
         </Stack>

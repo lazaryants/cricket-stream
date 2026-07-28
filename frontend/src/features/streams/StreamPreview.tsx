@@ -77,12 +77,14 @@ export function StreamPreview({
     queryFn: () =>
       getStreamPreview(
         streamId,
-        960,
+        640,
       ),
+
+    enabled: processAlive,
 
     refetchInterval:
       processAlive
-        ? 10_000
+        ? 15_000
         : false,
 
     refetchIntervalInBackground:
@@ -158,8 +160,8 @@ export function StreamPreview({
                 variant="body2"
                 color="text.secondary"
               >
-                Обновляемый JPEG-кадр
-                без изменения основного потока
+                JPEG 640 px, обновление
+                каждые 15 секунд
               </Typography>
             </Box>
 
@@ -206,6 +208,8 @@ export function StreamPreview({
             sx={{
               position: "relative",
               width: "100%",
+              maxWidth: 720,
+              mx: "auto",
               aspectRatio: "16 / 9",
               display: "grid",
               placeItems: "center",
