@@ -456,16 +456,20 @@ export default function DashboardPage() {
                   xs:
                     "minmax(0, 1fr)",
 
-                  md:
+                  sm:
                     "repeat(2, "
                     + "minmax(0, 1fr))",
 
-                  xl:
+                  lg:
                     "repeat(3, "
+                    + "minmax(0, 1fr))",
+
+                  xl:
+                    "repeat(4, "
                     + "minmax(0, 1fr))",
                 },
 
-                gap: 2.5,
+                gap: 2,
               }}
             >
               {streams.map(

@@ -50,6 +50,9 @@ import { useAuth }
 import { MetricItem }
   from "../../components/MetricItem";
 
+import { StreamCardPreview }
+  from "./StreamCardPreview";
+
 import { StreamStatusChip }
   from "../../components/StreamStatusChip";
 
@@ -292,6 +295,28 @@ export function StreamCard({
       === "running"
     );
 
+  const hasRuntimeProblem =
+    (
+      effectiveStatus
+      === "running"
+      || effectiveStatus
+      === "starting"
+      || effectiveStatus
+      === "restarting"
+    )
+    && !isRunning;
+
+  const canStop =
+    isRunning
+    || effectiveStatus
+      === "starting"
+    || effectiveStatus
+      === "running"
+    || effectiveStatus
+      === "restarting"
+    || effectiveStatus
+      === "stopping";
+
   const actionPending =
     startMutation.isPending
     || stopMutation.isPending;
@@ -329,6 +354,11 @@ export function StreamCard({
           + "rgba(255,255,255,0.08)",
       }}
     >
+      <StreamCardPreview
+        streamId={stream.id}
+        processAlive={isRunning}
+      />
+
       <CardContent
         sx={{
           flexGrow: 1,
@@ -428,6 +458,16 @@ export function StreamCard({
             </Alert>
           )}
 
+          {hasRuntimeProblem && (
+            <Alert
+              severity="warning"
+            >
+              Источник недоступен.
+              Выполняются попытки
+              восстановления.
+            </Alert>
+          )}
+
           {actionError && (
             <Alert
               severity="error"
@@ -498,38 +538,6 @@ export function StreamCard({
               )}
             />
           </Box>
-
-          {(stream.source_url
-            || stream
-              .destination_rtmp_url
-          ) && (
-            <>
-              <Divider />
-
-              <Stack spacing={1.5}>
-                {stream.source_url && (
-                  <MetricItem
-                    label="Источник"
-                    value={
-                      stream.source_url
-                    }
-                  />
-                )}
-
-                {stream
-                  .destination_rtmp_url
-                  && (
-                    <MetricItem
-                      label="Назначение"
-                      value={
-                        stream
-                          .destination_rtmp_url
-                      }
-                    />
-                  )}
-              </Stack>
-            </>
-          )}
 
           {runtime?.latest_session
             ?.error_message
@@ -607,13 +615,15 @@ export function StreamCard({
               }
               disabled={
                 actionPending
-                || !isRunning
+                || !canStop
               }
               onClick={() => {
                 stopMutation.mutate();
               }}
             >
-              Остановить
+              {hasRuntimeProblem
+              ? "Прекратить попытки"
+              : "Остановить"}
             </Button>
           </>
         )}
