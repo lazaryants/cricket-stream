@@ -18,8 +18,17 @@ export interface StreamSession {
   updated_at: string;
 }
 
+export interface SessionLogEntry {
+  timestamp?: string;
+  level?: string;
+  message?: string;
+  source?: string;
+
+  [key: string]: unknown;
+}
+
 export interface SessionLogsResponse {
   uuid: string;
   stream_id: number;
-  logs: string[];
+  logs: Array<string | SessionLogEntry>;
 }

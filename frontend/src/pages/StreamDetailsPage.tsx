@@ -49,6 +49,9 @@ import { MetricItem }
 import { StreamStatusChip }
   from "../components/StreamStatusChip";
 
+import { SessionLogViewer }
+  from "../components/SessionLogViewer";
+
 import { StreamControlPanel }
   from "../features/streams/StreamControlPanel";
 
@@ -314,6 +317,19 @@ export default function StreamDetailsPage() {
               flexGrow: 1,
             }}
           />
+
+          {(auth.user?.role === "operator"
+            || auth.user?.role === "admin"
+            || auth.user?.is_superuser
+          ) && (
+            <Button
+              component={Link}
+              to={`/streams/${streamId}/edit`}
+              variant="outlined"
+            >
+              Редактировать
+            </Button>
+          )}
 
           <Tooltip title="Обновить">
             <span>
@@ -836,29 +852,11 @@ export default function StreamDetailsPage() {
                     )}
 
                     {logsQuery.data && (
-                      <Box
-                        component="pre"
-                        sx={{
-                          m: 0,
-                          p: 2,
-                          maxHeight: 480,
-                          overflow: "auto",
-                          borderRadius: 1,
-                          bgcolor:
-                            "rgba(0,0,0,0.35)",
-                          fontFamily:
-                            "monospace",
-                          fontSize: 12,
-                          whiteSpace:
-                            "pre-wrap",
-                          overflowWrap:
-                            "anywhere",
-                        }}
-                      >
-                        {logsQuery.data.logs
-                          .join("\n")
-                          || "Журнал пуст."}
-                      </Box>
+                      <SessionLogViewer
+                        logs={
+                          logsQuery.data.logs
+                        }
+                      />
                     )}
                   </Stack>
                 </CardContent>
