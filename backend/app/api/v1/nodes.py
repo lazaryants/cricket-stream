@@ -1,15 +1,25 @@
-from fastapi import APIRouter, Depends
+from fastapi import (
+    APIRouter,
+    Depends,
+)
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+)
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.core.auth_dependencies import (
+    require_viewer,
+)
 from app.core.dependencies import get_db
+from app.models.user import User
 from app.schemas.node import NodeResponse
-from app.services.node_service import NodeService
+from app.services.node_service import (
+    NodeService,
+)
 
 
 router = APIRouter(
     prefix="/nodes",
-    tags=["Nodes"],
+    tags=["nodes"],
 )
 
 
@@ -18,9 +28,13 @@ router = APIRouter(
     response_model=list[NodeResponse],
 )
 async def get_nodes(
-    session: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_viewer
+    ),
 ):
-
     return await NodeService.get_active_nodes(
-        session
+        db
     )

@@ -1,10 +1,17 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+)
 
 
 class NodeResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
     uuid: UUID
     name: str
     hostname: str
@@ -12,7 +19,3 @@ class NodeResponse(BaseModel):
     location: str
     enabled: bool
     created_at: datetime
-
-    model_config = {
-        "from_attributes": True
-    }
