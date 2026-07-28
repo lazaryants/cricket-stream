@@ -10,6 +10,9 @@ import DashboardPage
 import LoginPage
   from "./pages/LoginPage";
 
+import StreamDetailsPage
+  from "./pages/StreamDetailsPage";
+
 import { RequireAuth }
   from "./routes/RequireAuth";
 
@@ -28,6 +31,13 @@ export default function App() {
           path="/"
           element={
             <DashboardPage />
+          }
+        />
+
+        <Route
+          path="/streams/:streamId"
+          element={
+            <StreamDetailsPage />
           }
         />
       </Route>

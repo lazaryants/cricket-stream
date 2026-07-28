@@ -35,6 +35,9 @@ import {
 
 import axios from "axios";
 
+import { Link }
+  from "react-router";
+
 import {
   getStreamStatus,
   startStream,
@@ -541,68 +544,81 @@ export function StreamCard({
         </Stack>
       </CardContent>
 
-      {canControl && (
-        <CardActions
-          sx={{
-            px: 2,
-            pb: 2,
-            pt: 0,
-          }}
+      <CardActions
+        sx={{
+          px: 2,
+          pb: 2,
+          pt: 0,
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <Button
+          component={Link}
+          to={`/streams/${stream.id}`}
+          variant="text"
         >
-          <Button
-            variant="contained"
-            color="success"
-            startIcon={
-              startMutation
-                .isPending
-                ? (
-                  <CircularProgress
-                    size={17}
-                    color="inherit"
-                  />
-                )
-                : (
-                  <PlayArrowIcon />
-                )
-            }
-            disabled={
-              actionPending
-              || isRunning
-              || !stream.enabled
-            }
-            onClick={() => {
-              startMutation.mutate();
-            }}
-          >
-            Запустить
-          </Button>
+          Подробнее
+        </Button>
 
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={
-              stopMutation
-                .isPending
-                ? (
-                  <CircularProgress
-                    size={17}
-                    color="inherit"
-                  />
-                )
-                : <StopIcon />
-            }
-            disabled={
-              actionPending
-              || !isRunning
-            }
-            onClick={() => {
-              stopMutation.mutate();
-            }}
-          >
-            Остановить
-          </Button>
-        </CardActions>
-      )}
+        {canControl && (
+          <>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={
+                startMutation
+                  .isPending
+                  ? (
+                    <CircularProgress
+                      size={17}
+                      color="inherit"
+                    />
+                  )
+                  : (
+                    <PlayArrowIcon />
+                  )
+              }
+              disabled={
+                actionPending
+                || isRunning
+                || !stream.enabled
+              }
+              onClick={() => {
+                startMutation.mutate();
+              }}
+            >
+              Запустить
+            </Button>
+
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={
+                stopMutation
+                  .isPending
+                  ? (
+                    <CircularProgress
+                      size={17}
+                      color="inherit"
+                    />
+                  )
+                  : <StopIcon />
+              }
+              disabled={
+                actionPending
+                || !isRunning
+              }
+              onClick={() => {
+                stopMutation.mutate();
+              }}
+            >
+              Остановить
+            </Button>
+          </>
+        )}
+      </CardActions>
+
     </Card>
   );
 }

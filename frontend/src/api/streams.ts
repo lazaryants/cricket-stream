@@ -16,6 +16,17 @@ Promise<StreamItem[]> {
   return response.data;
 }
 
+export async function getStream(
+  streamId: number,
+): Promise<StreamItem> {
+  const response =
+    await http.get<StreamItem>(
+      `/streams/${streamId}`,
+    );
+
+  return response.data;
+}
+
 export async function getStreamStatus(
   streamId: number,
 ): Promise<StreamRuntimeStatus> {
