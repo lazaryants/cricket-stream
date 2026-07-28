@@ -55,6 +55,9 @@ import { SessionLogViewer }
 import { StreamControlPanel }
   from "../features/streams/StreamControlPanel";
 
+import { StreamPreview }
+  from "../features/streams/StreamPreview";
+
 import type {
   StreamMetrics,
 } from "../types/stream";
@@ -437,6 +440,13 @@ export default function StreamDetailsPage() {
                 />
               </Stack>
             </Stack>
+
+            <StreamPreview
+              streamId={stream.id}
+              processAlive={
+                runtime.process_alive
+              }
+            />
 
             <StreamControlPanel
               streamId={stream.id}

@@ -5,6 +5,7 @@ from fastapi import (
     Body,
     Depends,
     HTTPException,
+    Query,
     Response,
     status,
 )
@@ -29,6 +30,10 @@ from app.schemas.stream import (
     StreamAdminUpdate,
     StreamCreate,
     StreamOperatorUpdate,
+)
+from app.services.stream_preview_service import (
+    StreamPreviewError,
+    stream_preview_service,
 )
 from app.services.stream_service import (
     StreamService,
@@ -323,6 +328,65 @@ async def delete_stream(
         status_code=(
             status.HTTP_204_NO_CONTENT
         )
+    )
+
+
+@router.get(
+    "/{stream_id}/preview",
+)
+async def get_stream_preview(
+    stream_id: int,
+    width: int = Query(
+        default=960,
+        ge=320,
+        le=1920,
+    ),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_viewer
+    ),
+):
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
+    )
+
+    if stream is None:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="Stream not found",
+        )
+
+    try:
+        image = (
+            await stream_preview_service
+            .generate(
+                stream=stream,
+                width=width,
+            )
+        )
+    except StreamPreviewError as exc:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_502_BAD_GATEWAY
+            ),
+            detail=str(exc),
+        ) from exc
+
+    return Response(
+        content=image,
+        media_type="image/jpeg",
+        headers={
+            "Cache-Control": (
+                "no-store, no-cache, "
+                "must-revalidate"
+            ),
+            "Pragma": "no-cache",
+        },
     )
 
 

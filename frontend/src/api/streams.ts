@@ -8,6 +8,7 @@ import type {
 
 import { http } from "./http";
 
+
 export async function getStreams():
 Promise<StreamItem[]> {
   const response =
@@ -17,6 +18,7 @@ Promise<StreamItem[]> {
 
   return response.data;
 }
+
 
 export async function getStream(
   streamId: number,
@@ -29,6 +31,7 @@ export async function getStream(
   return response.data;
 }
 
+
 export async function createStream(
   data: StreamCreateRequest,
 ): Promise<StreamItem> {
@@ -40,6 +43,7 @@ export async function createStream(
 
   return response.data;
 }
+
 
 export async function updateStream(
   streamId: number,
@@ -54,6 +58,7 @@ export async function updateStream(
   return response.data;
 }
 
+
 export async function deleteStream(
   streamId: number,
 ): Promise<void> {
@@ -61,6 +66,28 @@ export async function deleteStream(
     `/streams/${streamId}`,
   );
 }
+
+
+export async function getStreamPreview(
+  streamId: number,
+  width = 960,
+): Promise<Blob> {
+  const response =
+    await http.get<Blob>(
+      `/streams/${streamId}/preview`,
+      {
+        params: {
+          width,
+          cache_bust: Date.now(),
+        },
+
+        responseType: "blob",
+      },
+    );
+
+  return response.data;
+}
+
 
 export async function getStreamStatus(
   streamId: number,
@@ -73,6 +100,7 @@ export async function getStreamStatus(
   return response.data;
 }
 
+
 export async function startStream(
   streamId: number,
 ): Promise<StreamActionResponse> {
@@ -83,6 +111,7 @@ export async function startStream(
 
   return response.data;
 }
+
 
 export async function stopStream(
   streamId: number,
