@@ -5,6 +5,7 @@ from fastapi import (
     Depends,
     HTTPException,
     Query,
+    Response,
     status,
 )
 from sqlalchemy.ext.asyncio import (
@@ -18,6 +19,9 @@ from app.core.auth_dependencies import (
 from app.core.dependencies import get_db
 from app.engine.logs import log_buffer
 from app.engine.manager import stream_manager
+from app.models.enums import (
+    StreamSessionStatus,
+)
 from app.models.user import User
 from app.schemas.stream_session import (
     StreamSessionResponse,
@@ -40,6 +44,39 @@ router = APIRouter(
     ],
 )
 async def list_sessions(
+    response: Response,
+    limit: int = Query(
+        default=50,
+        ge=1,
+        le=200,
+        description=(
+            "Maximum number of sessions "
+            "returned"
+        ),
+    ),
+    offset: int = Query(
+        default=0,
+        ge=0,
+        description=(
+            "Number of sessions to skip"
+        ),
+    ),
+    stream_id: int | None = Query(
+        default=None,
+        ge=1,
+        description=(
+            "Filter by stream ID"
+        ),
+    ),
+    session_status: (
+        StreamSessionStatus | None
+    ) = Query(
+        default=None,
+        alias="status",
+        description=(
+            "Filter by session status"
+        ),
+    ),
     db: AsyncSession = Depends(
         get_db
     ),
@@ -51,7 +88,33 @@ async def list_sessions(
         db
     )
 
-    return await service.list_sessions()
+    sessions, total = (
+        await service.list_sessions(
+            limit=limit,
+            offset=offset,
+            stream_id=stream_id,
+            session_status=(
+                session_status
+            ),
+        )
+    )
+
+    # React сможет использовать эти
+    # заголовки для пагинации, при этом
+    # тело ответа остаётся обычным массивом.
+    response.headers[
+        "X-Total-Count"
+    ] = str(total)
+
+    response.headers[
+        "X-Limit"
+    ] = str(limit)
+
+    response.headers[
+        "X-Offset"
+    ] = str(offset)
+
+    return sessions
 
 
 @router.get(
@@ -179,11 +242,8 @@ async def session_logs(
     ),
 ):
     """
-    Raw logs are restricted to operator/admin.
-
-    FFmpeg and Streamlink output may contain
-    source URLs, resolved media URLs or RTMP
-    destination information.
+    Raw FFmpeg and Streamlink logs are
+    available only to operator and admin.
     """
 
     service = StreamSessionService(

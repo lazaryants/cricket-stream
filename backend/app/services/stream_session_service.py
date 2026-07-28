@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.engine.manager import stream_manager
@@ -21,14 +21,83 @@ class StreamSessionService:
     ):
         self.db = db
 
-    async def list_sessions(self):
-        result = await self.db.execute(
-            select(StreamSession)
-            .order_by(
-                StreamSession.created_at.desc()
+    async def list_sessions(
+        self,
+        *,
+        limit: int = 50,
+        offset: int = 0,
+        stream_id: int | None = None,
+        session_status: (
+            StreamSessionStatus | None
+        ) = None,
+    ) -> tuple[
+        list[StreamSession],
+        int,
+    ]:
+        filters = []
+
+        if stream_id is not None:
+            filters.append(
+                StreamSession.stream_id
+                == stream_id
+            )
+
+        if session_status is not None:
+            filters.append(
+                StreamSession.status
+                == session_status
+            )
+
+        count_query = select(
+            func.count(
+                StreamSession.id
             )
         )
-        return result.scalars().all()
+
+        sessions_query = (
+            select(StreamSession)
+            .order_by(
+                StreamSession.created_at.desc(),
+                StreamSession.id.desc(),
+            )
+            .limit(limit)
+            .offset(offset)
+        )
+
+        if filters:
+            count_query = (
+                count_query.where(
+                    *filters
+                )
+            )
+
+            sessions_query = (
+                sessions_query.where(
+                    *filters
+                )
+            )
+
+        count_result = await self.db.execute(
+            count_query
+        )
+
+        total = int(
+            count_result.scalar_one()
+        )
+
+        sessions_result = (
+            await self.db.execute(
+                sessions_query
+            )
+        )
+
+        sessions = list(
+            sessions_result
+            .scalars()
+            .all()
+        )
+
+        return sessions, total
 
     async def get_by_uuid(
         self,
