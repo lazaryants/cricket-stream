@@ -26,11 +26,14 @@ import {
 } from "@mui/material";
 
 import {
+  useQueries,
   useQuery,
 } from "@tanstack/react-query";
 
-import { getStreams }
-  from "../api/streams";
+import {
+  getStreams,
+  getStreamStatus,
+} from "../api/streams";
 
 import { useAuth }
   from "../auth/useAuth";
@@ -61,26 +64,79 @@ export default function DashboardPage() {
       true,
   });
 
+  const streams =
+    streamsQuery.data ?? [];
+
+  const statusQueries = useQueries({
+    queries: streams.map(
+      (stream) => ({
+        queryKey: [
+          "stream-status",
+          stream.id,
+        ],
+
+        queryFn: () =>
+          getStreamStatus(
+            stream.id,
+          ),
+
+        refetchInterval: 5_000,
+
+        refetchIntervalInBackground:
+          true,
+
+        retry: 1,
+      }),
+    ),
+  });
+
   if (!user) {
     return null;
   }
 
-  const streams =
-    streamsQuery.data ?? [];
+  const loadedStatuses =
+    statusQueries
+      .map((query) => query.data)
+      .filter(
+        (status) =>
+          status !== undefined,
+      );
 
   const runningCount =
-    streams.filter(
-      (stream) =>
-        stream.status
-        === "running",
+    loadedStatuses.filter(
+      (status) =>
+        status.process_alive,
     ).length;
 
   const errorCount =
-    streams.filter(
-      (stream) =>
-        stream.status
-        === "error",
+    loadedStatuses.filter(
+      (status) =>
+        status.database_status
+          === "error"
+        || (
+          status.database_status
+            === "running"
+          && !status.process_alive
+        ),
     ).length;
+
+  const statusLoading =
+    streams.length > 0
+    && statusQueries.some(
+      (query) =>
+        query.isLoading,
+    );
+
+  async function refreshAll() {
+    await streamsQuery.refetch();
+
+    await Promise.all(
+      statusQueries.map(
+        (query) =>
+          query.refetch(),
+      ),
+    );
+  }
 
   return (
     <Box
@@ -95,8 +151,10 @@ export default function DashboardPage() {
         sx={{
           backdropFilter:
             "blur(14px)",
+
           backgroundColor:
             "rgba(11,17,32,0.82)",
+
           borderBottom:
             "1px solid "
             + "rgba(255,255,255,0.08)",
@@ -192,6 +250,7 @@ export default function DashboardPage() {
                 xs: "flex-start",
                 sm: "center",
               },
+
               justifyContent:
                 "space-between",
             }}
@@ -210,8 +269,8 @@ export default function DashboardPage() {
                   mt: 0.5,
                 }}
               >
-                Текущее состояние
-                потоков и серверов
+                Текущее состояние потоков
+                и серверов
               </Typography>
             </Box>
 
@@ -221,6 +280,7 @@ export default function DashboardPage() {
               sx={{
                 alignItems: "center",
                 flexWrap: "wrap",
+                rowGap: 1,
               }}
             >
               <Chip
@@ -235,9 +295,11 @@ export default function DashboardPage() {
                 color="success"
                 variant="outlined"
                 label={
-                  `Работает: ${
-                    runningCount
-                  }`
+                  statusLoading
+                    ? "Работает: …"
+                    : `Работает: ${
+                        runningCount
+                      }`
                 }
               />
 
@@ -246,23 +308,26 @@ export default function DashboardPage() {
                   color="error"
                   variant="outlined"
                   label={
-                    `Ошибки: ${
+                    `Проблемы: ${
                       errorCount
                     }`
                   }
                 />
               )}
 
-              <Tooltip title="Обновить список">
+              <Tooltip title="Обновить всё">
                 <span>
                   <IconButton
                     disabled={
                       streamsQuery
                         .isFetching
+                      || statusQueries.some(
+                        (query) =>
+                          query.isFetching,
+                      )
                     }
                     onClick={() => {
-                      void streamsQuery
-                        .refetch();
+                      void refreshAll();
                     }}
                   >
                     {streamsQuery
