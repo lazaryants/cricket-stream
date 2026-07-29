@@ -324,6 +324,14 @@ export default function DashboardPage() {
                 />
               )}
 
+              <Button
+                component={Link}
+                to="/streams"
+                variant="outlined"
+              >
+                Все трансляции
+              </Button>
+
               {(user.role === "admin"
                 || user.is_superuser
               ) && (
