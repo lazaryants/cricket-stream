@@ -173,3 +173,22 @@ export interface StreamActionResponse {
   session_id: string;
   pid?: string | number | null;
 }
+
+export type StreamDiagnosticSeverity =
+  | "success"
+  | "info"
+  | "warning"
+  | "error";
+
+export interface StreamDiagnostic {
+  status: string;
+  severity: StreamDiagnosticSeverity;
+  title: string;
+  message: string;
+  time: string | null;
+}
+
+export interface StreamDiagnosticResponse {
+  stream_id: number;
+  diagnostic: StreamDiagnostic;
+}

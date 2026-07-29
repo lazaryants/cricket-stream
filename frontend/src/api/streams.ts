@@ -1,6 +1,7 @@
 import type {
   StreamActionResponse,
   StreamCreateRequest,
+  StreamDiagnosticResponse,
   StreamItem,
   StreamRuntimeStatus,
   StreamUpdateRequest,
@@ -119,6 +120,17 @@ export async function stopStream(
   const response =
     await http.post<StreamActionResponse>(
       `/streams/${streamId}/stop`,
+    );
+
+  return response.data;
+}
+
+export async function getStreamDiagnostics(
+  streamId: number,
+): Promise<StreamDiagnosticResponse> {
+  const response =
+    await http.get<StreamDiagnosticResponse>(
+      `/streams/${streamId}/diagnostics`,
     );
 
   return response.data;

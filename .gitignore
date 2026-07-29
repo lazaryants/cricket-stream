@@ -56,3 +56,5 @@ __pycache__/
 *.before-*
 *.bak
 *.backup
+*.backup-*
+*.before-*
