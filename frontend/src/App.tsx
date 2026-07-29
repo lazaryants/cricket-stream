@@ -3,22 +3,18 @@ import {
   Route,
   Routes,
 } from "react-router";
-
 import DashboardPage
   from "./pages/DashboardPage";
-
 import LoginPage
   from "./pages/LoginPage";
-
 import StreamCreatePage
   from "./pages/StreamCreatePage";
-
 import StreamDetailsPage
   from "./pages/StreamDetailsPage";
-
 import StreamEditPage
   from "./pages/StreamEditPage";
-
+import StreamsPage
+  from "./pages/StreamsPage";
 import { RequireAuth }
   from "./routes/RequireAuth";
 
@@ -36,6 +32,11 @@ export default function App() {
         <Route
           path="/"
           element={<DashboardPage />}
+        />
+
+        <Route
+          path="/streams"
+          element={<StreamsPage />}
         />
 
         <Route
