@@ -695,7 +695,7 @@ export default function StreamsPage() {
                   >
                     <Table
                       sx={{
-                        minWidth: 1300,
+                        minWidth: 1450,
                       }}
                     >
                       <TableHead>
@@ -717,6 +717,10 @@ export default function StreamsPage() {
                           <TableCell>
                             Диагностика
                           </TableCell>
+
+                            <TableCell>
+                              Live
+                            </TableCell>
 
                           <TableCell>
                             Провайдер

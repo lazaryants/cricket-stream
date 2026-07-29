@@ -36,6 +36,8 @@ import {
 } from "../../api/streams";
 import { StreamDiagnosticChip }
   from "../../components/StreamDiagnosticChip";
+import { StreamLiveMetrics }
+  from "../../components/StreamLiveMetrics";
 import { StreamStatusChip }
   from "../../components/StreamStatusChip";
 import type {
@@ -150,92 +152,6 @@ function getStatusBorderColor(
     default:
       return "grey.700";
   }
-}
-
-function formatUptime(
-  seconds: number | undefined,
-): string {
-  if (
-    seconds === undefined
-    || seconds < 0
-  ) {
-    return "—";
-  }
-
-  const totalSeconds =
-    Math.floor(seconds);
-
-  const hours =
-    Math.floor(totalSeconds / 3600);
-
-  const minutes =
-    Math.floor(
-      (totalSeconds % 3600) / 60,
-    );
-
-  const remainingSeconds =
-    totalSeconds % 60;
-
-  return [
-    String(hours).padStart(2, "0"),
-    String(minutes).padStart(2, "0"),
-    String(remainingSeconds)
-      .padStart(2, "0"),
-  ].join(":");
-}
-
-function getMetricsText(
-  runtime:
-    StreamRuntimeStatus | undefined,
-): string {
-  const metrics =
-    runtime?.metrics;
-
-  if (!metrics) {
-    return "Метрики пока недоступны";
-  }
-
-  const parts: string[] = [];
-
-  if (metrics.resolution) {
-    parts.push(metrics.resolution);
-  }
-
-  const fps =
-    metrics.source_fps
-    ?? metrics.fps;
-
-  if (
-    fps !== null
-    && fps !== undefined
-    && fps > 0
-  ) {
-    parts.push(
-      `${Math.round(fps)} fps`,
-    );
-  }
-
-  if (
-    metrics.bitrate_kbps !== null
-    && metrics.bitrate_kbps
-      !== undefined
-    && metrics.bitrate_kbps > 0
-  ) {
-    const megabits =
-      metrics.bitrate_kbps / 1000;
-
-    parts.push(
-      `${megabits.toFixed(1)} Mbps`,
-    );
-  } else if (metrics.bitrate) {
-    parts.push(metrics.bitrate);
-  }
-
-  if (parts.length === 0) {
-    return "Метрики пока недоступны";
-  }
-
-  return parts.join(" · ");
 }
 
 export function StreamMobileCard({
@@ -520,46 +436,25 @@ export function StreamMobileCard({
             <Typography
               variant="caption"
               color="text.secondary"
-            >
-              Параметры потока
-            </Typography>
-
-            <Typography
-              variant="body2"
               sx={{
-                mt: 0.25,
-                fontWeight: 600,
+                display: "block",
+                mb: 0.75,
               }}
             >
-              {getMetricsText(runtime)}
+              Live-метрики
             </Typography>
+
+            <StreamLiveMetrics
+              metrics={metrics}
+              processAlive={running}
+              compact
+            />
           </Box>
 
           <Stack
             direction="row"
             spacing={3}
           >
-            <Box>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-              >
-                Время работы
-              </Typography>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                {formatUptime(
-                  metrics
-                    ?.uptime_seconds,
-                )}
-              </Typography>
-            </Box>
-
             <Box>
               <Typography
                 variant="caption"

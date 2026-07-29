@@ -36,6 +36,8 @@ import {
 } from "../../api/streams";
 import { StreamDiagnosticChip }
   from "../../components/StreamDiagnosticChip";
+import { StreamLiveMetrics }
+  from "../../components/StreamLiveMetrics";
 import { StreamStatusChip }
   from "../../components/StreamStatusChip";
 import type {
@@ -381,6 +383,16 @@ export function StreamRow({
             }
           />
         </TableCell>
+
+          <TableCell>
+            <StreamLiveMetrics
+              metrics={
+                runtime?.metrics
+              }
+              processAlive={running}
+              compact
+            />
+          </TableCell>
 
         <TableCell>
           <Chip
