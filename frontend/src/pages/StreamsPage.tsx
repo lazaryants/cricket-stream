@@ -4,20 +4,12 @@ import {
 } from "react";
 import ArrowBackIcon
   from "@mui/icons-material/ArrowBack";
-import EditIcon
-  from "@mui/icons-material/Edit";
 import LogoutIcon
   from "@mui/icons-material/Logout";
-import OpenInNewIcon
-  from "@mui/icons-material/OpenInNew";
-import PlayArrowIcon
-  from "@mui/icons-material/PlayArrow";
 import RefreshIcon
   from "@mui/icons-material/Refresh";
 import SearchIcon
   from "@mui/icons-material/Search";
-import StopIcon
-  from "@mui/icons-material/Stop";
 import {
   Alert,
   AppBar,
@@ -34,7 +26,6 @@ import {
   Paper,
   Select,
   Stack,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -45,27 +36,25 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
-  useMutation,
   useQueries,
   useQuery,
-  useQueryClient,
 } from "@tanstack/react-query";
-import axios from "axios";
 import { Link }
   from "react-router";
 import {
   getStreams,
   getStreamStatus,
-  startStream,
-  stopStream,
-  updateStream,
 } from "../api/streams";
 import { useAuth }
   from "../auth/useAuth";
-import { StreamStatusChip }
-  from "../components/StreamStatusChip";
+import { StreamRow }
+  from "../features/streams/StreamRow";
+import { StreamMobileCard }
+  from "../features/streams/StreamMobileCard";
 import type {
   StreamItem,
   StreamRuntimeStatus,
@@ -79,51 +68,11 @@ type StreamFilter =
   | "hidden"
   | "disabled";
 
-const providerLabels: Record<
-  string,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестно",
-};
-
 const roleLabels = {
   viewer: "Наблюдатель",
   operator: "Оператор",
   admin: "Администратор",
 } as const;
-
-function getErrorMessage(
-  error: unknown,
-): string {
-  if (axios.isAxiosError(error)) {
-    const detail =
-      error.response?.data?.detail;
-
-    if (typeof detail === "string") {
-      return detail;
-    }
-
-    if (
-      typeof detail === "object"
-      && detail !== null
-      && "message" in detail
-      && typeof detail.message
-        === "string"
-    ) {
-      return detail.message;
-    }
-  }
-
-  return (
-    "Операция не выполнена. "
-    + "Проверьте состояние трансляции."
-  );
-}
 
 function getEffectiveStatus(
   stream: StreamItem,
@@ -161,387 +110,14 @@ function isStreamRunning(
   );
 }
 
-interface StreamRowProps {
-  stream: StreamItem;
-  runtime:
-    StreamRuntimeStatus | undefined;
-  canManage: boolean;
-}
-
-function StreamRow({
-  stream,
-  runtime,
-  canManage,
-}: StreamRowProps) {
-  const queryClient =
-    useQueryClient();
-
-  const [
-    actionError,
-    setActionError,
-  ] = useState<string | null>(
-    null,
-  );
-
-  const effectiveStatus =
-    getEffectiveStatus(
-      stream,
-      runtime,
-    );
-
-  const running =
-    isStreamRunning(
-      stream,
-      runtime,
-    );
-
-  const canStop =
-    running
-    || effectiveStatus === "starting"
-    || effectiveStatus === "running"
-    || effectiveStatus === "restarting"
-    || effectiveStatus === "stopping";
-
-  async function invalidateData() {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: [
-          "streams",
-        ],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: [
-          "stream-status",
-          stream.id,
-        ],
-      }),
-    ]);
-  }
-
-  const dashboardMutation =
-    useMutation({
-      mutationFn: (
-        showOnDashboard: boolean,
-      ) =>
-        updateStream(
-          stream.id,
-          {
-            show_on_dashboard:
-              showOnDashboard,
-          },
-        ),
-      onMutate: () => {
-        setActionError(null);
-      },
-      onSuccess: async () => {
-        await invalidateData();
-      },
-      onError: (error) => {
-        setActionError(
-          getErrorMessage(error),
-        );
-      },
-    });
-
-  const startMutation =
-    useMutation({
-      mutationFn: () =>
-        startStream(
-          stream.id,
-        ),
-      onMutate: () => {
-        setActionError(null);
-      },
-      onSuccess: async () => {
-        await invalidateData();
-      },
-      onError: (error) => {
-        setActionError(
-          getErrorMessage(error),
-        );
-      },
-    });
-
-  const stopMutation =
-    useMutation({
-      mutationFn: () =>
-        stopStream(
-          stream.id,
-        ),
-      onMutate: () => {
-        setActionError(null);
-      },
-      onSuccess: async () => {
-        await invalidateData();
-      },
-      onError: (error) => {
-        setActionError(
-          getErrorMessage(error),
-        );
-      },
-    });
-
-  const actionPending =
-    dashboardMutation.isPending
-    || startMutation.isPending
-    || stopMutation.isPending;
-
-  return (
-    <>
-      <TableRow
-        hover
-        sx={{
-          "&:last-child td": {
-            borderBottom: 0,
-          },
-        }}
-      >
-        <TableCell
-          padding="checkbox"
-          align="center"
-        >
-          <Tooltip
-            title={
-              stream.show_on_dashboard
-                ? "Показывается на Dashboard"
-                : "Скрыта с Dashboard"
-            }
-          >
-            <span>
-              <Switch
-                size="small"
-                checked={
-                  stream
-                    .show_on_dashboard
-                }
-                disabled={
-                  !canManage
-                  || dashboardMutation
-                    .isPending
-                }
-                onChange={(
-                  _event,
-                  checked,
-                ) => {
-                  dashboardMutation
-                    .mutate(checked);
-                }}
-                slotProps={{
-                  input: {
-                    "aria-label":
-                      "Показывать на Dashboard",
-                  },
-                }}
-              />
-            </span>
-          </Tooltip>
-        </TableCell>
-
-        <TableCell>
-          <Stack
-            spacing={0.35}
-            sx={{
-              minWidth: 180,
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 600,
-              }}
-            >
-              {stream.name}
-            </Typography>
-
-            {stream.description && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  maxWidth: 360,
-                  overflow: "hidden",
-                  textOverflow:
-                    "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-                title={
-                  stream.description
-                }
-              >
-                {stream.description}
-              </Typography>
-            )}
-          </Stack>
-        </TableCell>
-
-        <TableCell>
-          <StreamStatusChip
-            status={
-              effectiveStatus
-            }
-          />
-        </TableCell>
-
-        <TableCell>
-          <Chip
-            size="small"
-            variant="outlined"
-            label={
-              providerLabels[
-                stream.provider
-              ] ?? stream.provider
-            }
-          />
-        </TableCell>
-
-        <TableCell>
-          <Typography
-            variant="body2"
-          >
-            Node #{stream.node_id}
-          </Typography>
-        </TableCell>
-
-        <TableCell>
-          <Chip
-            size="small"
-            color={
-              stream.enabled
-                ? "success"
-                : "default"
-            }
-            variant="outlined"
-            label={
-              stream.enabled
-                ? "Включена"
-                : "Отключена"
-            }
-          />
-        </TableCell>
-
-        <TableCell align="right">
-          <Stack
-            direction="row"
-            spacing={0.5}
-            sx={{
-              justifyContent:
-                "flex-end",
-              minWidth: 275,
-            }}
-          >
-            <Tooltip title="Подробнее">
-              <IconButton
-                component={Link}
-                to={`/streams/${stream.id}`}
-                size="small"
-              >
-                <OpenInNewIcon
-                  fontSize="small"
-                />
-              </IconButton>
-            </Tooltip>
-
-            {canManage && (
-              <Tooltip title="Редактировать">
-                <IconButton
-                  component={Link}
-                  to={
-                    `/streams/${stream.id}/edit`
-                  }
-                  size="small"
-                >
-                  <EditIcon
-                    fontSize="small"
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
-
-            {canManage && (
-              <>
-                <Button
-                  size="small"
-                  color="success"
-                  variant="contained"
-                  startIcon={
-                    startMutation
-                      .isPending
-                      ? (
-                        <CircularProgress
-                          size={15}
-                          color="inherit"
-                        />
-                      )
-                      : (
-                        <PlayArrowIcon />
-                      )
-                  }
-                  disabled={
-                    actionPending
-                    || running
-                    || !stream.enabled
-                  }
-                  onClick={() => {
-                    startMutation.mutate();
-                  }}
-                >
-                  Старт
-                </Button>
-
-                <Button
-                  size="small"
-                  color="error"
-                  variant="outlined"
-                  startIcon={
-                    stopMutation
-                      .isPending
-                      ? (
-                        <CircularProgress
-                          size={15}
-                          color="inherit"
-                        />
-                      )
-                      : <StopIcon />
-                  }
-                  disabled={
-                    actionPending
-                    || !canStop
-                  }
-                  onClick={() => {
-                    stopMutation.mutate();
-                  }}
-                >
-                  Стоп
-                </Button>
-              </>
-            )}
-          </Stack>
-        </TableCell>
-      </TableRow>
-
-      {actionError && (
-        <TableRow>
-          <TableCell
-            colSpan={7}
-            sx={{
-              pt: 0,
-            }}
-          >
-            <Alert
-              severity="error"
-              onClose={() => {
-                setActionError(null);
-              }}
-            >
-              {actionError}
-            </Alert>
-          </TableCell>
-        </TableRow>
-      )}
-    </>
-  );
-}
-
 export default function StreamsPage() {
+  const theme = useTheme();
+
+  const isMobile =
+    useMediaQuery(
+      theme.breakpoints.down("md"),
+    );
+
   const auth = useAuth();
   const user = auth.user;
 
@@ -760,6 +336,9 @@ export default function StreamsPage() {
     <Box
       sx={{
         minHeight: "100vh",
+        width: "100%",
+        maxWidth: "100vw",
+        overflowX: "hidden",
       }}
     >
       <AppBar
@@ -855,8 +434,14 @@ export default function StreamsPage() {
       <Container
         maxWidth="xl"
         sx={{
+          minWidth: 0,
+          overflowX: "hidden",
+          px: {
+            xs: 1.5,
+            sm: 3,
+          },
           py: {
-            xs: 3,
+            xs: 2,
             md: 4,
           },
         }}
@@ -1082,54 +667,12 @@ export default function StreamsPage() {
             && filteredStreams.length
               > 0
             && (
-              <TableContainer
-                component={Paper}
-              >
-                <Table
-                  sx={{
-                    minWidth: 1100,
-                  }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell
-                        align="center"
-                      >
-                        Dashboard
-                      </TableCell>
-
-                      <TableCell>
-                        Название
-                      </TableCell>
-
-                      <TableCell>
-                        Статус
-                      </TableCell>
-
-                      <TableCell>
-                        Провайдер
-                      </TableCell>
-
-                      <TableCell>
-                        Узел
-                      </TableCell>
-
-                      <TableCell>
-                        Доступность
-                      </TableCell>
-
-                      <TableCell
-                        align="right"
-                      >
-                        Действия
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-
-                  <TableBody>
+              isMobile
+                ? (
+                  <Stack spacing={2}>
                     {filteredStreams.map(
                       (stream) => (
-                        <StreamRow
+                        <StreamMobileCard
                           key={stream.id}
                           stream={stream}
                           runtime={
@@ -1144,9 +687,79 @@ export default function StreamsPage() {
                         />
                       ),
                     )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  </Stack>
+                )
+                : (
+                  <TableContainer
+                    component={Paper}
+                  >
+                    <Table
+                      sx={{
+                        minWidth: 1300,
+                      }}
+                    >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell
+                            align="center"
+                          >
+                            Dashboard
+                          </TableCell>
+
+                          <TableCell>
+                            Название
+                          </TableCell>
+
+                          <TableCell>
+                            Статус
+                          </TableCell>
+
+                          <TableCell>
+                            Диагностика
+                          </TableCell>
+
+                          <TableCell>
+                            Провайдер
+                          </TableCell>
+
+                          <TableCell>
+                            Узел
+                          </TableCell>
+
+                          <TableCell>
+                            Доступность
+                          </TableCell>
+
+                          <TableCell
+                            align="right"
+                          >
+                            Действия
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+
+                      <TableBody>
+                        {filteredStreams.map(
+                          (stream) => (
+                            <StreamRow
+                              key={stream.id}
+                              stream={stream}
+                              runtime={
+                                runtimeByStreamId
+                                  .get(
+                                    stream.id,
+                                  )
+                              }
+                              canManage={
+                                canManage
+                              }
+                            />
+                          ),
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )
             )}
         </Stack>
       </Container>
