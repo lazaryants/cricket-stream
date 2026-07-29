@@ -21,6 +21,7 @@ from app.core.auth_dependencies import (
 )
 from app.core.dependencies import get_db
 from app.engine.manager import stream_manager
+from app.engine.logs import log_buffer
 from app.models.enums import (
     StreamSessionStatus,
     UserRole,
@@ -30,6 +31,9 @@ from app.schemas.stream import (
     StreamAdminUpdate,
     StreamCreate,
     StreamOperatorUpdate,
+)
+from app.services.stream_diagnostics_service import (
+    stream_diagnostics_service,
 )
 from app.services.stream_preview_service import (
     StreamPreviewError,
@@ -731,3 +735,84 @@ async def stop_stream(
             session.uuid
         ),
     }
+
+@router.get(
+    "/{stream_id}/logs",
+)
+async def get_stream_logs(
+    stream_id: int,
+    limit: int = Query(
+        default=100,
+        ge=1,
+        le=1000,
+    ),
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_admin
+    ),
+):
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
+    )
+
+    if stream is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Stream not found",
+        )
+
+    return {
+        "stream_id": stream.id,
+        "items": log_buffer.get(
+            stream_id,
+            limit=limit,
+        ),
+    }
+
+@router.get(
+    "/{stream_id}/diagnostics",
+)
+async def get_stream_diagnostics(
+    stream_id: int,
+    db: AsyncSession = Depends(
+        get_db
+    ),
+    current_user: User = Depends(
+        require_operator
+    ),
+):
+    service = StreamSessionService(
+        db
+    )
+
+    runtime = (
+        await service.get_runtime_status(
+            stream_id
+        )
+    )
+
+    if runtime is None:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="Stream not found",
+        )
+
+    diagnostic = (
+        stream_diagnostics_service.get(
+            stream_id=stream_id,
+            process_alive=runtime[
+                "process_alive"
+            ],
+        )
+    )
+
+    return {
+        "stream_id": stream_id,
+        "diagnostic": diagnostic,
+    }
+

@@ -194,6 +194,17 @@ class StreamSessionService:
         session: StreamSession,
         stream: Stream,
     ):
+        # Ручной запуск имеет приоритет над отложенным
+        # автоматическим рестартом.
+        from app.engine.lifecycle import (
+            cancel_restart,
+        )
+
+        cancel_restart(
+            stream.id,
+            reset_backoff=True,
+        )
+
         session.status = (
             StreamSessionStatus.starting
         )
@@ -245,6 +256,17 @@ class StreamSessionService:
         self,
         session: StreamSession,
     ):
+        # Сначала отменяем ожидающий автоперезапуск,
+        # затем останавливаем текущий процесс.
+        from app.engine.lifecycle import (
+            cancel_restart,
+        )
+
+        cancel_restart(
+            session.stream_id,
+            reset_backoff=True,
+        )
+
         stream = await self.get_stream(
             session.stream_id
         )
