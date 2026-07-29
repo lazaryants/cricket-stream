@@ -58,10 +58,16 @@ import { StreamStatusChip }
 
 import type {
   StreamItem,
+  StreamRuntimeStatus,
 } from "../../types/stream";
 
 interface StreamCardProps {
   stream: StreamItem;
+  runtime?: StreamRuntimeStatus;
+  runtimeLoading?: boolean;
+  runtimeError?: boolean;
+  onRuntimeRefresh?: () => void | Promise<void>;
+  showDetails?: boolean;
 }
 
 const providerLabels: Record<
@@ -174,6 +180,11 @@ function getErrorMessage(
 
 export function StreamCard({
   stream,
+  runtime: externalRuntime,
+  runtimeLoading = false,
+  runtimeError = false,
+  onRuntimeRefresh,
+  showDetails = true,
 }: StreamCardProps) {
   const auth = useAuth();
   const queryClient =
@@ -191,6 +202,9 @@ export function StreamCard({
     || auth.user?.role === "admin"
     || auth.user?.is_superuser;
 
+  const usesExternalRuntime =
+    onRuntimeRefresh !== undefined;
+
   const statusQuery = useQuery({
     queryKey: [
       "stream-status",
@@ -202,7 +216,12 @@ export function StreamCard({
         stream.id,
       ),
 
-    refetchInterval: 5_000,
+    enabled:
+      !usesExternalRuntime,
+    refetchInterval:
+      usesExternalRuntime
+        ? false
+        : 5_000,
 
     /*
      * В скрытой вкладке браузера
@@ -279,7 +298,28 @@ export function StreamCard({
     });
 
   const runtime =
-    statusQuery.data;
+    usesExternalRuntime
+      ? externalRuntime
+      : statusQuery.data;
+
+  const statusIsFetching =
+    usesExternalRuntime
+      ? runtimeLoading
+      : statusQuery.isFetching;
+
+  const statusIsError =
+    usesExternalRuntime
+      ? runtimeError
+      : statusQuery.isError;
+
+  async function refreshRuntime() {
+    if (onRuntimeRefresh) {
+      await onRuntimeRefresh();
+      return;
+    }
+
+    await statusQuery.refetch();
+  }
 
   const metrics =
     runtime?.metrics;
@@ -416,16 +456,13 @@ export function StreamCard({
                   <IconButton
                     size="small"
                     disabled={
-                      statusQuery
-                        .isFetching
+                      statusIsFetching
                     }
                     onClick={() => {
-                      void statusQuery
-                        .refetch();
+                      void refreshRuntime();
                     }}
                   >
-                    {statusQuery
-                      .isFetching
+                    {statusIsFetching
                       ? (
                         <CircularProgress
                           size={18}
@@ -451,7 +488,7 @@ export function StreamCard({
             </Typography>
           )}
 
-          {statusQuery.isError && (
+          {statusIsError && (
             <Alert severity="error">
               Не удалось получить
               текущий статус потока.
@@ -561,13 +598,15 @@ export function StreamCard({
           gap: 1,
         }}
       >
-        <Button
-          component={Link}
-          to={`/streams/${stream.id}`}
-          variant="text"
-        >
-          Подробнее
-        </Button>
+        {showDetails && (
+          <Button
+            component={Link}
+            to={`/streams/${stream.id}`}
+            variant="text"
+          >
+            Подробнее
+          </Button>
+        )}
 
         {canControl && (
           <>

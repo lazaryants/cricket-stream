@@ -487,13 +487,41 @@ export default function DashboardPage() {
               }}
             >
               {streams.map(
-                (stream) => (
-                  <StreamCard
-                    key={stream.id}
-                    stream={stream}
-                  />
-                ),
-              )}
+                  (
+                    stream,
+                    index,
+                  ) => (
+                    <StreamCard
+                      key={stream.id}
+                      stream={stream}
+                      runtime={
+                        statusQueries[
+                          index
+                        ]?.data
+                      }
+                      runtimeLoading={
+                        statusQueries[
+                          index
+                        ]?.isFetching
+                        ?? false
+                      }
+                      runtimeError={
+                        statusQueries[
+                          index
+                        ]?.isError
+                        ?? false
+                      }
+                      onRuntimeRefresh={
+                        async () => {
+                          await statusQueries[
+                            index
+                          ]?.refetch();
+                        }
+                      }
+                      showDetails={false}
+                    />
+                  ),
+                )}
             </Box>
           )}
         </Stack>
