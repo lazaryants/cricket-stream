@@ -16,6 +16,7 @@ import {
 import { BrowserRouter }
   from "react-router";
 
+import { RuntimeWebSocketBridge } from "./websocket/RuntimeWebSocketBridge";
 import App from "./App";
 
 import { AuthProvider }
@@ -58,6 +59,7 @@ createRoot(
       >
         <BrowserRouter>
           <AuthProvider>
+            <RuntimeWebSocketBridge />
             <App />
           </AuthProvider>
         </BrowserRouter>
