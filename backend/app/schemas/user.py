@@ -23,7 +23,7 @@ class UserCreate(BaseModel):
     )
 
     password: str = Field(
-        min_length=10,
+        min_length=8,
         max_length=1024,
     )
 
@@ -44,7 +44,7 @@ class UserUpdate(BaseModel):
 
     password: str | None = Field(
         default=None,
-        min_length=10,
+        min_length=8,
         max_length=1024,
     )
 

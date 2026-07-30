@@ -432,6 +432,35 @@ export function StreamMobileCard({
             />
           </Stack>
 
+          {stream.destination_rtmp_url && (
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  display: "block",
+                  mb: 0.5,
+                }}
+              >
+                Назначение
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily:
+                    "monospace",
+                  overflowWrap:
+                    "anywhere",
+                }}
+              >
+                {
+                  stream
+                    .destination_rtmp_url
+                }
+              </Typography>
+            </Box>
+          )}
+
           <Box>
             <Typography
               variant="caption"

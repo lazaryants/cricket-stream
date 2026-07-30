@@ -9,9 +9,9 @@ def hash_password(
 ) -> str:
     normalized = password.strip()
 
-    if len(normalized) < 10:
+    if len(normalized) < 8:
         raise ValueError(
-            "Password must contain at least 10 characters"
+            "Password must contain at least 8 characters"
         )
 
     if len(normalized) > 1024:

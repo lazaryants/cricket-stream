@@ -11,17 +11,15 @@ import {
   CardContent,
   Checkbox,
   CircularProgress,
-  FormControl,
   FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 
 import axios from "axios";
+import { SourceSelector }
+  from "./SourceSelector";
 
 import type {
   ProviderType,
@@ -43,37 +41,6 @@ interface StreamFormProps {
       | StreamUpdateRequest,
   ): Promise<void>;
 }
-
-
-const providers: Array<{
-  value: ProviderType;
-  label: string;
-}> = [
-  {
-    value: "youtube",
-    label: "YouTube",
-  },
-  {
-    value: "twitch",
-    label: "Twitch",
-  },
-  {
-    value: "kick",
-    label: "Kick",
-  },
-  {
-    value: "vimeo",
-    label: "Vimeo",
-  },
-  {
-    value: "custom",
-    label: "Прямая ссылка",
-  },
-  {
-    value: "unknown",
-    label: "Неизвестный",
-  },
-];
 
 
 function getErrorMessage(
@@ -353,7 +320,7 @@ export function StreamForm({
               Оператор может изменить
               источник, provider, название
               и описание. RTMP назначение
-              изменяет только администратор.
+              доступно только для просмотра.
             </Alert>
           )}
 
@@ -382,51 +349,15 @@ export function StreamForm({
             disabled={isSubmitting}
           />
 
-          <FormControl
-            fullWidth
+          <SourceSelector
+            provider={provider}
+            sourceUrl={sourceUrl}
             disabled={isSubmitting}
-          >
-            <InputLabel id="provider-label">
-              Provider
-            </InputLabel>
-
-            <Select
-              labelId="provider-label"
-              label="Provider"
-              value={provider}
-              onChange={(event) => {
-                setProvider(
-                  event.target
-                    .value as ProviderType,
-                );
-              }}
-            >
-              {providers.map(
-                (item) => (
-                  <MenuItem
-                    key={item.value}
-                    value={item.value}
-                  >
-                    {item.label}
-                  </MenuItem>
-                ),
-              )}
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="Исходная ссылка"
-            value={sourceUrl}
-            onChange={(event) => {
-              setSourceUrl(
-                event.target.value,
-              );
-            }}
-            required
-            fullWidth
-            disabled={isSubmitting}
-            placeholder={
-              "https://www.twitch.tv/..."
+            onProviderChange={
+              setProvider
+            }
+            onSourceUrlChange={
+              setSourceUrl
             }
           />
 
@@ -449,24 +380,38 @@ export function StreamForm({
             }
           />
 
+          <TextField
+            label="RTMP назначение"
+            value={destinationUrl}
+            onChange={(event) => {
+              setDestinationUrl(
+                event.target.value,
+              );
+            }}
+            required={isAdmin}
+            fullWidth
+            disabled={
+              isSubmitting
+              || !isAdmin
+            }
+            helperText={
+              isAdmin
+                ? (
+                  "Администратор может "
+                  + "изменить назначение."
+                )
+                : (
+                  "Назначение задано "
+                  + "администратором."
+                )
+            }
+            placeholder={
+              "rtmp://server/app/key"
+            }
+          />
+
           {isAdmin && (
             <>
-              <TextField
-                label="RTMP назначение"
-                value={destinationUrl}
-                onChange={(event) => {
-                  setDestinationUrl(
-                    event.target.value,
-                  );
-                }}
-                required
-                fullWidth
-                disabled={isSubmitting}
-                placeholder={
-                  "rtmp://server/app/key"
-                }
-              />
-
               <TextField
                 label="ID узла"
                 value={nodeId}

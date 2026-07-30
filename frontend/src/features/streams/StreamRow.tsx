@@ -355,6 +355,32 @@ export function StreamRow({
                 {stream.description}
               </Typography>
             )}
+            {stream.destination_rtmp_url && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  display: "block",
+                  maxWidth: 420,
+                  overflow: "hidden",
+                  textOverflow:
+                    "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontFamily:
+                    "monospace",
+                }}
+                title={
+                  stream
+                    .destination_rtmp_url
+                }
+              >
+                Назначение:{" "}
+                {
+                  stream
+                    .destination_rtmp_url
+                }
+              </Typography>
+            )}
           </Stack>
         </TableCell>
 

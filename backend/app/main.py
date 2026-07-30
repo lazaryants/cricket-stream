@@ -6,16 +6,23 @@ from contextlib import suppress
 
 from fastapi import FastAPI
 
+from app.api.v1 import auth
 from app.api.v1 import nodes
 from app.api.v1 import sessions
-from app.api.v1 import auth
 from app.api.v1 import sources
+from app.api.v1.saved_sources import (
+    router as saved_sources_router,
+)
 from app.api.v1 import streams
 from app.core.config import settings
 from app.engine.lifecycle import (
     monitor_streams,
     restore_streams,
     shutdown_streams,
+)
+from app.websocket import runtime
+from app.websocket.runtime import (
+    runtime_publisher,
 )
 
 
@@ -35,15 +42,31 @@ async def lifespan(
         name="stream-supervisor",
     )
 
+    runtime_publisher_task = (
+        asyncio.create_task(
+            runtime_publisher.run(),
+            name=(
+                "runtime-websocket-publisher"
+            ),
+        )
+    )
+
     try:
         yield
+
     finally:
         print(
             "[LIFECYCLE] Backend stopping",
             flush=True,
         )
 
+        runtime_publisher_task.cancel()
         monitor_task.cancel()
+
+        with suppress(
+            asyncio.CancelledError
+        ):
+            await runtime_publisher_task
 
         with suppress(
             asyncio.CancelledError
@@ -59,9 +82,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
 app.include_router(
     auth.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    runtime.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    saved_sources_router,
     prefix="/api/v1",
 )
 app.include_router(
