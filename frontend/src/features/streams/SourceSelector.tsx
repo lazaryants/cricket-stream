@@ -6,6 +6,7 @@ import {
 import {
   Alert,
   Box,
+  Button,
   Chip,
   CircularProgress,
   FormControl,
@@ -25,6 +26,11 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
+
+import {
+  Link,
+} from "react-router";
+
 import {
   getSavedSources,
 } from "../../api/savedSources";
@@ -269,6 +275,18 @@ export function SourceSelector({
             Источник трансляции
           </Typography>
 
+          <Button
+            component={Link}
+            to="/libraries"
+            size="small"
+            sx={{
+              mt: 1,
+              px: 0,
+            }}
+          >
+            Управление библиотекой
+          </Button>
+
           <Typography
             variant="body2"
             color="text.secondary"
@@ -481,7 +499,7 @@ export function SourceSelector({
                     )}
 
                   <TextField
-                    label="Provider"
+                    label="Платформа"
                     value={
                       providerLabels[
                         selectedSource
@@ -494,7 +512,7 @@ export function SourceSelector({
 
                   <TextField
                     label={
-                      "Исходная ссылка"
+                      "URL источника"
                     }
                     value={
                       selectedSource
@@ -526,17 +544,17 @@ export function SourceSelector({
               >
                 <InputLabel
                   id={
-                    "manual-provider-label"
+                    "manual-platform-label"
                   }
                 >
-                  Provider
+                  Платформа
                 </InputLabel>
 
                 <Select
                   labelId={
-                    "manual-provider-label"
+                    "manual-platform-label"
                   }
-                  label="Provider"
+                  label="Платформа"
                   value={provider}
                   onChange={(event) => {
                     const nextProvider:
@@ -561,8 +579,9 @@ export function SourceSelector({
                 </Select>
               </FormControl>
 
+              <>
               <TextField
-                label="Исходная ссылка"
+                label="URL источника"
                 value={sourceUrl}
                 onChange={(event) => {
                   onSourceUrlChange(
@@ -576,6 +595,16 @@ export function SourceSelector({
                   "https://twitch.tv/channel"
                 }
               />
+
+              <Alert severity="info">
+                Введённая вручную ссылка
+                используется только в этой
+                карточке и не сохраняется
+                в библиотеку.
+              </Alert>
+              </>
+
+
             </Stack>
           )}
       </Stack>

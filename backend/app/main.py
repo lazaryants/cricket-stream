@@ -10,6 +10,9 @@ from app.api.v1 import auth
 from app.api.v1 import nodes
 from app.api.v1 import sessions
 from app.api.v1 import sources
+from app.api.v1.saved_destinations import (
+    router as saved_destinations_router,
+)
 from app.api.v1.saved_sources import (
     router as saved_sources_router,
 )
@@ -92,6 +95,10 @@ app.include_router(
     prefix="/api/v1",
 )
 
+app.include_router(
+    saved_destinations_router,
+    prefix="/api/v1",
+)
 app.include_router(
     saved_sources_router,
     prefix="/api/v1",

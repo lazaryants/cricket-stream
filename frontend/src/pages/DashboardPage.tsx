@@ -1,3 +1,5 @@
+import LibraryBooksIcon
+  from "@mui/icons-material/LibraryBooks";
 import LogoutIcon
   from "@mui/icons-material/Logout";
 
@@ -187,6 +189,39 @@ export default function DashboardPage() {
             Cricket Stream Platform
           </Typography>
 
+          <Button
+            component={Link}
+            to="/libraries"
+            color="inherit"
+            startIcon={
+              <LibraryBooksIcon />
+            }
+            sx={{
+              display: {
+                xs: "none",
+                md: "inline-flex",
+              },
+              mr: 1,
+            }}
+          >
+            Библиотеки
+          </Button>
+          <Tooltip title="Библиотеки">
+            <IconButton
+              component={Link}
+              to="/libraries"
+              color="inherit"
+              sx={{
+                display: {
+                  xs: "inline-flex",
+                  md: "none",
+                },
+                mr: 0.5,
+              }}
+            >
+              <LibraryBooksIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             title={
               `${user.username} — `

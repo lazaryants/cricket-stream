@@ -4,6 +4,8 @@ import {
 } from "react";
 import ArrowBackIcon
   from "@mui/icons-material/ArrowBack";
+import LibraryBooksIcon
+  from "@mui/icons-material/LibraryBooks";
 import LogoutIcon
   from "@mui/icons-material/Logout";
 import RefreshIcon
@@ -380,6 +382,39 @@ export default function StreamsPage() {
             Все трансляции
           </Typography>
 
+          <Button
+            component={Link}
+            to="/libraries"
+            color="inherit"
+            startIcon={
+              <LibraryBooksIcon />
+            }
+            sx={{
+              display: {
+                xs: "none",
+                md: "inline-flex",
+              },
+              mr: 1,
+            }}
+          >
+            Библиотеки
+          </Button>
+          <Tooltip title="Библиотеки">
+            <IconButton
+              component={Link}
+              to="/libraries"
+              color="inherit"
+              sx={{
+                display: {
+                  xs: "inline-flex",
+                  md: "none",
+                },
+                mr: 0.5,
+              }}
+            >
+              <LibraryBooksIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             title={
               `${user.username} — `

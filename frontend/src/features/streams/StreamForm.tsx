@@ -18,6 +18,9 @@ import {
 } from "@mui/material";
 
 import axios from "axios";
+import {
+  DestinationSelector,
+} from "./DestinationSelector";
 import { SourceSelector }
   from "./SourceSelector";
 
@@ -202,7 +205,7 @@ export function StreamForm({
 
         if (!destinationUrl.trim()) {
           setErrorMessage(
-            "Укажите RTMP назначение.",
+            "Укажите RTMP-назначение.",
           );
           return;
         }
@@ -318,8 +321,8 @@ export function StreamForm({
           {!isAdmin && (
             <Alert severity="info">
               Оператор может изменить
-              источник, provider, название
-              и описание. RTMP назначение
+              источник, платформу, название
+              и описание. RTMP-назначение
               доступно только для просмотра.
             </Alert>
           )}
@@ -380,35 +383,18 @@ export function StreamForm({
             }
           />
 
-          <TextField
-            label="RTMP назначение"
-            value={destinationUrl}
-            onChange={(event) => {
-              setDestinationUrl(
-                event.target.value,
-              );
-            }}
-            required={isAdmin}
-            fullWidth
-            disabled={
-              isSubmitting
-              || !isAdmin
-            }
-            helperText={
-              isAdmin
-                ? (
-                  "Администратор может "
-                  + "изменить назначение."
-                )
-                : (
-                  "Назначение задано "
-                  + "администратором."
-                )
-            }
-            placeholder={
-              "rtmp://server/app/key"
-            }
-          />
+            <DestinationSelector
+              destinationUrl={
+                destinationUrl
+              }
+              disabled={
+                isSubmitting
+                || !isAdmin
+              }
+              onDestinationUrlChange={
+                setDestinationUrl
+              }
+            />
 
           {isAdmin && (
             <>
