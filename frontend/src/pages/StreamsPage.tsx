@@ -140,9 +140,7 @@ export default function StreamsPage() {
       "streams",
     ],
     queryFn: getStreams,
-    refetchInterval: 15_000,
-    refetchIntervalInBackground:
-      true,
+    staleTime: 60_000,
   });
 
   const streams = useMemo(
@@ -164,9 +162,9 @@ export default function StreamsPage() {
           getStreamStatus(
             stream.id,
           ),
-        refetchInterval: 5_000,
-        refetchIntervalInBackground:
-          true,
+        // Runtime обновляется через WebSocket.
+        // REST используется только при ручном обновлении.
+        enabled: false,
         retry: 1,
       }),
     ),

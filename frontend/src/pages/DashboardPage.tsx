@@ -63,10 +63,7 @@ export default function DashboardPage() {
 
     queryFn: getStreams,
 
-    refetchInterval: 15_000,
-
-    refetchIntervalInBackground:
-      true,
+    staleTime: 60_000,
   });
 
   const allStreams =
@@ -91,10 +88,9 @@ export default function DashboardPage() {
             stream.id,
           ),
 
-        refetchInterval: 5_000,
-
-        refetchIntervalInBackground:
-          true,
+        // Runtime обновляется через WebSocket.
+        // REST используется только при ручном обновлении.
+        enabled: false,
 
         retry: 1,
       }),
