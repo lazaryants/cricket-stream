@@ -1,5 +1,6 @@
 import os
 import signal
+from pathlib import Path
 
 from app.engine.ffmpeg import (
     FFmpegCommandBuilder,
@@ -10,6 +11,8 @@ from app.engine.process import (
 from app.providers.registry import (
     source_resolvers,
 )
+from app.core.config import settings
+from app.models.enums import SourceEngine
 
 
 class StreamManager:
@@ -75,18 +78,26 @@ class StreamManager:
                 None,
             )
 
-        resolver = (
-            source_resolvers
-            .get_streamlink()
+        hls_directory = (
+            Path(settings.hls_dir)
+            / str(stream_id)
         )
+        hls_directory.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+        for stale_file in hls_directory.glob("*"):
+            if stale_file.is_file():
+                stale_file.unlink()
 
-        source = (
-            resolver.build_stream_command(
-                source_url=(
-                    stream.source_url
-                ),
-                quality="best",
-            )
+        source_engine = getattr(
+            stream,
+            "source_engine",
+            SourceEngine.AUTO,
+        )
+        source = await self._resolve_source(
+            stream.source_url,
+            source_engine,
         )
 
         if source.direct_url:
@@ -160,6 +171,71 @@ class StreamManager:
         )
 
         return pid
+
+    async def _resolve_source(
+        self,
+        source_url: str,
+        source_engine: SourceEngine | str,
+    ):
+        engine_value = getattr(
+            source_engine,
+            "value",
+            source_engine,
+        )
+        streamlink = (
+            source_resolvers.get_streamlink()
+        )
+
+        # Прямые media URL не требуют resolver.
+        direct_source = (
+            streamlink.build_stream_command(
+                source_url=source_url,
+                quality="best",
+            )
+        )
+        if direct_source.direct_url:
+            return direct_source
+
+        if engine_value == SourceEngine.STREAMLINK.value:
+            return direct_source
+
+        if engine_value == SourceEngine.AUTO.value:
+            try:
+                probe = await streamlink.probe(
+                    source_url=source_url,
+                    quality="best",
+                    timeout=25.0,
+                )
+                if probe.success:
+                    return direct_source
+            except Exception as exc:
+                print(
+                    "[SOURCE RESOLVER] "
+                    f"Streamlink preflight failed: {exc}; "
+                    "falling back to yt-dlp",
+                    flush=True,
+                )
+
+        ytdlp = source_resolvers.get_ytdlp()
+        probe = await ytdlp.probe(
+            source_url=source_url,
+            quality="best",
+            timeout=35.0,
+            include_resolved_url=True,
+        )
+        if not probe.success or not probe.resolved_url:
+            raise RuntimeError(
+                probe.error
+                or "yt-dlp did not return a playable URL"
+            )
+
+        return type(direct_source)(
+            source_kind=probe.source_kind,
+            provider=probe.provider,
+            quality=probe.quality,
+            command=None,
+            direct_url=probe.resolved_url,
+        )
 
     async def stop(
         self,

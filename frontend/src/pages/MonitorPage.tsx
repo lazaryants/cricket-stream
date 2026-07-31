@@ -49,8 +49,8 @@ import {
   getStreamStatus,
 } from "../api/streams";
 
-import { StreamCardPreview }
-  from "../features/streams/StreamCardPreview";
+import { StreamLivePlayer }
+  from "../features/streams/StreamLivePlayer";
 
 import { StreamStatusChip }
   from "../components/StreamStatusChip";
@@ -270,11 +270,12 @@ function MonitorTile({
           position: "relative",
         }}
       >
-        <StreamCardPreview
+        <StreamLivePlayer
           streamId={stream.id}
           processAlive={
             processAlive
           }
+          compact={compact}
         />
 
         <Box
@@ -472,6 +473,37 @@ function MonitorTile({
                     / 1000
                   ).toFixed(1)}
                   {" Mbps"}
+                </Typography>
+              )}
+
+            {(
+              runtime?.metrics?.fps
+              ?? runtime?.metrics
+                ?.source_fps
+            ) !== null
+              && (
+                runtime?.metrics?.fps
+                ?? runtime?.metrics
+                  ?.source_fps
+              ) !== undefined
+              && (
+                runtime?.metrics?.fps
+                ?? runtime?.metrics
+                  ?.source_fps
+                ?? 0
+              ) > 0
+              && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  {"FPS "}
+                  {(
+                    runtime?.metrics?.fps
+                    ?? runtime?.metrics
+                      ?.source_fps
+                    ?? 0
+                  ).toFixed(1)}
                 </Typography>
               )}
           </Stack>

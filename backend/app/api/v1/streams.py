@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from fastapi import (
@@ -9,6 +10,7 @@ from fastapi import (
     Response,
     status,
 )
+from fastapi.responses import FileResponse
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -20,6 +22,14 @@ from app.core.auth_dependencies import (
     require_viewer,
 )
 from app.core.dependencies import get_db
+from app.core.config import settings
+from app.core.tokens import (
+    PLAYBACK_TOKEN_TYPE,
+    InvalidTokenError,
+    TokenExpiredError,
+    create_playback_token,
+    decode_token,
+)
 from app.engine.manager import stream_manager
 from app.engine.logs import log_buffer
 from app.models.enums import (
@@ -51,6 +61,35 @@ router = APIRouter(
     prefix="/streams",
     tags=["streams"],
 )
+
+
+def _validate_playback_token(
+    stream_id: int,
+    token: str,
+) -> None:
+    try:
+        payload = decode_token(
+            token,
+            PLAYBACK_TOKEN_TYPE,
+        )
+    except (
+        InvalidTokenError,
+        TokenExpiredError,
+    ) as exc:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_401_UNAUTHORIZED
+            ),
+            detail="Invalid or expired playback token",
+        ) from exc
+
+    if payload.get("sub") != str(stream_id):
+        raise HTTPException(
+            status_code=(
+                status.HTTP_403_FORBIDDEN
+            ),
+            detail="Playback token does not match stream",
+        )
 
 
 def validation_http_exception(
@@ -451,6 +490,110 @@ async def get_stream_preview(
 
 
 @router.get(
+    "/{stream_id}/playback",
+)
+async def get_stream_playback(
+    stream_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(
+        require_viewer
+    ),
+):
+    stream = await StreamService.get_by_id(
+        db,
+        stream_id,
+    )
+    if stream is None:
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="Stream not found",
+        )
+
+    token, expires_at = create_playback_token(
+        stream_id
+    )
+    return {
+        "stream_id": stream_id,
+        "playlist_url": (
+            f"/api/v1/streams/{stream_id}/hls/"
+            f"index.m3u8?token={token}"
+        ),
+        "expires_at": expires_at,
+    }
+
+
+@router.get(
+    "/{stream_id}/hls/{filename}",
+    include_in_schema=False,
+)
+async def get_stream_hls_file(
+    stream_id: int,
+    filename: str,
+    token: str = Query(...),
+):
+    _validate_playback_token(
+        stream_id,
+        token,
+    )
+
+    if not (
+        filename == "index.m3u8"
+        or (
+            filename.startswith("segment_")
+            and filename.endswith(".ts")
+            and filename[8:-3].isdigit()
+        )
+    ):
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="HLS file not found",
+        )
+
+    file_path = (
+        Path(settings.hls_dir)
+        / str(stream_id)
+        / filename
+    )
+    if not file_path.is_file():
+        raise HTTPException(
+            status_code=(
+                status.HTTP_404_NOT_FOUND
+            ),
+            detail="HLS file not ready",
+        )
+
+    if filename.endswith(".m3u8"):
+        playlist = file_path.read_text(
+            encoding="utf-8"
+        )
+        protected_lines = []
+        for line in playlist.splitlines():
+            if line and not line.startswith("#"):
+                line = f"{line}?token={token}"
+            protected_lines.append(line)
+        return Response(
+            content="\n".join(protected_lines) + "\n",
+            media_type=(
+                "application/vnd.apple.mpegurl"
+            ),
+            headers={
+                "Cache-Control": "no-store, no-cache",
+            },
+        )
+
+    return FileResponse(
+        file_path,
+        media_type="video/mp2t",
+        headers={
+            "Cache-Control": "no-store, no-cache",
+        },
+    )
+
+@router.get(
     "/{stream_id}/status",
 )
 async def get_stream_status(
@@ -522,6 +665,9 @@ async def get_stream_status(
         "name": stream.name,
         "provider": (
             stream.provider.value
+        ),
+        "source_engine": (
+            stream.source_engine.value
         ),
         "database_status": (
             stream.status.value
@@ -815,4 +961,3 @@ async def get_stream_diagnostics(
         "stream_id": stream_id,
         "diagnostic": diagnostic,
     }
-

@@ -10,6 +10,12 @@ class ProviderType(str, Enum):
     UNKNOWN = "unknown"
 
 
+class SourceEngine(str, Enum):
+    AUTO = "auto"
+    STREAMLINK = "streamlink"
+    YT_DLP = "yt-dlp"
+
+
 class StreamStatus(str, Enum):
     DRAFT = "draft"
     READY = "ready"

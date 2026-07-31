@@ -3,6 +3,7 @@ import type {
   StreamCreateRequest,
   StreamDiagnosticResponse,
   StreamItem,
+  StreamPlayback,
   StreamRuntimeStatus,
   StreamUpdateRequest,
 } from "../types/stream";
@@ -84,6 +85,18 @@ export async function getStreamPreview(
 
         responseType: "blob",
       },
+    );
+
+  return response.data;
+}
+
+
+export async function getStreamPlayback(
+  streamId: number,
+): Promise<StreamPlayback> {
+  const response =
+    await http.get<StreamPlayback>(
+      `/streams/${streamId}/playback`,
     );
 
   return response.data;

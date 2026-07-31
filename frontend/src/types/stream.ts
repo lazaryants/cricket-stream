@@ -16,6 +16,11 @@ export type StreamStatus =
   | "stopped"
   | "error";
 
+export type SourceEngine =
+  | "auto"
+  | "streamlink"
+  | "yt-dlp";
+
 export interface StreamItem {
   id: number;
   uuid: string;
@@ -24,6 +29,7 @@ export interface StreamItem {
   description: string | null;
 
   provider: ProviderType;
+  source_engine: SourceEngine;
   node_id: number;
 
   enabled: boolean;
@@ -46,6 +52,7 @@ export interface StreamCreateRequest {
   description: string | null;
   provider: ProviderType;
   source_url: string;
+  source_engine: SourceEngine;
   destination_rtmp_url: string;
   node_id: number;
   enabled: boolean;
@@ -58,6 +65,7 @@ export interface StreamAdminUpdateRequest {
   description?: string | null;
   provider?: ProviderType;
   source_url?: string;
+  source_engine?: SourceEngine;
   destination_rtmp_url?: string;
   node_id?: number;
   enabled?: boolean;
@@ -70,6 +78,7 @@ export interface StreamOperatorUpdateRequest {
   description?: string | null;
   provider?: ProviderType;
   source_url?: string;
+  source_engine?: SourceEngine;
   show_on_dashboard?: boolean;
 }
 
@@ -153,6 +162,7 @@ export interface StreamRuntimeStatus {
 
   name: string;
   provider: ProviderType;
+  source_engine: SourceEngine;
 
   database_status: StreamStatus;
   manager_status: string;
@@ -191,4 +201,10 @@ export interface StreamDiagnostic {
 export interface StreamDiagnosticResponse {
   stream_id: number;
   diagnostic: StreamDiagnostic;
+}
+
+export interface StreamPlayback {
+  stream_id: number;
+  playlist_url: string;
+  expires_at: string;
 }

@@ -1,7 +1,59 @@
+from pathlib import Path
+
+from app.core.config import settings
 from app.models.stream import Stream
 
 
 class FFmpegCommandBuilder:
+    @staticmethod
+    def _outputs(
+        stream: Stream,
+    ) -> list[str]:
+        hls_directory = (
+            Path(settings.hls_dir)
+            / str(stream.id)
+        )
+        playlist_path = (
+            hls_directory / "index.m3u8"
+        )
+        segment_path = (
+            hls_directory
+            / "segment_%06d.ts"
+        )
+
+        return [
+            "-map", "0:v:0?",
+            "-map", "0:a:0?",
+            "-c:v", "copy",
+            "-c:a", "copy",
+            "-f", "flv",
+            "-flvflags", "no_duration_filesize",
+            stream.destination_rtmp_url,
+
+            # Второй mux-выход использует те же
+            # закодированные пакеты: CPU-тяжёлого
+            # перекодирования для preview нет.
+            "-map", "0:v:0?",
+            "-map", "0:a:0?",
+            "-c:v", "copy",
+            "-c:a", "copy",
+            "-f", "hls",
+            "-hls_time", str(
+                settings.hls_segment_time
+            ),
+            "-hls_list_size", str(
+                settings.hls_list_size
+            ),
+            "-hls_flags",
+            (
+                "delete_segments+omit_endlist+"
+                "independent_segments+program_date_time"
+            ),
+            "-hls_segment_filename",
+            str(segment_path),
+            str(playlist_path),
+        ]
+
     @staticmethod
     def build_direct(
         stream: Stream,
@@ -17,7 +69,7 @@ class FFmpegCommandBuilder:
         - SRT input
         """
         return [
-            "/usr/bin/ffmpeg",
+            settings.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "info",
@@ -31,8 +83,6 @@ class FFmpegCommandBuilder:
             "1",
             "-reconnect_streamed",
             "1",
-            "-reconnect_at_eof",
-            "1",
             "-reconnect_delay_max",
             "5",
 
@@ -42,20 +92,6 @@ class FFmpegCommandBuilder:
 
             "-i",
             source_url,
-
-            # Первый видеопоток, если он существует.
-            "-map",
-            "0:v:0?",
-
-            # Первый аудиопоток, если он существует.
-            "-map",
-            "0:a:0?",
-
-            # Строго без перекодирования.
-            "-c:v",
-            "copy",
-            "-c:a",
-            "copy",
 
             # Коррекция отрицательных timestamps.
             "-avoid_negative_ts",
@@ -68,13 +104,9 @@ class FFmpegCommandBuilder:
             "1",
             "-nostats",
 
-            # RTMP output.
-            "-f",
-            "flv",
-            "-flvflags",
-            "no_duration_filesize",
-
-            stream.destination_rtmp_url,
+            *FFmpegCommandBuilder._outputs(
+                stream
+            ),
         ]
 
     @staticmethod
@@ -89,7 +121,7 @@ class FFmpegCommandBuilder:
         Streamlink stdout → FFmpeg stdin → RTMP
         """
         return [
-            "/usr/bin/ffmpeg",
+            settings.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "info",
@@ -107,20 +139,6 @@ class FFmpegCommandBuilder:
             "-i",
             "pipe:0",
 
-            # Первый видеопоток, если он существует.
-            "-map",
-            "0:v:0?",
-
-            # Первый аудиопоток, если он существует.
-            "-map",
-            "0:a:0?",
-
-            # Строго без перекодирования.
-            "-c:v",
-            "copy",
-            "-c:a",
-            "copy",
-
             "-avoid_negative_ts",
             "make_zero",
 
@@ -131,11 +149,7 @@ class FFmpegCommandBuilder:
             "1",
             "-nostats",
 
-            # RTMP output.
-            "-f",
-            "flv",
-            "-flvflags",
-            "no_duration_filesize",
-
-            stream.destination_rtmp_url,
+            *FFmpegCommandBuilder._outputs(
+                stream
+            ),
         ]

@@ -15,6 +15,7 @@ from app.core.auth_config import (
 
 ACCESS_TOKEN_TYPE = "access"
 REFRESH_TOKEN_TYPE = "refresh"
+PLAYBACK_TOKEN_TYPE = "playback"
 
 
 class TokenError(Exception):
@@ -90,6 +91,16 @@ def create_refresh_token(
                 .refresh_token_days
             )
         ),
+    )
+
+
+def create_playback_token(
+    stream_id: int,
+) -> tuple[str, datetime]:
+    return _create_token(
+        subject=str(stream_id),
+        token_type=PLAYBACK_TOKEN_TYPE,
+        expires_delta=timedelta(hours=2),
     )
 
 

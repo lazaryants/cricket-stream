@@ -7,6 +7,7 @@ from contextlib import suppress
 from fastapi import FastAPI
 
 from app.api.v1 import auth
+from app.api.v1 import components
 from app.api.v1 import nodes
 from app.api.v1 import sessions
 from app.api.v1 import sources
@@ -87,6 +88,11 @@ app = FastAPI(
 
 app.include_router(
     auth.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    components.router,
     prefix="/api/v1",
 )
 

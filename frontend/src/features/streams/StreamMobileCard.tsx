@@ -271,10 +271,11 @@ export function StreamMobileCard({
         await invalidateData();
       },
 
-      onError: (error) => {
-        setActionError(
-          getErrorMessage(error),
-        );
+      onError: async () => {
+        // Ошибка запуска уже видна в статусе
+        // и диагностике самой карточки.
+        setActionError(null);
+        await invalidateData();
       },
     });
 

@@ -35,7 +35,10 @@ import {
 
 import axios from "axios";
 
-import { Link }
+import {
+  Link,
+  useNavigate,
+}
   from "react-router";
 
 import {
@@ -187,6 +190,7 @@ export function StreamCard({
   showDetails = true,
 }: StreamCardProps) {
   const auth = useAuth();
+  const navigate = useNavigate();
   const queryClient =
     useQueryClient();
 
@@ -383,8 +387,48 @@ export function StreamCard({
     ],
   );
 
+  function openDetailsFromCard(
+    target: EventTarget | null,
+  ): void {
+    if (
+      target instanceof Element
+      && target.closest(
+        "button, a, input, select, textarea",
+      )
+    ) {
+      return;
+    }
+
+    navigate(`/streams/${stream.id}`);
+  }
+
   return (
     <Card
+      role="link"
+      tabIndex={0}
+      aria-label={
+        `Открыть подробности: ${stream.name}`
+      }
+      onClick={(event) => {
+        openDetailsFromCard(
+          event.target,
+        );
+      }}
+      onKeyDown={(event) => {
+        if (
+          event.key !== "Enter"
+          && event.key !== " "
+        ) {
+          return;
+        }
+
+        if (event.target !== event.currentTarget) {
+          return;
+        }
+
+        event.preventDefault();
+        navigate(`/streams/${stream.id}`);
+      }}
       sx={{
         height: "100%",
         display: "flex",
@@ -392,6 +436,19 @@ export function StreamCard({
         border:
           "1px solid "
           + "rgba(255,255,255,0.08)",
+        cursor: "pointer",
+        transition:
+          "border-color 150ms ease, "
+          + "transform 150ms ease",
+        "&:hover": {
+          borderColor: "primary.main",
+          transform: "translateY(-1px)",
+        },
+        "&:focus-visible": {
+          outline: "2px solid",
+          outlineColor: "primary.main",
+          outlineOffset: 2,
+        },
       }}
     >
       <StreamCardPreview

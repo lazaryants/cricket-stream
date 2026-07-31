@@ -1,6 +1,8 @@
 import asyncio
 import logging
+from pathlib import Path
 
+from app.core.config import settings
 from app.models.stream import Stream
 from app.providers.registry import source_resolvers
 
@@ -74,6 +76,14 @@ class StreamPreviewService:
         self,
         stream: Stream,
     ) -> str:
+        local_playlist = (
+            Path(settings.hls_dir)
+            / str(stream.id)
+            / "index.m3u8"
+        )
+        if local_playlist.is_file():
+            return str(local_playlist)
+
         resolver = (
             source_resolvers
             .get_streamlink()

@@ -13,12 +13,14 @@ from app.providers.source import (
 from app.providers.streamlink import (
     StreamlinkResolver,
 )
+from app.providers.ytdlp import YtDlpResolver
 
 __all__ = [
     "SourceCommand",
     "SourceKind",
     "SourceProbeResult",
     "StreamlinkResolver",
+    "YtDlpResolver",
     "detect_source_kind",
     "normalize_source_url",
     "source_resolvers",

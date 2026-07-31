@@ -9,6 +9,7 @@ from pydantic import (
 
 from app.models.enums import (
     ProviderType,
+    SourceEngine,
     StreamStatus,
 )
 
@@ -30,6 +31,8 @@ class StreamCreate(BaseModel):
     source_url: str = Field(
         min_length=1,
     )
+
+    source_engine: SourceEngine = SourceEngine.AUTO
 
     destination_rtmp_url: str = Field(
         min_length=1,
@@ -69,6 +72,8 @@ class StreamOperatorUpdate(BaseModel):
         min_length=1,
     )
 
+    source_engine: SourceEngine | None = None
+
     # Оставляем существующие права operator.
     # Технические поля всё равно потребуют
     # остановки живого процесса.
@@ -103,6 +108,8 @@ class StreamAdminUpdate(BaseModel):
         min_length=1,
     )
 
+    source_engine: SourceEngine | None = None
+
     destination_rtmp_url: str | None = Field(
         default=None,
         min_length=1,
@@ -130,6 +137,7 @@ class StreamBaseResponse(BaseModel):
     description: str | None
 
     provider: ProviderType
+    source_engine: SourceEngine
     node_id: int
 
     enabled: bool

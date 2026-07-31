@@ -11,7 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import BaseModel
-from app.models.enums import ProviderType, StreamStatus
+from app.models.enums import ProviderType, SourceEngine, StreamStatus
 
 
 if TYPE_CHECKING:
@@ -39,6 +39,13 @@ class Stream(BaseModel):
 
     source_url: Mapped[str] = mapped_column(
         Text,
+        nullable=False,
+    )
+
+    source_engine: Mapped[SourceEngine] = mapped_column(
+        Enum(SourceEngine),
+        default=SourceEngine.AUTO,
+        server_default="AUTO",
         nullable=False,
     )
 

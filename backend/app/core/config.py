@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     max_streams: int
     preview_interval: int
+    hls_dir: str = "/opt/cricket-stream/var/hls"
+    hls_segment_time: int = 4
+    hls_list_size: int = 6
 
     log_level: str
 

@@ -12,6 +12,10 @@ import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
@@ -26,6 +30,7 @@ import { SourceSelector }
 
 import type {
   ProviderType,
+  SourceEngine,
   StreamCreateRequest,
   StreamItem,
   StreamUpdateRequest,
@@ -83,49 +88,75 @@ export function StreamForm({
   const [
     name,
     setName,
-  ] = useState("");
+  ] = useState(
+    () => stream?.name ?? "",
+  );
 
   const [
     description,
     setDescription,
-  ] = useState("");
+  ] = useState(
+    () => stream?.description ?? "",
+  );
 
   const [
     provider,
     setProvider,
   ] = useState<ProviderType>(
-    "custom",
+    () => stream?.provider ?? "custom",
   );
 
   const [
     sourceUrl,
     setSourceUrl,
-  ] = useState("");
+  ] = useState(
+    () => stream?.source_url ?? "",
+  );
+
+  const [
+    sourceEngine,
+    setSourceEngine,
+  ] = useState<SourceEngine>(
+    () => stream?.source_engine ?? "auto",
+  );
 
   const [
     destinationUrl,
     setDestinationUrl,
-  ] = useState("");
+  ] = useState(
+    () =>
+      stream?.destination_rtmp_url
+      ?? "",
+  );
 
   const [
     nodeId,
     setNodeId,
-  ] = useState("1");
+  ] = useState(
+    () => String(stream?.node_id ?? 1),
+  );
 
   const [
     enabled,
     setEnabled,
-  ] = useState(true);
+  ] = useState(
+    () => stream?.enabled ?? true,
+  );
 
   const [
     autoStart,
     setAutoStart,
-  ] = useState(false);
+  ] = useState(
+    () => stream?.auto_start ?? false,
+  );
 
   const [
     showOnDashboard,
     setShowOnDashboard,
-  ] = useState(true);
+  ] = useState(
+    () => stream?.show_on_dashboard
+      ?? true,
+  );
 
   const [
     errorMessage,
@@ -146,6 +177,9 @@ export function StreamForm({
     setProvider(stream.provider);
     setSourceUrl(
       stream.source_url ?? "",
+    );
+    setSourceEngine(
+      stream.source_engine ?? "auto",
     );
     setDestinationUrl(
       stream.destination_rtmp_url ?? "",
@@ -218,6 +252,8 @@ export function StreamForm({
           provider,
           source_url:
             cleanedSource,
+          source_engine:
+            sourceEngine,
           destination_rtmp_url:
             destinationUrl.trim(),
           node_id:
@@ -256,6 +292,8 @@ export function StreamForm({
           provider,
           source_url:
             cleanedSource,
+          source_engine:
+            sourceEngine,
           destination_rtmp_url:
             destinationUrl.trim(),
           node_id:
@@ -278,6 +316,8 @@ export function StreamForm({
         provider,
         source_url:
           cleanedSource,
+        source_engine:
+          sourceEngine,
         show_on_dashboard:
           showOnDashboard,
       });
@@ -363,6 +403,44 @@ export function StreamForm({
               setSourceUrl
             }
           />
+
+          <FormControl
+            fullWidth
+            disabled={isSubmitting}
+          >
+            <InputLabel id="source-engine-label">
+              Движок источника
+            </InputLabel>
+            <Select
+              labelId="source-engine-label"
+              label="Движок источника"
+              value={sourceEngine}
+              onChange={(event) => {
+                setSourceEngine(
+                  event.target.value as SourceEngine,
+                );
+              }}
+            >
+              <MenuItem value="auto">
+                Авто (Streamlink → yt-dlp)
+              </MenuItem>
+              <MenuItem value="streamlink">
+                Streamlink
+              </MenuItem>
+              <MenuItem value="yt-dlp">
+                yt-dlp
+              </MenuItem>
+            </Select>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 0.75, ml: 1.75 }}
+            >
+              В автоматическом режиме сначала
+              проверяется Streamlink, затем
+              используется yt-dlp.
+            </Typography>
+          </FormControl>
 
           <FormControlLabel
             control={

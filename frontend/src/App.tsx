@@ -7,6 +7,8 @@ import DashboardPage
   from "./pages/DashboardPage";
 import LoginPage
   from "./pages/LoginPage";
+import ComponentsPage
+  from "./pages/ComponentsPage";
 import MonitorPage
   from "./pages/MonitorPage";
 import LibrariesPage
@@ -50,6 +52,11 @@ export default function App() {
         <Route
           path="/libraries"
           element={<LibrariesPage />}
+        />
+
+        <Route
+          path="/components"
+          element={<ComponentsPage />}
         />
 
         <Route

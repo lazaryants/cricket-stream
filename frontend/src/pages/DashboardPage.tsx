@@ -4,6 +4,8 @@ import MonitorHeartIcon
   from "@mui/icons-material/MonitorHeart";
 import LogoutIcon
   from "@mui/icons-material/Logout";
+import SystemUpdateAltIcon
+  from "@mui/icons-material/SystemUpdateAlt";
 
 import RefreshIcon
   from "@mui/icons-material/Refresh";
@@ -255,6 +257,20 @@ export default function DashboardPage() {
               <LibraryBooksIcon />
             </IconButton>
           </Tooltip>
+          {(user.role === "admin"
+            || user.is_superuser
+          ) && (
+            <Tooltip title="Версии компонентов">
+              <IconButton
+                component={Link}
+                to="/components"
+                color="inherit"
+                sx={{ mr: 0.5 }}
+              >
+                <SystemUpdateAltIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip
             title={
               `${user.username} — `

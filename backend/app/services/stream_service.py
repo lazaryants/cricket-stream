@@ -110,6 +110,9 @@ class StreamService:
                 stream.description
             ),
             "provider": stream.provider,
+            "source_engine": (
+                stream.source_engine
+            ),
             "node_id": stream.node_id,
             "enabled": stream.enabled,
             "auto_start": (

@@ -321,19 +321,6 @@ export default function StreamDetailsPage() {
             }}
           />
 
-          {(auth.user?.role === "operator"
-            || auth.user?.role === "admin"
-            || auth.user?.is_superuser
-          ) && (
-            <Button
-              component={Link}
-              to={`/streams/${streamId}/edit`}
-              variant="outlined"
-            >
-              Редактировать
-            </Button>
-          )}
-
           <Tooltip title="Обновить">
             <span>
               <IconButton
@@ -445,6 +432,11 @@ export default function StreamDetailsPage() {
               streamId={stream.id}
               processAlive={
                 runtime.process_alive
+              }
+              editUrl={
+                canViewLogs
+                  ? `/streams/${streamId}/edit`
+                  : undefined
               }
             />
 

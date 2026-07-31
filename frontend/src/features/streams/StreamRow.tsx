@@ -240,10 +240,13 @@ export function StreamRow({
       onSuccess: async () => {
         await invalidateData();
       },
-      onError: (error) => {
-        setActionError(
-          getErrorMessage(error),
-        );
+      onError: async () => {
+        // Недоступный live-источник отражается
+        // штатным статусом и диагностикой строки.
+        // Не показываем дублирующий Alert,
+        // который требуется закрывать вручную.
+        setActionError(null);
+        await invalidateData();
       },
     });
 
