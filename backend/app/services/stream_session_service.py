@@ -219,7 +219,8 @@ class StreamSessionService:
 
         try:
             pid = await stream_manager.start(
-                stream
+                stream,
+                session_uuid=session.uuid,
             )
 
             session.process_id = str(pid)

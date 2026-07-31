@@ -164,7 +164,8 @@ async def restore_streams():
             try:
 
                 pid = await stream_manager.start(
-                    stream
+                    stream,
+                    session_uuid=session.uuid,
                 )
 
 
@@ -473,7 +474,8 @@ async def _restart_stream(
             try:
                 new_pid = (
                     await stream_manager.start(
-                        stream
+                        stream,
+                        session_uuid=session.uuid,
                     )
                 )
 

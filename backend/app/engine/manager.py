@@ -51,6 +51,8 @@ class StreamManager:
     async def start(
         self,
         stream,
+        *,
+        session_uuid,
     ) -> int:
         stream_id = stream.id
 
@@ -121,6 +123,7 @@ class StreamManager:
 
         process = FFmpegProcess(
             stream_id=stream_id,
+            session_uuid=session_uuid,
             ffmpeg_command=(
                 ffmpeg_command
             ),

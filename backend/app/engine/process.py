@@ -4,7 +4,9 @@ import re
 from asyncio.subprocess import Process
 from datetime import datetime, timezone
 
-from app.engine.logs import log_buffer
+from app.engine.session_logger import (
+    session_logger,
+)
 from app.engine.metrics import metrics_store
 
 
@@ -12,12 +14,14 @@ class FFmpegProcess:
     def __init__(
         self,
         stream_id: int,
+        session_uuid,
         ffmpeg_command: list[str],
         source_command: list[str] | None = None,
         source_kind: str = "direct",
         provider: str = "direct",
     ):
         self.stream_id = stream_id
+        self.session_uuid = session_uuid
 
         self.ffmpeg_command = (
             ffmpeg_command
@@ -85,8 +89,9 @@ class FFmpegProcess:
             },
         )
 
-        log_buffer.add(
+        session_logger.add(
             self.stream_id,
+            self.session_uuid,
             (
                 "FFmpeg started "
                 f"PID={self.process.pid}"
@@ -94,8 +99,9 @@ class FFmpegProcess:
         )
 
         if self.source_process:
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 (
                     "Source resolver started "
                     f"PID={self.source_process.pid}"
@@ -254,8 +260,9 @@ class FFmpegProcess:
             BrokenPipeError,
             ConnectionResetError,
         ):
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 (
                     "FFmpeg input pipe "
                     "was closed"
@@ -266,8 +273,9 @@ class FFmpegProcess:
             raise
 
         except Exception as exc:
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 (
                     "Source pipe error: "
                     f"{exc}"
@@ -323,8 +331,9 @@ class FFmpegProcess:
             if not text:
                 continue
 
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 f"[streamlink] {text}",
             )
 
@@ -365,8 +374,9 @@ class FFmpegProcess:
                 continue
 
             if "=" not in text:
-                log_buffer.add(
+                session_logger.add(
                     self.stream_id,
+                    self.session_uuid,
                     f"[stdout] {text}",
                 )
                 continue
@@ -409,8 +419,9 @@ class FFmpegProcess:
             if not text:
                 continue
 
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 f"[stderr] {text}",
             )
 
@@ -453,8 +464,9 @@ class FFmpegProcess:
                 f"unexpectedly code={code}"
             )
 
-        log_buffer.add(
+        session_logger.add(
             self.stream_id,
+            self.session_uuid,
             message,
         )
 
@@ -539,8 +551,9 @@ class FFmpegProcess:
                 f"code={code}"
             )
 
-        log_buffer.add(
+        session_logger.add(
             self.stream_id,
+            self.session_uuid,
             message,
         )
 
@@ -557,8 +570,9 @@ class FFmpegProcess:
     ) -> None:
         self.stopping = True
 
-        log_buffer.add(
+        session_logger.add(
             self.stream_id,
+            self.session_uuid,
             "Stopping stream pipeline",
         )
 
@@ -596,8 +610,9 @@ class FFmpegProcess:
         if process.returncode is not None:
             return
 
-        log_buffer.add(
+        session_logger.add(
             self.stream_id,
+            self.session_uuid,
             f"Stopping {name}",
         )
 
@@ -610,8 +625,9 @@ class FFmpegProcess:
             )
 
         except asyncio.TimeoutError:
-            log_buffer.add(
+            session_logger.add(
                 self.stream_id,
+                self.session_uuid,
                 f"Force killing {name}",
             )
 

@@ -17,7 +17,9 @@ from app.core.auth_dependencies import (
     require_viewer,
 )
 from app.core.dependencies import get_db
-from app.engine.logs import log_buffer
+from app.engine.session_logger import (
+    session_logger,
+)
 from app.engine.manager import stream_manager
 from app.models.enums import (
     StreamSessionStatus,
@@ -232,7 +234,22 @@ async def session_logs(
     limit: int = Query(
         default=100,
         ge=1,
-        le=1000,
+        le=5000,
+    ),
+    source: str | None = Query(
+        default=None,
+        description=(
+            "Optional source filter: "
+            "engine, ffmpeg, streamlink "
+            "or supervisor"
+        ),
+    ),
+    level: str | None = Query(
+        default=None,
+        description=(
+            "Optional level filter: "
+            "info, warning or error"
+        ),
     ),
     db: AsyncSession = Depends(
         get_db
@@ -241,11 +258,6 @@ async def session_logs(
         require_operator
     ),
 ):
-    """
-    Raw FFmpeg and Streamlink logs are
-    available only to operator and admin.
-    """
-
     service = StreamSessionService(
         db
     )
@@ -262,6 +274,48 @@ async def session_logs(
             detail="Session not found",
         )
 
+    allowed_sources = {
+        "engine",
+        "ffmpeg",
+        "streamlink",
+        "supervisor",
+    }
+
+    allowed_levels = {
+        "info",
+        "warning",
+        "error",
+    }
+
+    if (
+        source is not None
+        and source not in allowed_sources
+    ):
+        raise HTTPException(
+            status_code=(
+                status.HTTP_422_UNPROCESSABLE_ENTITY
+            ),
+            detail="Invalid source filter",
+        )
+
+    if (
+        level is not None
+        and level not in allowed_levels
+    ):
+        raise HTTPException(
+            status_code=(
+                status.HTTP_422_UNPROCESSABLE_ENTITY
+            ),
+            detail="Invalid level filter",
+        )
+
+    items = session_logger.get(
+        session.uuid,
+        limit=limit,
+        source=source,
+        level=level,
+    )
+
     return {
         "uuid": str(
             session.uuid
@@ -269,8 +323,14 @@ async def session_logs(
         "stream_id": (
             session.stream_id
         ),
-        "logs": log_buffer.get(
-            session.stream_id,
-            limit,
+        "logs": items,
+        "items": items,
+        "persistent": True,
+        "log_exists": (
+            session_logger.exists(
+                session.uuid
+            )
         ),
     }
+
+
