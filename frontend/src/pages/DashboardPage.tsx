@@ -1,5 +1,7 @@
 import LibraryBooksIcon
   from "@mui/icons-material/LibraryBooks";
+import MonitorHeartIcon
+  from "@mui/icons-material/MonitorHeart";
 import LogoutIcon
   from "@mui/icons-material/Logout";
 
@@ -184,6 +186,41 @@ export default function DashboardPage() {
           >
             Cricket Stream Platform
           </Typography>
+
+          <Button
+            component={Link}
+            to="/monitor"
+            color="inherit"
+            startIcon={
+              <MonitorHeartIcon />
+            }
+            sx={{
+              display: {
+                xs: "none",
+                md: "inline-flex",
+              },
+              mr: 1,
+            }}
+          >
+            Монитор
+          </Button>
+
+          <Tooltip title="Монитор">
+            <IconButton
+              component={Link}
+              to="/monitor"
+              color="inherit"
+              sx={{
+                display: {
+                  xs: "inline-flex",
+                  md: "none",
+                },
+                mr: 0.5,
+              }}
+            >
+              <MonitorHeartIcon />
+            </IconButton>
+          </Tooltip>
 
           <Button
             component={Link}

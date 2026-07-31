@@ -7,6 +7,8 @@ import DashboardPage
   from "./pages/DashboardPage";
 import LoginPage
   from "./pages/LoginPage";
+import MonitorPage
+  from "./pages/MonitorPage";
 import LibrariesPage
   from "./pages/LibrariesPage";
 import StreamCreatePage
@@ -39,6 +41,10 @@ export default function App() {
         <Route
           path="/streams"
           element={<StreamsPage />}
+        />
+        <Route
+          path="/monitor"
+          element={<MonitorPage />}
         />
 
         <Route
