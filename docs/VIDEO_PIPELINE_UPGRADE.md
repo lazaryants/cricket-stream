@@ -17,6 +17,8 @@ without its video downloader.
 
 ## Deployment
 
+Полная инструкция находится в [DEPLOYMENT.md](DEPLOYMENT.md).
+
 Run these commands from `/opt/cricket-stream` after copying the revision:
 
 ```bash
@@ -30,11 +32,6 @@ cd /opt/cricket-stream/frontend
 npm ci
 npm run build
 
-sudo cp /opt/cricket-stream/deploy/nginx/cricket-stream.conf \
-  /etc/nginx/sites-available/cricket-stream
-sudo nginx -t
-sudo systemctl reload nginx
-
 sudo systemctl restart cricket-backend
 sudo systemctl status cricket-backend --no-pager
 ```
@@ -45,6 +42,10 @@ secret with the placeholders from the example.
 
 The old public Nginx `location /hls/` must be removed. Preview files are served
 through `/api/v1/streams/{id}/hls/...` after playback authorization.
+
+Do not copy the generic Nginx template over an existing Certbot-managed
+production configuration during an application update. That can remove the
+HTTPS directives. Back up and compare the files first.
 
 ## Verification
 
