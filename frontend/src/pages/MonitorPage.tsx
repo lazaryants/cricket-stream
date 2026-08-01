@@ -6,6 +6,10 @@ import {
 
 import ArrowBackIcon
   from "@mui/icons-material/ArrowBack";
+import ChevronLeftIcon
+  from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon
+  from "@mui/icons-material/ChevronRight";
 import FullscreenIcon
   from "@mui/icons-material/Fullscreen";
 import GridViewIcon
@@ -548,6 +552,9 @@ export default function MonitorPage() {
     setFullscreen,
   ] = useState(false);
 
+  const [page, setPage] =
+    useState(0);
+
   const streamsQuery = useQuery({
     queryKey: [
       "streams",
@@ -581,21 +588,48 @@ export default function MonitorPage() {
       ],
     );
 
+  const pageCount = Math.max(
+    1,
+    Math.ceil(
+      streams.length / layout,
+    ),
+  );
+
+  const activePage = Math.min(
+    page,
+    pageCount - 1,
+  );
+
   const visibleStreams =
     useMemo(
       () =>
         isMobile
           ? streams
           : streams.slice(
-            0,
-            layout,
+            activePage * layout,
+            (activePage + 1)
+              * layout,
           ),
       [
         streams,
         layout,
         isMobile,
+        activePage,
       ],
     );
+
+  const firstVisibleNumber =
+    streams.length === 0
+      ? 0
+      : activePage * layout + 1;
+
+  const lastVisibleNumber =
+    isMobile
+      ? streams.length
+      : Math.min(
+        (activePage + 1) * layout,
+        streams.length,
+      );
 
   /*
    * RuntimeWebSocketBridge уже обновляет
@@ -705,6 +739,17 @@ export default function MonitorPage() {
     );
   }, [
     layout,
+  ]);
+
+  useEffect(() => {
+    if (page >= pageCount) {
+      setPage(
+        Math.max(0, pageCount - 1),
+      );
+    }
+  }, [
+    page,
+    pageCount,
   ]);
 
   useEffect(() => {
@@ -901,6 +946,7 @@ export default function MonitorPage() {
                 ) => {
                   if (value) {
                     setLayout(value);
+                    setPage(0);
                   }
                 }}
               >
@@ -932,17 +978,79 @@ export default function MonitorPage() {
               />
 
               {!isMobile
-                && streams.length
-                  > visibleStreams.length
+                && streams.length > 0
                 && (
                   <Chip
                     size="small"
                     variant="outlined"
                     label={
-                      `Показано: ${visibleStreams.length}`
-                      + `/${streams.length}`
+                      `Камеры ${firstVisibleNumber}`
+                      + `–${lastVisibleNumber}`
+                      + ` из ${streams.length}`
                     }
                   />
+                )}
+
+              {!isMobile
+                && pageCount > 1
+                && (
+                  <Stack
+                    direction="row"
+                    spacing={0.25}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tooltip title="Предыдущие камеры">
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={
+                            activePage === 0
+                          }
+                          onClick={() => {
+                            setPage(
+                              activePage - 1,
+                            );
+                          }}
+                        >
+                          <ChevronLeftIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        minWidth: 44,
+                        textAlign: "center",
+                      }}
+                    >
+                      {activePage + 1}
+                      {" / "}
+                      {pageCount}
+                    </Typography>
+
+                    <Tooltip title="Следующие камеры">
+                      <span>
+                        <IconButton
+                          size="small"
+                          disabled={
+                            activePage
+                            >= pageCount - 1
+                          }
+                          onClick={() => {
+                            setPage(
+                              activePage + 1,
+                            );
+                          }}
+                        >
+                          <ChevronRightIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </Stack>
                 )}
 
               <Chip
