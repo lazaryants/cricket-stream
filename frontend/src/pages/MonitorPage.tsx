@@ -695,16 +695,6 @@ export default function MonitorPage() {
    */
   const rowCount = columnCount;
 
-  const desktopGridMaxWidth: Record<
-    MonitorLayout,
-    number
-  > = {
-    1: 1200,
-    4: 1240,
-    9: 1150,
-    16: 1000,
-  };
-
   const compact =
     !isMobile && layout > 1;
 
@@ -846,6 +836,7 @@ export default function MonitorPage() {
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
+          boxSizing: "border-box",
           overflow: isMobile
             ? "visible"
             : "hidden",
@@ -1063,15 +1054,9 @@ export default function MonitorPage() {
                   gap: fullscreen
                     ? 1
                     : 1.5,
-                  alignItems: "start",
-                  justifyItems: "center",
+                  alignItems: "stretch",
+                  justifyItems: "stretch",
                   width: "100%",
-                  maxWidth: isMobile
-                    ? "none"
-                    : desktopGridMaxWidth[
-                      layout
-                    ],
-                  mx: "auto",
                   flex: 1,
                   minHeight: 0,
                   overflow: isMobile
@@ -1091,7 +1076,7 @@ export default function MonitorPage() {
                           )
                       }
                       compact={compact}
-                      fillContainer={false}
+                      fillContainer={!isMobile}
                     />
                   ),
                 )}
