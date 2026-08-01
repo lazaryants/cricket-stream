@@ -18,6 +18,17 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export interface AdminUser extends CurrentUser {
+  last_login_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TokenPairResponse {
   access_token: string;
   refresh_token: string;
