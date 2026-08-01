@@ -29,6 +29,7 @@ interface StreamLivePlayerProps {
   processAlive: boolean;
   controls?: boolean;
   compact?: boolean;
+  fillContainer?: boolean;
 }
 
 
@@ -37,12 +38,19 @@ export function StreamLivePlayer({
   processAlive,
   controls = true,
   compact = false,
+  fillContainer = false,
 }: StreamLivePlayerProps) {
   const videoRef =
     useRef<HTMLVideoElement | null>(null);
 
   const [playerError, setPlayerError] =
     useState<string | null>(null);
+
+  const [playerReady, setPlayerReady] =
+    useState(false);
+
+  const [connectionAttempt, setConnectionAttempt] =
+    useState(0);
 
   const playbackQuery = useQuery({
     queryKey: [
@@ -80,6 +88,23 @@ export function StreamLivePlayer({
     }
 
     setPlayerError(null);
+    setPlayerReady(false);
+
+    let retryTimer:
+      number | undefined;
+
+    const retryConnection = () => {
+      setPlayerReady(false);
+      setPlayerError(null);
+      retryTimer = window.setTimeout(
+        () => {
+          setConnectionAttempt(
+            (value) => value + 1,
+          );
+        },
+        2_000,
+      );
+    };
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -98,6 +123,7 @@ export function StreamLivePlayer({
       hls.on(
         Hls.Events.MANIFEST_PARSED,
         () => {
+          setPlayerReady(true);
           void video.play().catch(() => {
             // Controls remain available if autoplay
             // is blocked by the browser.
@@ -114,7 +140,8 @@ export function StreamLivePlayer({
             data.type
             === Hls.ErrorTypes.NETWORK_ERROR
           ) {
-            hls.startLoad();
+            hls.destroy();
+            retryConnection();
             return;
           }
           if (
@@ -132,6 +159,9 @@ export function StreamLivePlayer({
       );
 
       return () => {
+        if (retryTimer !== undefined) {
+          window.clearTimeout(retryTimer);
+        }
         hls.destroy();
       };
     }
@@ -141,9 +171,36 @@ export function StreamLivePlayer({
         "application/vnd.apple.mpegurl",
       )
     ) {
+      const handleReady = () => {
+        setPlayerReady(true);
+      };
+
+      const handleError = () => {
+        retryConnection();
+      };
+
+      video.addEventListener(
+        "loadedmetadata",
+        handleReady,
+      );
+      video.addEventListener(
+        "error",
+        handleError,
+      );
       video.src = playlistUrl;
       void video.play().catch(() => undefined);
       return () => {
+        if (retryTimer !== undefined) {
+          window.clearTimeout(retryTimer);
+        }
+        video.removeEventListener(
+          "loadedmetadata",
+          handleReady,
+        );
+        video.removeEventListener(
+          "error",
+          handleError,
+        );
         video.removeAttribute("src");
         video.load();
       };
@@ -155,11 +212,14 @@ export function StreamLivePlayer({
   }, [
     playbackQuery.data?.playlist_url,
     processAlive,
+    connectionAttempt,
   ]);
 
   useEffect(() => {
     if (!processAlive) {
       setPlayerError(null);
+      setPlayerReady(false);
+      setConnectionAttempt(0);
     }
   }, [processAlive]);
 
@@ -168,6 +228,7 @@ export function StreamLivePlayer({
     || playbackQuery.isLoading
     || playbackQuery.isError
     || playerError !== null
+    || !playerReady
   );
 
   return (
@@ -176,7 +237,13 @@ export function StreamLivePlayer({
         position: "relative",
         zIndex: 2,
         width: "100%",
-        aspectRatio: "16 / 9",
+        aspectRatio: fillContainer
+          ? "auto"
+          : "16 / 9",
+        height: fillContainer
+          ? "100%"
+          : "auto",
+        minHeight: 0,
         display: "grid",
         placeItems: "center",
         overflow: "hidden",
