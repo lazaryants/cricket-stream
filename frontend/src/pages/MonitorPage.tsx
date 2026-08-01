@@ -219,6 +219,7 @@ interface MonitorTileProps {
   runtime:
     StreamRuntimeStatus | undefined;
   compact: boolean;
+  denseMetrics: boolean;
   fillContainer: boolean;
 }
 
@@ -227,6 +228,7 @@ function MonitorTile({
   stream,
   runtime,
   compact,
+  denseMetrics,
   fillContainer,
 }: MonitorTileProps) {
   const effectiveStatus =
@@ -390,7 +392,11 @@ function MonitorTile({
                 ? 0.75
                 : 1.5,
               py: compact
-                ? 0.75
+                ? (
+                  denseMetrics
+                    ? 0.25
+                    : 0.75
+                )
                 : 1.25,
               display: "flex",
               alignItems: "flex-start",
@@ -403,6 +409,7 @@ function MonitorTile({
                 processAlive
               }
               compact
+              dense={denseMetrics}
             />
           </Box>
         )}
@@ -1233,6 +1240,10 @@ export default function MonitorPage() {
                           )
                       }
                       compact={compact}
+                      denseMetrics={
+                        !isMobile
+                        && layout === 16
+                      }
                       fillContainer={!isMobile}
                     />
                   ),
