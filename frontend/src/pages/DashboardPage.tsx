@@ -6,6 +6,10 @@ import LogoutIcon
   from "@mui/icons-material/Logout";
 import SystemUpdateAltIcon
   from "@mui/icons-material/SystemUpdateAlt";
+import ManageAccountsIcon
+  from "@mui/icons-material/ManageAccounts";
+import PeopleIcon
+  from "@mui/icons-material/People";
 
 import RefreshIcon
   from "@mui/icons-material/Refresh";
@@ -271,6 +275,32 @@ export default function DashboardPage() {
               </IconButton>
             </Tooltip>
           )}
+
+          {(user.role === "admin"
+            || user.is_superuser
+          ) && (
+            <Tooltip title="Пользователи">
+              <IconButton
+                component={Link}
+                to="/users"
+                color="inherit"
+                sx={{ mr: 0.5 }}
+              >
+                <PeopleIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
+          <Tooltip title="Аккаунт и пароль">
+            <IconButton
+              component={Link}
+              to="/account"
+              color="inherit"
+              sx={{ mr: 0.5 }}
+            >
+              <ManageAccountsIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             title={
               `${user.username} — `
