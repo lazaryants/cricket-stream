@@ -296,10 +296,10 @@ function MonitorTile({
             minHeight: 0,
             boxSizing: "border-box",
             pt: fillContainer
-              ? 0.75
+              ? 1.5
               : 0,
             pl: fillContainer
-              ? 0.75
+              ? 1.5
               : 0,
           }}
         >
