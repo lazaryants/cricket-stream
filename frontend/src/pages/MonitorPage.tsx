@@ -248,6 +248,7 @@ function MonitorTile({
       variant="outlined"
       sx={{
         position: "relative",
+        width: "100%",
         minWidth: 0,
         overflow: "hidden",
         display: "flex",
@@ -442,7 +443,6 @@ function MonitorTile({
             processAlive={
               processAlive
             }
-            compact
           />
         )}
 
@@ -687,13 +687,23 @@ export default function MonitorPage() {
       )
       : getColumnCount(layout);
 
-  const rowCount = Math.max(
-    1,
-    Math.ceil(
-      visibleStreams.length
-      / columnCount,
-    ),
-  );
+  /*
+   * Размер ячейки определяется выбранной
+   * сеткой, а не фактическим числом потоков.
+   * Иначе четыре потока в режиме 16
+   * ошибочно растягиваются в один ряд.
+   */
+  const rowCount = columnCount;
+
+  const desktopGridMaxWidth: Record<
+    MonitorLayout,
+    number
+  > = {
+    1: 1200,
+    4: 1240,
+    9: 1150,
+    16: 1000,
+  };
 
   const compact =
     !isMobile && layout > 1;
@@ -930,6 +940,20 @@ export default function MonitorPage() {
                 }
               />
 
+              {!isMobile
+                && streams.length
+                  > visibleStreams.length
+                && (
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={
+                      `Показано: ${visibleStreams.length}`
+                      + `/${streams.length}`
+                    }
+                  />
+                )}
+
               <Chip
                 size="small"
                 color={
@@ -1011,22 +1035,6 @@ export default function MonitorPage() {
               </Alert>
             )}
 
-          {!isMobile
-            && streams.length > layout && (
-            <Alert
-              severity="info"
-              variant="outlined"
-            >
-              Показаны первые {layout}
-              {" из "}
-              {streams.length}
-              {" потоков. "}
-              Выберите более крупную
-              сетку, чтобы увидеть
-              остальные.
-            </Alert>
-          )}
-
           {streamsQuery.isLoading
             ? (
               <Box
@@ -1055,7 +1063,15 @@ export default function MonitorPage() {
                   gap: fullscreen
                     ? 1
                     : 1.5,
-                  alignItems: "stretch",
+                  alignItems: "start",
+                  justifyItems: "center",
+                  width: "100%",
+                  maxWidth: isMobile
+                    ? "none"
+                    : desktopGridMaxWidth[
+                      layout
+                    ],
+                  mx: "auto",
                   flex: 1,
                   minHeight: 0,
                   overflow: isMobile
@@ -1075,7 +1091,7 @@ export default function MonitorPage() {
                           )
                       }
                       compact={compact}
-                      fillContainer={!isMobile}
+                      fillContainer={false}
                     />
                   ),
                 )}
