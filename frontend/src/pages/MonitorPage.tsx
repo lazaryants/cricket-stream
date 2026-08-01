@@ -280,82 +280,124 @@ function MonitorTile({
     >
       <Box
         sx={{
-          position: "relative",
           flex: fillContainer
             ? "1 1 auto"
             : "0 0 auto",
           minHeight: 0,
+          minWidth: 0,
+          display: "flex",
         }}
       >
-        <StreamLivePlayer
-          streamId={stream.id}
-          processAlive={
-            processAlive
-          }
-          compact={compact}
-          fillContainer={fillContainer}
-        />
-
         <Box
-          component={Link}
-          to={`/streams/${stream.id}`}
-          aria-label={
-            `Открыть ${stream.name}`
-          }
           sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 1,
-          }}
-        />
-
-        <Stack
-          direction="row"
-          spacing={0.75}
-          sx={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            zIndex: 2,
+            position: "relative",
+            flex: "1 1 auto",
+            minWidth: 0,
+            minHeight: 0,
           }}
         >
-          <Tooltip
-            title="Открыть подробности"
-          >
-            <IconButton
-              component={Link}
-              to={`/streams/${stream.id}`}
-              size="small"
-              sx={{
-                color: "common.white",
-                bgcolor:
-                  "rgba(0,0,0,0.65)",
-                "&:hover": {
-                  bgcolor:
-                    "rgba(0,0,0,0.82)",
-                },
-              }}
-            >
-              <OpenInNewIcon
-                fontSize="small"
-              />
-            </IconButton>
-          </Tooltip>
-        </Stack>
+          <StreamLivePlayer
+            streamId={stream.id}
+            processAlive={
+              processAlive
+            }
+            compact={compact}
+            fillContainer={fillContainer}
+          />
 
-        {runtimeProblem && (
-          <Chip
-            size="small"
-            color="error"
-            label="ПРОБЛЕМА"
+          <Box
+            component={Link}
+            to={`/streams/${stream.id}`}
+            aria-label={
+              `Открыть ${stream.name}`
+            }
             sx={{
               position: "absolute",
-              left: 8,
-              bottom: 8,
-              zIndex: 2,
-              fontWeight: 700,
+              inset: 0,
+              zIndex: 1,
             }}
           />
+
+          <Stack
+            direction="row"
+            spacing={0.75}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              zIndex: 2,
+            }}
+          >
+            <Tooltip
+              title="Открыть подробности"
+            >
+              <IconButton
+                component={Link}
+                to={`/streams/${stream.id}`}
+                size="small"
+                sx={{
+                  color: "common.white",
+                  bgcolor:
+                    "rgba(0,0,0,0.65)",
+                  "&:hover": {
+                    bgcolor:
+                      "rgba(0,0,0,0.82)",
+                  },
+                }}
+              >
+                <OpenInNewIcon
+                  fontSize="small"
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+
+          {runtimeProblem && (
+            <Chip
+              size="small"
+              color="error"
+              label="ПРОБЛЕМА"
+              sx={{
+                position: "absolute",
+                left: 8,
+                bottom: 8,
+                zIndex: 2,
+                fontWeight: 700,
+              }}
+            />
+          )}
+        </Box>
+
+        {fillContainer && (
+          <Box
+            sx={{
+              width: compact
+                ? 138
+                : 170,
+              flex: "0 0 auto",
+              minWidth: 0,
+              overflow: "hidden",
+              borderLeft: 1,
+              borderColor: "divider",
+              px: compact
+                ? 0.75
+                : 1.5,
+              py: compact
+                ? 0.75
+                : 1.25,
+              display: "flex",
+              alignItems: "flex-start",
+              bgcolor: "background.paper",
+            }}
+          >
+            <StreamLiveMetrics
+              metrics={runtime?.metrics}
+              processAlive={
+                processAlive
+              }
+              compact
+            />
+          </Box>
         )}
       </Box>
 
@@ -441,7 +483,7 @@ function MonitorTile({
           />
         </Stack>
 
-        {!compact && (
+        {!fillContainer && !compact && (
           <StreamLiveMetrics
             metrics={runtime?.metrics}
             processAlive={
@@ -450,7 +492,7 @@ function MonitorTile({
           />
         )}
 
-        {compact && (
+        {!fillContainer && compact && (
           <Stack
             direction="row"
             spacing={1}
