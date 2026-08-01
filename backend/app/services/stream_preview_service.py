@@ -3,6 +3,9 @@ import logging
 from pathlib import Path
 
 from app.core.config import settings
+from app.engine.ffmpeg import (
+    FFmpegCommandBuilder,
+)
 from app.models.stream import Stream
 from app.providers.registry import source_resolvers
 
@@ -138,6 +141,10 @@ class StreamPreviewService:
             # 15 секунд в микросекундах.
             "-rw_timeout",
             "15000000",
+
+            *FFmpegCommandBuilder.input_options(
+                source_url
+            ),
 
             "-i",
             source_url,
