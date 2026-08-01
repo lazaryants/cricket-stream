@@ -1,10 +1,50 @@
 from pathlib import Path
+from urllib.parse import urlparse
 
 from app.core.config import settings
 from app.models.stream import Stream
 
 
 class FFmpegCommandBuilder:
+    @staticmethod
+    def input_options(
+        source_url: str,
+    ) -> list[str]:
+        """Return input options suitable for the URL protocol."""
+        parsed = urlparse(source_url)
+        scheme = parsed.scheme.lower()
+
+        if scheme in ("rtmp", "rtmps"):
+            # Some RTMP servers reject FFmpeg's default recorded/live
+            # auto-detection. Explicit live mode is also what players
+            # such as PotPlayer use for a live application stream.
+            return ["-rtmp_live", "live"]
+
+        if scheme in ("http", "https"):
+            options = [
+                # Read VOD/test sources in real time. This is harmless
+                # for a genuinely live HTTP input.
+                "-re",
+                "-reconnect",
+                "1",
+                "-reconnect_streamed",
+                "1",
+                "-reconnect_delay_max",
+                "5",
+            ]
+
+            if parsed.path.lower().endswith(".m3u8"):
+                options.extend([
+                    "-live_start_index",
+                    "-3",
+                ])
+
+            return options
+
+        # SRT and local/direct inputs must not receive HTTP or RTMP
+        # protocol-specific options.
+        return []
+
     @staticmethod
     def _outputs(
         stream: Stream,
@@ -74,21 +114,9 @@ class FFmpegCommandBuilder:
             "-loglevel",
             "info",
 
-            # Читать VOD/test source в реальном времени.
-            # Для настоящего live HLS это не мешает.
-            "-re",
-
-            # Повторное подключение к HTTP/HLS.
-            "-reconnect",
-            "1",
-            "-reconnect_streamed",
-            "1",
-            "-reconnect_delay_max",
-            "5",
-
-            # Начинать ближе к live edge.
-            "-live_start_index",
-            "-3",
+            *FFmpegCommandBuilder.input_options(
+                source_url
+            ),
 
             "-i",
             source_url,
