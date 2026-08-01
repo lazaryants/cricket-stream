@@ -294,6 +294,13 @@ function MonitorTile({
             flex: "1 1 auto",
             minWidth: 0,
             minHeight: 0,
+            boxSizing: "border-box",
+            pt: fillContainer
+              ? 0.75
+              : 0,
+            pl: fillContainer
+              ? 0.75
+              : 0,
           }}
         >
           <StreamLivePlayer
