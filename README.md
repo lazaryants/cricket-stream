@@ -99,6 +99,7 @@ Viewer не получает `source_url` и `destination_rtmp_url` даже в 
 ## Документация
 
 - [Развёртывание](docs/DEPLOYMENT.md)
+- [Руководство пользователя и администратора](docs/USER_GUIDE.md)
 - [Эксплуатация и диагностика](docs/OPERATIONS.md)
 - [Видеотракт](docs/VIDEO_PIPELINE_UPGRADE.md)
 - [Дорожная карта](docs/ROADMAP.md)
@@ -130,4 +131,3 @@ cd /opt/cricket-stream/backend
 запуск, мониторинг, остановка и восстановление трансляций — реализован и
 эксплуатируется. План дальнейшего развития находится в
 [ROADMAP.md](docs/ROADMAP.md).
-
