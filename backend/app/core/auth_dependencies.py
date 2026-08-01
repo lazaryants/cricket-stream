@@ -104,6 +104,11 @@ async def get_current_user(
             ),
         )
 
+    if payload.get("ver") != user.token_version:
+        raise credentials_exception(
+            "Token has been revoked"
+        )
+
     return user
 
 

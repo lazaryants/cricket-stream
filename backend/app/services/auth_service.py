@@ -136,14 +136,16 @@ class AuthService:
             access_token,
             access_expires_at,
         ) = create_access_token(
-            subject
+            subject,
+            user.token_version,
         )
 
         (
             refresh_token,
             refresh_expires_at,
         ) = create_refresh_token(
-            subject
+            subject,
+            user.token_version,
         )
 
         return {
@@ -194,11 +196,17 @@ class AuthService:
                 "User account is disabled"
             )
 
+        if payload.get("ver") != user.token_version:
+            raise AuthenticationError(
+                "Token has been revoked"
+            )
+
         (
             access_token,
             access_expires_at,
         ) = create_access_token(
-            str(user.uuid)
+            str(user.uuid),
+            user.token_version,
         )
 
         return {

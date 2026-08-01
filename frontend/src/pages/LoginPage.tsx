@@ -32,6 +32,7 @@ import { useAuth } from "../auth/useAuth";
 
 interface LocationState {
   from?: string;
+  passwordChanged?: boolean;
 }
 
 function getErrorMessage(
@@ -208,6 +209,14 @@ export default function LoginPage() {
                   {errorMessage}
                 </Alert>
               )}
+
+              {locationState
+                ?.passwordChanged
+                && (
+                  <Alert severity="success">
+                    Пароль изменён. Войдите с новым паролем.
+                  </Alert>
+                )}
 
               <TextField
                 label="Имя пользователя"

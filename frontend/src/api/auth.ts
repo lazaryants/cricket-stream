@@ -1,5 +1,6 @@
 import type {
   CurrentUser,
+  ChangePasswordRequest,
   LoginRequest,
   TokenPairResponse,
 } from "../types/auth";
@@ -18,6 +19,15 @@ export async function loginRequest(
     );
 
   return response.data;
+}
+
+export async function changePassword(
+  data: ChangePasswordRequest,
+): Promise<void> {
+  await http.put(
+    "/auth/password",
+    data,
+  );
 }
 
 export async function getCurrentUser():
