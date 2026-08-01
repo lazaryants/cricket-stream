@@ -33,6 +33,8 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 import {
@@ -213,6 +215,7 @@ interface MonitorTileProps {
   runtime:
     StreamRuntimeStatus | undefined;
   compact: boolean;
+  fillContainer: boolean;
 }
 
 
@@ -220,6 +223,7 @@ function MonitorTile({
   stream,
   runtime,
   compact,
+  fillContainer,
 }: MonitorTileProps) {
   const effectiveStatus =
     getEffectiveStatus(
@@ -248,6 +252,10 @@ function MonitorTile({
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        height: fillContainer
+          ? "100%"
+          : "auto",
+        minHeight: 0,
         borderColor:
           runtimeProblem
             ? "error.main"
@@ -268,6 +276,10 @@ function MonitorTile({
       <Box
         sx={{
           position: "relative",
+          flex: fillContainer
+            ? "1 1 auto"
+            : "0 0 auto",
+          minHeight: 0,
         }}
       >
         <StreamLivePlayer
@@ -276,6 +288,7 @@ function MonitorTile({
             processAlive
           }
           compact={compact}
+          fillContainer={fillContainer}
         />
 
         <Box
@@ -355,7 +368,7 @@ function MonitorTile({
             ? 0.75
             : 1.25,
           minWidth: 0,
-          flexGrow: 1,
+          flex: "0 0 auto",
         }}
       >
         <Stack
@@ -515,6 +528,14 @@ function MonitorTile({
 
 
 export default function MonitorPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(
+    theme.breakpoints.down("md"),
+  );
+  const isLandscape = useMediaQuery(
+    "(orientation: landscape)",
+  );
+
   const [
     layout,
     setLayout,
@@ -563,13 +584,16 @@ export default function MonitorPage() {
   const visibleStreams =
     useMemo(
       () =>
-        streams.slice(
-          0,
-          layout,
-        ),
+        isMobile
+          ? streams
+          : streams.slice(
+            0,
+            layout,
+          ),
       [
         streams,
         layout,
+        isMobile,
       ],
     );
 
@@ -655,12 +679,24 @@ export default function MonitorPage() {
     ).length;
 
   const columnCount =
-    getColumnCount(
-      layout,
-    );
+    isMobile
+      ? (
+        isLandscape
+          ? 2
+          : 1
+      )
+      : getColumnCount(layout);
+
+  const rowCount = Math.max(
+    1,
+    Math.ceil(
+      visibleStreams.length
+      / columnCount,
+    ),
+  );
 
   const compact =
-    layout >= 9;
+    !isMobile && layout > 1;
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -720,7 +756,15 @@ export default function MonitorPage() {
   return (
     <Box
       sx={{
+        height: isMobile
+          ? "auto"
+          : "100dvh",
         minHeight: "100vh",
+        overflow: isMobile
+          ? "visible"
+          : "hidden",
+        display: "flex",
+        flexDirection: "column",
         bgcolor:
           fullscreen
             ? "#05070b"
@@ -729,7 +773,7 @@ export default function MonitorPage() {
     >
       {!fullscreen && (
         <AppBar
-          position="sticky"
+          position="static"
           color="transparent"
           elevation={0}
           sx={{
@@ -788,9 +832,22 @@ export default function MonitorPage() {
               sm: 2.5,
               lg: 3,
             },
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: isMobile
+            ? "visible"
+            : "hidden",
         }}
       >
-        <Stack spacing={2}>
+        <Stack
+          spacing={fullscreen ? 1 : 1.5}
+          sx={{
+            flex: 1,
+            minHeight: 0,
+          }}
+        >
           <Stack
             direction={{
               xs: "column",
@@ -815,18 +872,23 @@ export default function MonitorPage() {
                 rowGap: 1,
               }}
             >
-              <GridViewIcon
-                color="primary"
-              />
+              {!isMobile && (
+                <GridViewIcon
+                  color="primary"
+                />
+              )}
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-                Сетка
-              </Typography>
+              {!isMobile && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  Сетка
+                </Typography>
+              )}
 
-              <ToggleButtonGroup
+              {!isMobile && (
+                <ToggleButtonGroup
                 exclusive
                 size="small"
                 value={layout}
@@ -855,7 +917,8 @@ export default function MonitorPage() {
                     </ToggleButton>
                   ),
                 )}
-              </ToggleButtonGroup>
+                </ToggleButtonGroup>
+              )}
 
               <Chip
                 size="small"
@@ -948,7 +1011,8 @@ export default function MonitorPage() {
               </Alert>
             )}
 
-          {streams.length > layout && (
+          {!isMobile
+            && streams.length > layout && (
             <Alert
               severity="info"
               variant="outlined"
@@ -979,23 +1043,24 @@ export default function MonitorPage() {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm:
-                      columnCount >= 2
-                        ? (
-                          "repeat(2, "
-                          + "minmax(0, 1fr))"
-                        )
-                        : "1fr",
-                    lg:
-                      `repeat(${columnCount}, `
-                      + "minmax(0, 1fr))",
-                  },
+                  gridTemplateColumns:
+                    `repeat(${columnCount}, `
+                    + "minmax(0, 1fr))",
+                  gridTemplateRows: isMobile
+                    ? "none"
+                    : (
+                      `repeat(${rowCount}, `
+                      + "minmax(0, 1fr))"
+                    ),
                   gap: fullscreen
                     ? 1
                     : 1.5,
-                  alignItems: "start",
+                  alignItems: "stretch",
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: isMobile
+                    ? "visible"
+                    : "hidden",
                 }}
               >
                 {visibleStreams.map(
@@ -1010,6 +1075,7 @@ export default function MonitorPage() {
                           )
                       }
                       compact={compact}
+                      fillContainer={!isMobile}
                     />
                   ),
                 )}
