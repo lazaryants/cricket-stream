@@ -21,6 +21,10 @@ import StreamEditPage
   from "./pages/StreamEditPage";
 import StreamsPage
   from "./pages/StreamsPage";
+import AccountPage
+  from "./pages/AccountPage";
+import UsersPage
+  from "./pages/UsersPage";
 import { RequireAuth }
   from "./routes/RequireAuth";
 
@@ -57,6 +61,16 @@ export default function App() {
         <Route
           path="/components"
           element={<ComponentsPage />}
+        />
+
+        <Route
+          path="/account"
+          element={<AccountPage />}
+        />
+
+        <Route
+          path="/users"
+          element={<UsersPage />}
         />
 
         <Route
