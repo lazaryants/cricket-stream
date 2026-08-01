@@ -20,18 +20,21 @@ interface StreamLiveMetricsProps {
     StreamMetrics | null | undefined;
   processAlive?: boolean;
   compact?: boolean;
+  dense?: boolean;
 }
 
 interface MetricValueProps {
   label: string;
   value: string;
   compact: boolean;
+  dense: boolean;
 }
 
 function MetricValue({
   label,
   value,
   compact,
+  dense,
 }: MetricValueProps) {
   return (
     <Box
@@ -61,7 +64,12 @@ function MetricValue({
         sx={{
           fontWeight: 600,
           whiteSpace: "nowrap",
-          lineHeight: 1.35,
+          fontSize: dense
+            ? "0.68rem"
+            : undefined,
+          lineHeight: dense
+            ? 1.15
+            : 1.35,
         }}
       >
         {compact
@@ -76,6 +84,7 @@ export function StreamLiveMetrics({
   metrics,
   processAlive = false,
   compact = false,
+  dense = false,
 }: StreamLiveMetricsProps) {
   if (
     !processAlive
@@ -137,7 +146,7 @@ export function StreamLiveMetrics({
   if (compact) {
     return (
       <Stack
-        spacing={0.25}
+        spacing={dense ? 0 : 0.25}
         sx={{
           minWidth: 125,
         }}
@@ -153,6 +162,7 @@ export function StreamLiveMetrics({
               label={item.label}
               value={item.value}
               compact
+              dense={dense}
             />
           ))}
       </Stack>
@@ -176,6 +186,7 @@ export function StreamLiveMetrics({
           label={item.label}
           value={item.value}
           compact={false}
+          dense={false}
         />
       ))}
     </Box>
