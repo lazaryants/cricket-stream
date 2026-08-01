@@ -35,6 +35,7 @@ def _create_token(
     subject: str,
     token_type: str,
     expires_delta: timedelta,
+    token_version: int | None = None,
 ) -> tuple[str, datetime]:
     now = datetime.now(
         timezone.utc
@@ -53,6 +54,9 @@ def _create_token(
         "jti": str(uuid4()),
     }
 
+    if token_version is not None:
+        payload["ver"] = token_version
+
     encoded = jwt.encode(
         payload,
         auth_settings.secret_key,
@@ -66,6 +70,7 @@ def _create_token(
 
 def create_access_token(
     subject: str,
+    token_version: int,
 ) -> tuple[str, datetime]:
     return _create_token(
         subject=subject,
@@ -76,11 +81,13 @@ def create_access_token(
                 .access_token_minutes
             )
         ),
+        token_version=token_version,
     )
 
 
 def create_refresh_token(
     subject: str,
+    token_version: int,
 ) -> tuple[str, datetime]:
     return _create_token(
         subject=subject,
@@ -91,6 +98,7 @@ def create_refresh_token(
                 .refresh_token_days
             )
         ),
+        token_version=token_version,
     )
 
 
