@@ -250,17 +250,20 @@ export function StreamLivePlayer({
         bgcolor: "#000",
       }}
     >
-      <Box
-        component="video"
+      <video
         ref={videoRef}
         muted
         autoPlay
         playsInline
         controls={controls}
-        sx={{
+        style={{
+          position: "absolute",
+          inset: 0,
           width: "100%",
           height: "100%",
           objectFit: "contain",
+          objectPosition: "center center",
+          backgroundColor: "#000",
           display: showPlaceholder
             ? "none"
             : "block",
