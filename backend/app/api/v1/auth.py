@@ -2,6 +2,7 @@ from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Response,
     status,
 )
 from sqlalchemy.ext.asyncio import (
@@ -20,6 +21,7 @@ from app.models.user import User
 from app.schemas.auth import (
     AccessTokenResponse,
     CurrentUserResponse,
+    ChangePasswordRequest,
     LoginRequest,
     RefreshRequest,
     TokenPairResponse,
@@ -28,6 +30,11 @@ from app.services.auth_service import (
     AuthenticationError,
     AuthService,
     InactiveUserError,
+)
+from app.services.user_service import (
+    InvalidCurrentPasswordError,
+    PasswordUnchangedError,
+    UserService,
 )
 
 
@@ -142,3 +149,39 @@ async def current_user(
     ),
 ):
     return user
+
+
+@router.put(
+    "/password",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def change_password(
+    data: ChangePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        await UserService(db).change_own_password(
+            user,
+            data.current_password,
+            data.new_password,
+        )
+    except InvalidCurrentPasswordError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        ) from exc
+    except PasswordUnchangedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must differ from the current password",
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    return Response(
+        status_code=status.HTTP_204_NO_CONTENT
+    )
