@@ -4,6 +4,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Enum,
+    Integer,
     String,
 )
 from sqlalchemy.orm import (
@@ -56,6 +57,13 @@ class User(BaseModel):
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+        nullable=False,
+    )
+
+    token_version: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        server_default="0",
         nullable=False,
     )
 
