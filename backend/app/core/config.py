@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     hls_dir: str = "/opt/cricket-stream/var/hls"
     hls_segment_time: int = 4
     hls_list_size: int = 6
+    media_startup_grace_seconds: float = 45.0
+    media_stall_timeout_seconds: float = 30.0
 
     log_level: str
 
