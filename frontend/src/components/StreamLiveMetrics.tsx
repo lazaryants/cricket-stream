@@ -7,11 +7,13 @@ import type {
   StreamMetrics,
 } from "../types/stream";
 import {
+  formatAudioCodec,
   formatBitrate,
   formatDuration,
   formatFps,
   formatResolution,
   formatSpeed,
+  formatVideoCodec,
   hasLiveMetrics,
 } from "../utils/streamMetrics";
 
@@ -113,33 +115,49 @@ export function StreamLiveMetrics({
 
   const values = [
     {
-      label: "Видео",
+      label: "Разрешение",
       value:
         formatResolution(metrics),
     },
     {
-      label: "FPS",
+      label: "FPS источника",
       value:
         formatFps(metrics),
     },
     {
-      label: "Битрейт",
+      label: "Выходной битрейт",
       value:
         formatBitrate(
           metrics.bitrate_kbps,
         ),
     },
     {
-      label: "Скорость",
+      label: "Скорость FFmpeg",
       value:
         formatSpeed(metrics),
     },
     {
-      label: "Uptime",
+      label: "Видеокодек",
+      value:
+        formatVideoCodec(metrics),
+    },
+    {
+      label: "Аудиокодек",
+      value:
+        formatAudioCodec(metrics),
+    },
+    {
+      label: "Время работы",
       value:
         formatDuration(
           metrics.uptime_seconds,
         ),
+    },
+    {
+      label: "Пропущено FFmpeg",
+      value: String(
+        metrics.drop_frames ?? 0,
+      ),
     },
   ];
 

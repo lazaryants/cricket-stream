@@ -49,6 +49,10 @@ import { MetricItem }
 import { StreamStatusChip }
   from "../components/StreamStatusChip";
 
+import {
+  formatFps,
+} from "../utils/streamMetrics";
+
 import { SessionLogViewer }
   from "../components/SessionLogViewer";
 
@@ -522,17 +526,14 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="FPS"
-                        value={
-                          metrics?.fps
-                            ? metrics.fps
-                              .toFixed(2)
-                            : "—"
-                        }
+                        label="FPS источника"
+                        value={formatFps(
+                          metrics,
+                        )}
                       />
 
                       <MetricItem
-                        label="Битрейт"
+                        label="Выходной битрейт"
                         value={formatBitrate(
                           metrics
                             ?.bitrate_kbps,
@@ -540,7 +541,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Скорость"
+                        label="Скорость FFmpeg"
                         value={
                           metrics?.speed
                             ?.trim()
@@ -630,7 +631,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Sample rate"
+                        label="Частота аудио"
                         value={
                           metrics
                             ?.sample_rate
@@ -658,7 +659,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Dropped frames"
+                        label="Пропущено FFmpeg"
                         value={String(
                           metrics
                             ?.drop_frames
@@ -667,7 +668,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Duplicated frames"
+                        label="Дублировано FFmpeg"
                         value={String(
                           metrics
                             ?.dup_frames

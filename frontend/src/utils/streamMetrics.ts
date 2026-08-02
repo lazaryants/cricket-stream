@@ -166,6 +166,61 @@ export function formatSpeed(
   return "—";
 }
 
+export function formatVideoCodec(
+  metrics:
+    StreamMetrics | null | undefined,
+): string {
+  if (!metrics?.video_codec) {
+    return "—";
+  }
+
+  const codec =
+    metrics.video_codec.toLowerCase()
+      === "h264"
+      ? "H.264"
+      : metrics.video_codec;
+
+  return [codec, metrics.video_profile]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+export function formatAudioCodec(
+  metrics:
+    StreamMetrics | null | undefined,
+): string {
+  if (!metrics?.audio_codec) {
+    return "—";
+  }
+
+  const sampleRate =
+    metrics.sample_rate
+      ? `${(
+          metrics.sample_rate / 1000
+        ).toFixed(
+          metrics.sample_rate % 1000
+            ? 1
+            : 0,
+        )} kHz`
+      : null;
+
+  const channels =
+    metrics.channel_layout
+    ?? (
+      metrics.audio_channels
+        ? `${metrics.audio_channels} ch`
+        : null
+    );
+
+  return [
+    metrics.audio_codec,
+    sampleRate,
+    channels,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 export function hasLiveMetrics(
   metrics:
     StreamMetrics | null | undefined,

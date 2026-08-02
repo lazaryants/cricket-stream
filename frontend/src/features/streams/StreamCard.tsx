@@ -59,6 +59,11 @@ import { StreamCardPreview }
 import { StreamStatusChip }
   from "../../components/StreamStatusChip";
 
+import {
+  formatAudioCodec,
+  formatVideoCodec,
+} from "../../utils/streamMetrics";
+
 import type {
   StreamItem,
   StreamRuntimeStatus,
@@ -368,8 +373,8 @@ export function StreamCard({
   const sourceFps = useMemo(
     () => {
       const fps =
-        metrics?.fps
-        ?? metrics?.source_fps;
+        metrics?.source_fps
+        ?? metrics?.fps;
 
       if (
         fps === null
@@ -382,8 +387,8 @@ export function StreamCard({
       return fps.toFixed(1);
     },
     [
-      metrics?.fps,
       metrics?.source_fps,
+      metrics?.fps,
     ],
   );
 
@@ -594,12 +599,12 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="FPS"
+              label="FPS источника"
               value={sourceFps}
             />
 
             <MetricItem
-              label="Битрейт"
+              label="Выходной битрейт"
               value={formatBitrate(
                 metrics
                   ?.bitrate_kbps,
@@ -607,12 +612,26 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="Скорость"
+              label="Скорость FFmpeg"
               value={
                 metrics?.speed
                 ?.trim()
                 ?? "—"
               }
+            />
+
+            <MetricItem
+              label="Видеокодек"
+              value={formatVideoCodec(
+                metrics,
+              )}
+            />
+
+            <MetricItem
+              label="Аудиокодек"
+              value={formatAudioCodec(
+                metrics,
+              )}
             />
 
             <MetricItem
@@ -624,7 +643,7 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="Пропущено кадров"
+              label="Пропущено FFmpeg"
               value={String(
                 metrics
                   ?.drop_frames
