@@ -16,6 +16,11 @@ from app.models.enums import (
 
 from app.engine.manager import stream_manager
 from app.engine.logs import log_buffer
+from app.engine.metrics import metrics_store
+from app.engine.progress_watchdog import (
+    MediaProgressWatchdog,
+)
+from app.core.config import settings
 
 
 
@@ -38,6 +43,15 @@ _healthy_since: dict[int, float] = {}
 
 # Одна отложенная задача автоперезапуска на один stream_id.
 _restart_tasks: dict[int, asyncio.Task] = {}
+
+_media_watchdog = MediaProgressWatchdog(
+    startup_grace_seconds=(
+        settings.media_startup_grace_seconds
+    ),
+    stall_timeout_seconds=(
+        settings.media_stall_timeout_seconds
+    ),
+)
 
 
 def _restart_delay(
@@ -641,11 +655,70 @@ async def monitor_streams():
                         pid
                     )
 
+                    stalled = False
+                    stall_seconds = 0.0
+
                     if alive:
-                        _mark_healthy(
-                            stream_id
+                        observation = (
+                            _media_watchdog.observe(
+                                stream_id,
+                                pid,
+                                metrics_store.get(
+                                    stream_id
+                                ),
+                            )
                         )
-                        continue
+
+                        if not observation.stalled:
+                            _mark_healthy(
+                                stream_id
+                            )
+                            continue
+
+                        stalled = True
+                        stall_seconds = (
+                            observation.silence_seconds
+                        )
+
+                        print(
+                            f"[SUPERVISOR] "
+                            f"media stalled "
+                            f"pid={pid} "
+                            f"stream={stream_id} "
+                            f"silence={stall_seconds:.1f}s",
+                            flush=True,
+                        )
+
+                        log_buffer.add(
+                            stream_id,
+                            (
+                                "FFmpeg media progress "
+                                "stalled for "
+                                f"{stall_seconds:.1f}s"
+                            ),
+                        )
+
+                        stopped = (
+                            await stream_manager.stop(
+                                stream_id,
+                                pid,
+                            )
+                        )
+
+                        if not stopped:
+                            print(
+                                f"[SUPERVISOR] "
+                                f"stalled process could not "
+                                f"be stopped "
+                                f"pid={pid} "
+                                f"stream={stream_id}",
+                                flush=True,
+                            )
+                            continue
+
+                    _media_watchdog.remove(
+                        stream_id
+                    )
 
                     _mark_unhealthy(
                         stream_id
@@ -663,13 +736,14 @@ async def monitor_streams():
                     ):
                         continue
 
-                    print(
-                        f"[SUPERVISOR] "
-                        f"dead or missing ffmpeg "
-                        f"pid={pid} "
-                        f"stream={stream_id}",
-                        flush=True,
-                    )
+                    if not stalled:
+                        print(
+                            f"[SUPERVISOR] "
+                            f"dead or missing ffmpeg "
+                            f"pid={pid} "
+                            f"stream={stream_id}",
+                            flush=True,
+                        )
 
                     stream_result = await db.execute(
                         select(Stream)
@@ -691,11 +765,19 @@ async def monitor_streams():
                         StreamStatus.RESTARTING
                     )
 
-                    session.error_message = (
-                        "FFmpeg process stopped "
-                        "unexpectedly; automatic "
-                        "restart scheduled"
-                    )
+                    if stalled:
+                        session.error_message = (
+                            "FFmpeg process is alive but "
+                            "media progress stalled for "
+                            f"{stall_seconds:.1f}s; "
+                            "automatic restart scheduled"
+                        )
+                    else:
+                        session.error_message = (
+                            "FFmpeg process stopped "
+                            "unexpectedly; automatic "
+                            "restart scheduled"
+                        )
 
                     await db.commit()
 
@@ -726,6 +808,7 @@ async def monitor_streams():
                 )
 
             _restart_tasks.clear()
+            _media_watchdog.clear()
 
             print(
                 "[SUPERVISOR] Monitor stopped",
