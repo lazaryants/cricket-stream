@@ -550,19 +550,19 @@ function MonitorTile({
               )}
 
             {(
-              runtime?.metrics?.fps
-              ?? runtime?.metrics
+              runtime?.metrics
                 ?.source_fps
+              ?? runtime?.metrics?.fps
             ) !== null
               && (
-                runtime?.metrics?.fps
-                ?? runtime?.metrics
+                runtime?.metrics
                   ?.source_fps
+                ?? runtime?.metrics?.fps
               ) !== undefined
               && (
-                runtime?.metrics?.fps
-                ?? runtime?.metrics
+                runtime?.metrics
                   ?.source_fps
+                ?? runtime?.metrics?.fps
                 ?? 0
               ) > 0
               && (
@@ -570,11 +570,11 @@ function MonitorTile({
                   variant="caption"
                   color="text.secondary"
                 >
-                  {"FPS "}
+                  {"FPS источника "}
                   {(
-                    runtime?.metrics?.fps
-                    ?? runtime?.metrics
+                    runtime?.metrics
                       ?.source_fps
+                    ?? runtime?.metrics?.fps
                     ?? 0
                   ).toFixed(1)}
                 </Typography>
