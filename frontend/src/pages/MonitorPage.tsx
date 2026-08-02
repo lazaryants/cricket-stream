@@ -298,10 +298,10 @@ function MonitorTile({
             minHeight: 0,
             boxSizing: "border-box",
             pt: fillContainer
-              ? 1.5
+              ? 1
               : 0,
             pl: fillContainer
-              ? 1.5
+              ? 0.75
               : 0,
           }}
         >
@@ -381,8 +381,8 @@ function MonitorTile({
           <Box
             sx={{
               width: compact
-                ? 138
-                : 170,
+                ? 168
+                : 188,
               flex: "0 0 auto",
               minWidth: 0,
               overflow: "hidden",
@@ -390,7 +390,7 @@ function MonitorTile({
               borderColor: "divider",
               px: compact
                 ? 0.75
-                : 1.5,
+                : 1.25,
               py: compact
                 ? (
                   denseMetrics
