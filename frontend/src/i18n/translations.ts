@@ -127,6 +127,41 @@ export const translations = {
     "player.connecting":
       "Connecting to video…",
 
+    "monitor.title":
+      "Stream monitor",
+    "monitor.dashboard":
+      "Dashboard",
+    "monitor.grid":
+      "Grid",
+    "monitor.running":
+      "Running: {{count}}",
+    "monitor.cameras":
+      "Cameras {{first}}–{{last}} of {{total}}",
+    "monitor.problems":
+      "Problems: {{count}}",
+    "monitor.previousCameras":
+      "Previous cameras",
+    "monitor.nextCameras":
+      "Next cameras",
+    "monitor.refresh":
+      "Refresh data",
+    "monitor.fullscreen":
+      "Full screen",
+    "monitor.exitFullscreen":
+      "Exit full screen",
+    "monitor.openStream":
+      "Open {{name}}",
+    "monitor.openDetails":
+      "Open details",
+    "monitor.problem":
+      "PROBLEM",
+    "monitor.loadError":
+      "Unable to load the stream list.",
+    "monitor.empty":
+      "No streams are selected for the Dashboard. Enable “Show on Dashboard” in the stream settings.",
+    "monitor.sourceFps":
+      "Source FPS {{value}}",
+
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -259,6 +294,41 @@ export const translations = {
       "HLS ещё не готов",
     "player.connecting":
       "Подключение к видео…",
+
+    "monitor.title":
+      "Монитор трансляций",
+    "monitor.dashboard":
+      "Dashboard",
+    "monitor.grid":
+      "Сетка",
+    "monitor.running":
+      "Работает: {{count}}",
+    "monitor.cameras":
+      "Камеры {{first}}–{{last}} из {{total}}",
+    "monitor.problems":
+      "Проблемы: {{count}}",
+    "monitor.previousCameras":
+      "Предыдущие камеры",
+    "monitor.nextCameras":
+      "Следующие камеры",
+    "monitor.refresh":
+      "Обновить данные",
+    "monitor.fullscreen":
+      "Во весь экран",
+    "monitor.exitFullscreen":
+      "Выйти из полноэкранного режима",
+    "monitor.openStream":
+      "Открыть {{name}}",
+    "monitor.openDetails":
+      "Открыть подробности",
+    "monitor.problem":
+      "ПРОБЛЕМА",
+    "monitor.loadError":
+      "Не удалось получить список трансляций.",
+    "monitor.empty":
+      "На Dashboard пока нет выбранных трансляций. Включите параметр «Показывать на Dashboard» в настройках потока.",
+    "monitor.sourceFps":
+      "FPS источника {{value}}",
 
     "login.subtitle":
       "Вход в панель управления",
