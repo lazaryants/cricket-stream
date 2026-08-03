@@ -50,17 +50,25 @@ import {
 
 import { useAuth }
   from "../auth/useAuth";
+import { LanguageSwitcher }
+  from "../components/LanguageSwitcher";
+import { useI18n }
+  from "../i18n/useI18n";
 
 import { StreamCard }
   from "../features/streams/StreamCard";
 
-const roleLabels = {
-  viewer: "Наблюдатель",
-  operator: "Оператор",
-  admin: "Администратор",
-} as const;
-
 export default function DashboardPage() {
+  const {
+    t,
+  } = useI18n();
+
+  const roleLabels = {
+    viewer: t("role.viewer"),
+    operator: t("role.operator"),
+    admin: t("role.admin"),
+  } as const;
+
   const auth = useAuth();
   const user = auth.user;
 
@@ -208,10 +216,12 @@ export default function DashboardPage() {
               mr: 1,
             }}
           >
-            Монитор
+            {t("common.monitor")}
           </Button>
 
-          <Tooltip title="Монитор">
+          <Tooltip
+            title={t("common.monitor")}
+          >
             <IconButton
               component={Link}
               to="/monitor"
@@ -243,9 +253,11 @@ export default function DashboardPage() {
               mr: 1,
             }}
           >
-            Библиотеки
+            {t("common.libraries")}
           </Button>
-          <Tooltip title="Библиотеки">
+          <Tooltip
+            title={t("common.libraries")}
+          >
             <IconButton
               component={Link}
               to="/libraries"
@@ -264,7 +276,11 @@ export default function DashboardPage() {
           {(user.role === "admin"
             || user.is_superuser
           ) && (
-            <Tooltip title="Версии компонентов">
+            <Tooltip
+              title={t(
+                "common.componentVersions",
+              )}
+            >
               <IconButton
                 component={Link}
                 to="/components"
@@ -279,7 +295,9 @@ export default function DashboardPage() {
           {(user.role === "admin"
             || user.is_superuser
           ) && (
-            <Tooltip title="Пользователи">
+            <Tooltip
+              title={t("common.users")}
+            >
               <IconButton
                 component={Link}
                 to="/users"
@@ -291,7 +309,9 @@ export default function DashboardPage() {
             </Tooltip>
           )}
 
-          <Tooltip title="Аккаунт и пароль">
+          <Tooltip
+            title={t("common.account")}
+          >
             <IconButton
               component={Link}
               to="/account"
@@ -332,10 +352,12 @@ export default function DashboardPage() {
               },
             }}
           >
-            Выйти
+            {t("common.logout")}
           </Button>
 
-          <Tooltip title="Выйти">
+          <Tooltip
+            title={t("common.logout")}
+          >
             <IconButton
               color="inherit"
               onClick={auth.logout}
@@ -349,6 +371,22 @@ export default function DashboardPage() {
               <LogoutIcon />
             </IconButton>
           </Tooltip>
+
+          <Box
+            sx={{
+              ml: {
+                xs: 0.5,
+                sm: 1,
+              },
+              display: "inline-flex",
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <LanguageSwitcher
+              compact
+            />
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -383,7 +421,7 @@ export default function DashboardPage() {
                 variant="h4"
                 component="h1"
               >
-                Трансляции
+                {t("dashboard.title")}
               </Typography>
 
               <Typography
@@ -392,8 +430,7 @@ export default function DashboardPage() {
                   mt: 0.5,
                 }}
               >
-                Текущее состояние потоков
-                и серверов
+                {t("dashboard.subtitle")}
               </Typography>
             </Box>
 
@@ -407,11 +444,12 @@ export default function DashboardPage() {
               }}
             >
               <Chip
-                label={
-                  `Всего: ${
-                    streams.length
-                  }`
-                }
+                label={t(
+                  "dashboard.total",
+                  {
+                    count: streams.length,
+                  },
+                )}
               />
 
               <Chip
@@ -419,10 +457,16 @@ export default function DashboardPage() {
                 variant="outlined"
                 label={
                   statusLoading
-                    ? "Работает: …"
-                    : `Работает: ${
-                        runningCount
-                      }`
+                    ? t(
+                      "dashboard.runningLoading",
+                    )
+                    : t(
+                      "dashboard.running",
+                      {
+                        count:
+                          runningCount,
+                      },
+                    )
                 }
               />
 
@@ -430,11 +474,12 @@ export default function DashboardPage() {
                 <Chip
                   color="error"
                   variant="outlined"
-                  label={
-                    `Проблемы: ${
-                      errorCount
-                    }`
-                  }
+                  label={t(
+                    "dashboard.problems",
+                    {
+                      count: errorCount,
+                    },
+                  )}
                 />
               )}
 
@@ -443,7 +488,9 @@ export default function DashboardPage() {
                 to="/streams"
                 variant="outlined"
               >
-                Все трансляции
+                {t(
+                  "dashboard.allStreams",
+                )}
               </Button>
 
               {(user.role === "admin"
@@ -454,11 +501,17 @@ export default function DashboardPage() {
                   to="/streams/new"
                   variant="contained"
                 >
-                  Новая трансляция
+                  {t(
+                    "dashboard.newStream",
+                  )}
                 </Button>
               )}
 
-              <Tooltip title="Обновить всё">
+              <Tooltip
+                title={t(
+                  "common.refreshAll",
+                )}
+              >
                 <span>
                   <IconButton
                     disabled={
@@ -519,7 +572,9 @@ export default function DashboardPage() {
                     variant="body2"
                   >
                     {user.email
-                      ?? "Email не указан"}
+                      ?? t(
+                        "dashboard.emailMissing",
+                      )}
                   </Typography>
                 </Box>
 
@@ -559,9 +614,9 @@ export default function DashboardPage() {
 
           {streamsQuery.isError && (
             <Alert severity="error">
-              Не удалось загрузить список
-              трансляций. Проверьте backend
-              и повторите запрос.
+              {t(
+                "dashboard.loadError",
+              )}
             </Alert>
           )}
 
@@ -570,8 +625,7 @@ export default function DashboardPage() {
             && streams.length === 0
             && (
               <Alert severity="info">
-                В системе пока нет
-                настроенных потоков.
+                {t("dashboard.empty")}
               </Alert>
             )}
 

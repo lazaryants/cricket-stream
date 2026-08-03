@@ -49,6 +49,8 @@ import {
 
 import { useAuth }
   from "../../auth/useAuth";
+import { useI18n }
+  from "../../i18n/useI18n";
 
 import { MetricItem }
   from "../../components/MetricItem";
@@ -78,17 +80,6 @@ interface StreamCardProps {
   showDetails?: boolean;
 }
 
-const providerLabels: Record<
-  string,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестно",
-};
 
 function formatBitrate(
   bitrateKbps:
@@ -160,6 +151,7 @@ function formatUptime(
 
 function getErrorMessage(
   error: unknown,
+  fallbackMessage: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -180,10 +172,7 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Операция не выполнена. "
-    + "Проверьте состояние потока."
-  );
+  return fallbackMessage;
 }
 
 export function StreamCard({
@@ -194,6 +183,24 @@ export function StreamCard({
   onRuntimeRefresh,
   showDetails = true,
 }: StreamCardProps) {
+  const {
+    t,
+  } = useI18n();
+
+  const providerLabels:
+    Record<string, string> = {
+      youtube: "YouTube",
+      twitch: "Twitch",
+      kick: "Kick",
+      vimeo: "Vimeo",
+      custom: t(
+        "stream.provider.custom",
+      ),
+      unknown: t(
+        "stream.provider.unknown",
+      ),
+    };
+
   const auth = useAuth();
   const navigate = useNavigate();
   const queryClient =
@@ -279,7 +286,12 @@ export function StreamCard({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t(
+              "stream.operationError",
+            ),
+          ),
         );
       },
     });
@@ -301,7 +313,12 @@ export function StreamCard({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t(
+              "stream.operationError",
+            ),
+          ),
         );
       },
     });
@@ -411,9 +428,12 @@ export function StreamCard({
     <Card
       role="link"
       tabIndex={0}
-      aria-label={
-        `Открыть подробности: ${stream.name}`
-      }
+      aria-label={t(
+        "stream.openDetails",
+        {
+          name: stream.name,
+        },
+      )}
       onClick={(event) => {
         openDetailsFromCard(
           event.target,
@@ -513,7 +533,11 @@ export function StreamCard({
                 }
               />
 
-              <Tooltip title="Обновить">
+              <Tooltip
+                title={t(
+                  "common.refresh",
+                )}
+              >
                 <span>
                   <IconButton
                     size="small"
@@ -552,8 +576,9 @@ export function StreamCard({
 
           {statusIsError && (
             <Alert severity="error">
-              Не удалось получить
-              текущий статус потока.
+              {t(
+                "stream.statusError",
+              )}
             </Alert>
           )}
 
@@ -561,9 +586,9 @@ export function StreamCard({
             <Alert
               severity="warning"
             >
-              Источник недоступен.
-              Выполняются попытки
-              восстановления.
+              {t(
+                "stream.sourceUnavailable",
+              )}
             </Alert>
           )}
 
@@ -591,7 +616,9 @@ export function StreamCard({
             }}
           >
             <MetricItem
-              label="Разрешение"
+              label={t(
+                "metrics.resolution",
+              )}
               value={
                 metrics?.resolution
                 ?? "—"
@@ -599,12 +626,16 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="FPS источника"
+              label={t(
+                "metrics.sourceFps",
+              )}
               value={sourceFps}
             />
 
             <MetricItem
-              label="Выходной битрейт"
+              label={t(
+                "metrics.outputBitrate",
+              )}
               value={formatBitrate(
                 metrics
                   ?.bitrate_kbps,
@@ -612,7 +643,9 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="Скорость FFmpeg"
+              label={t(
+                "metrics.ffmpegSpeed",
+              )}
               value={
                 metrics?.speed
                 ?.trim()
@@ -621,21 +654,27 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="Видеокодек"
+              label={t(
+                "metrics.videoCodec",
+              )}
               value={formatVideoCodec(
                 metrics,
               )}
             />
 
             <MetricItem
-              label="Аудиокодек"
+              label={t(
+                "metrics.audioCodec",
+              )}
               value={formatAudioCodec(
                 metrics,
               )}
             />
 
             <MetricItem
-              label="Время работы"
+              label={t(
+                "metrics.uptime",
+              )}
               value={formatUptime(
                 metrics
                   ?.uptime_seconds,
@@ -643,7 +682,9 @@ export function StreamCard({
             />
 
             <MetricItem
-              label="Пропущено FFmpeg"
+              label={t(
+                "metrics.dropped",
+              )}
               value={String(
                 metrics
                   ?.drop_frames
@@ -680,7 +721,9 @@ export function StreamCard({
             to={`/streams/${stream.id}`}
             variant="text"
           >
-            Подробнее
+            {t(
+              "common.details",
+            )}
           </Button>
         )}
 
@@ -711,7 +754,9 @@ export function StreamCard({
                 startMutation.mutate();
               }}
             >
-              Запустить
+              {t(
+                "stream.start",
+              )}
             </Button>
 
             <Button
@@ -737,8 +782,12 @@ export function StreamCard({
               }}
             >
               {hasRuntimeProblem
-              ? "Прекратить попытки"
-              : "Остановить"}
+                ? t(
+                  "stream.stopAttempts",
+                )
+                : t(
+                  "stream.stop",
+                )}
             </Button>
           </>
         )}

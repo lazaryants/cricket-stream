@@ -2,10 +2,13 @@ import {
   CircularProgress,
   Chip,
   Tooltip,
+  type ChipProps,
 } from "@mui/material";
-import type {
-  ChipProps,
-} from "@mui/material";
+
+import {
+  useI18n,
+} from "../i18n/useI18n";
+
 import type {
   StreamDiagnostic,
 } from "../types/stream";
@@ -24,10 +27,13 @@ function getChipColor(
   switch (diagnostic?.severity) {
     case "success":
       return "success";
+
     case "warning":
       return "warning";
+
     case "error":
       return "error";
+
     case "info":
     default:
       return "default";
@@ -39,6 +45,10 @@ export function StreamDiagnosticChip({
   loading = false,
   error = false,
 }: StreamDiagnosticChipProps) {
+  const {
+    t,
+  } = useI18n();
+
   if (loading && !diagnostic) {
     return (
       <Chip
@@ -49,7 +59,9 @@ export function StreamDiagnosticChip({
             size={14}
           />
         }
-        label="Проверка…"
+        label={t(
+          "diagnostic.checking",
+        )}
       />
     );
   }
@@ -57,15 +69,16 @@ export function StreamDiagnosticChip({
   if (error && !diagnostic) {
     return (
       <Tooltip
-        title={
-          "Не удалось получить "
-          + "диагностику потока"
-        }
+        title={t(
+          "diagnostic.loadError",
+        )}
       >
         <Chip
           size="small"
           variant="outlined"
-          label="Нет данных"
+          label={t(
+            "common.noData",
+          )}
         />
       </Tooltip>
     );
@@ -76,11 +89,17 @@ export function StreamDiagnosticChip({
       <Chip
         size="small"
         variant="outlined"
-        label="Нет данных"
+        label={t(
+          "common.noData",
+        )}
       />
     );
   }
 
+  /*
+   * diagnostic.title и diagnostic.message
+   * приходят от backend. Их пока не меняем.
+   */
   return (
     <Tooltip
       arrow

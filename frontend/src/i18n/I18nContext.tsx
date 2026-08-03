@@ -21,6 +21,10 @@ interface I18nContextValue {
   ) => void;
   t: (
     key: TranslationKey,
+    values?: Record<
+      string,
+      string | number
+    >,
   ) => string;
 }
 
@@ -78,7 +82,28 @@ export function I18nProvider({
       setLanguage,
       t: (
         key: TranslationKey,
-      ) => translations[language][key],
+        values: Record<
+          string,
+          string | number
+        > = {},
+      ) => {
+        let result: string =
+          translations[language][key];
+
+        for (
+          const [
+            name,
+            replacement,
+          ] of Object.entries(values)
+        ) {
+          result = result.replaceAll(
+            `{{${name}}}`,
+            String(replacement),
+          );
+        }
+
+        return result;
+      },
     }),
     [
       language,
