@@ -45,18 +45,16 @@ import {
 } from "../api/users";
 import { useAuth }
   from "../auth/useAuth";
+import {
+  useI18n,
+} from "../i18n/useI18n";
 import type { AdminUser }
   from "../types/auth";
 
-
-const roleLabels = {
-  viewer: "Наблюдатель",
-  operator: "Оператор",
-  admin: "Администратор",
-} as const;
-
-
-function errorText(error: unknown): string {
+function errorText(
+  error: unknown,
+  fallbackMessage: string,
+): string {
   if (axios.isAxiosError(error)) {
     const detail =
       error.response?.data?.detail;
@@ -64,25 +62,52 @@ function errorText(error: unknown): string {
       return detail;
     }
   }
-  return "Не удалось сменить пароль.";
+  return fallbackMessage;
 }
 
-
 export default function UsersPage() {
+  const {
+    language,
+    t,
+  } = useI18n();
+
   const auth = useAuth();
   const isAdmin =
     auth.user?.role === "admin"
     || auth.user?.is_superuser;
-  const [selected, setSelected] =
-    useState<AdminUser | null>(null);
-  const [password, setPassword] =
-    useState("");
-  const [confirmation, setConfirmation] =
-    useState("");
-  const [formError, setFormError] =
-    useState<string | null>(null);
-  const [success, setSuccess] =
-    useState<string | null>(null);
+
+  const roleLabels = {
+    viewer: t("role.viewer"),
+    operator: t("role.operator"),
+    admin: t("role.admin"),
+  } as const;
+
+  const [
+    selected,
+    setSelected,
+  ] = useState<AdminUser | null>(
+    null,
+  );
+  const [
+    password,
+    setPassword,
+  ] = useState("");
+  const [
+    confirmation,
+    setConfirmation,
+  ] = useState("");
+  const [
+    formError,
+    setFormError,
+  ] = useState<string | null>(
+    null,
+  );
+  const [
+    success,
+    setSuccess,
+  ] = useState<string | null>(
+    null,
+  );
 
   const usersQuery = useQuery({
     queryKey: ["users"],
@@ -97,24 +122,42 @@ export default function UsersPage() {
         password,
       ),
     onSuccess: () => {
-      const username = selected!.username;
+      const username =
+        selected!.username;
       setSelected(null);
       setPassword("");
       setConfirmation("");
       setSuccess(
-        `Пароль пользователя ${username} изменён. Его активные сеансы завершены.`,
+        t(
+          "users.passwordChanged",
+          {
+            username,
+          },
+        ),
       );
     },
     onError: (error) => {
-      setFormError(errorText(error));
+      setFormError(
+        errorText(
+          error,
+          t("users.passwordChangeError"),
+        ),
+      );
     },
   });
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return (
+      <Navigate
+        to="/"
+        replace
+      />
+    );
   }
 
-  function openDialog(user: AdminUser) {
+  function openDialog(
+    user: AdminUser,
+  ) {
     setSelected(user);
     setPassword("");
     setConfirmation("");
@@ -124,47 +167,69 @@ export default function UsersPage() {
 
   function submitReset() {
     setFormError(null);
+
     if (password.length < 8) {
       setFormError(
-        "Пароль должен содержать не менее 8 символов.",
+        t("password.minimumLength"),
       );
       return;
     }
+
     if (password !== confirmation) {
-      setFormError("Пароли не совпадают.");
+      setFormError(
+        t("password.mismatch"),
+      );
       return;
     }
+
     resetMutation.mutate();
   }
 
   return (
     <Container
       maxWidth="lg"
-      sx={{ py: { xs: 3, md: 5 } }}
+      sx={{
+        py: {
+          xs: 3,
+          md: 5,
+        },
+      }}
     >
       <Stack spacing={3}>
         <Button
           component={Link}
           to="/"
-          startIcon={<ArrowBackIcon />}
-          sx={{ alignSelf: "flex-start" }}
+          startIcon={
+            <ArrowBackIcon />
+          }
+          sx={{
+            alignSelf:
+              "flex-start",
+          }}
         >
-          На Dashboard
+          {t("users.backDashboard")}
         </Button>
 
         <Stack spacing={0.5}>
-          <Typography variant="h4" component="h1">
-            Пользователи
+          <Typography
+            variant="h4"
+            component="h1"
+          >
+            {t("users.title")}
           </Typography>
-          <Typography color="text.secondary">
-            Смена паролей и завершение пользовательских сеансов
+          <Typography
+            color="text.secondary"
+          >
+            {t("users.subtitle")}
           </Typography>
         </Stack>
 
         {success && (
           <Alert
             severity="success"
-            onClose={() => setSuccess(null)}
+            onClose={() =>
+              setSuccess(null)
+            }
           >
             {success}
           </Alert>
@@ -173,105 +238,180 @@ export default function UsersPage() {
         {usersQuery.isLoading && (
           <CircularProgress />
         )}
+
         {usersQuery.isError && (
           <Alert severity="error">
-            Не удалось загрузить пользователей.
+            {t("users.loadError")}
           </Alert>
         )}
 
         {usersQuery.data && (
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+          >
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Пользователь</TableCell>
-                  <TableCell>Роль</TableCell>
-                  <TableCell>Состояние</TableCell>
-                  <TableCell>Последний вход</TableCell>
-                  <TableCell align="right">Действия</TableCell>
+                  <TableCell>
+                    {t(
+                      "users.column.user",
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {t(
+                      "users.column.role",
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {t(
+                      "users.column.status",
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {t(
+                      "users.column.lastLogin",
+                    )}
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                  >
+                    {t(
+                      "users.column.actions",
+                    )}
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {usersQuery.data.map((user) => (
-                  <TableRow key={user.id} hover>
-                    <TableCell>
-                      <Typography
-                        sx={{ fontWeight: 600 }}
-                      >
-                        {user.username}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
-                        {user.email ?? "Email не указан"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        label={roleLabels[user.role]}
-                        color={
-                          user.role === "admin"
-                            ? "primary"
-                            : "default"
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        color={
-                          user.is_active
-                            ? "success"
-                            : "default"
-                        }
-                        label={
-                          user.is_active
-                            ? "Активен"
-                            : "Отключён"
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {user.last_login_at
-                        ? new Intl.DateTimeFormat(
-                            "ru-RU",
-                            {
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            },
-                          ).format(
-                            new Date(user.last_login_at),
-                          )
-                        : "—"}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip
-                        title={
-                          user.id === auth.user?.id
-                            ? "Свой пароль меняется в разделе Аккаунт"
-                            : "Сменить пароль"
-                        }
-                      >
-                        <span>
-                        <IconButton
-                          onClick={() => openDialog(user)}
-                          disabled={
-                            user.id === auth.user?.id
-                          }
-                          aria-label={
-                            `Сменить пароль ${user.username}`
+                {usersQuery.data.map(
+                  (user) => (
+                    <TableRow
+                      key={user.id}
+                      hover
+                    >
+                      <TableCell>
+                        <Typography
+                          sx={{
+                            fontWeight:
+                              600,
+                          }}
+                        >
+                          {user.username}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color={
+                            "text.secondary"
                           }
                         >
-                          <LockResetIcon />
-                        </IconButton>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {user.email
+                            ?? t(
+                              "dashboard.emailMissing",
+                            )}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={
+                            roleLabels[
+                              user.role
+                            ]
+                          }
+                          color={
+                            user.role
+                            === "admin"
+                              ? "primary"
+                              : "default"
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          color={
+                            user.is_active
+                              ? "success"
+                              : "default"
+                          }
+                          label={
+                            user.is_active
+                              ? t(
+                                "users.active",
+                              )
+                              : t(
+                                "users.disabled",
+                              )
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {user.last_login_at
+                          ? new Intl
+                            .DateTimeFormat(
+                              language
+                                === "ru"
+                                ? "ru-RU"
+                                : "en-GB",
+                              {
+                                dateStyle:
+                                  "short",
+                                timeStyle:
+                                  "short",
+                              },
+                            )
+                            .format(
+                              new Date(
+                                user
+                                  .last_login_at,
+                              ),
+                            )
+                          : "—"}
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                      >
+                        <Tooltip
+                          title={
+                            user.id
+                            === auth.user
+                              ?.id
+                              ? t(
+                                "users.selfPasswordHint",
+                              )
+                              : t(
+                                "users.changePassword",
+                              )
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              onClick={() =>
+                                openDialog(
+                                  user,
+                                )
+                              }
+                              disabled={
+                                user.id
+                                === auth.user
+                                  ?.id
+                              }
+                              aria-label={t(
+                                "users.changePasswordFor",
+                                {
+                                  username:
+                                    user.username,
+                                },
+                              )}
+                            >
+                              <LockResetIcon />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -281,7 +421,10 @@ export default function UsersPage() {
       <Dialog
         open={selected !== null}
         onClose={() => {
-          if (!resetMutation.isPending) {
+          if (
+            !resetMutation
+              .isPending
+          ) {
             setSelected(null);
           }
         }}
@@ -289,61 +432,103 @@ export default function UsersPage() {
         maxWidth="xs"
       >
         <DialogTitle>
-          Сменить пароль: {selected?.username}
+          {t(
+            "users.changePasswordTitle",
+            {
+              username:
+                selected?.username
+                ?? "",
+            },
+          )}
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ pt: 1 }}>
+          <Stack
+            spacing={2}
+            sx={{
+              pt: 1,
+            }}
+          >
             <Alert severity="warning">
-              Все активные сеансы пользователя будут завершены.
+              {t(
+                "users.sessionsWarning",
+              )}
             </Alert>
+
             {formError && (
               <Alert severity="error">
                 {formError}
               </Alert>
             )}
+
             <TextField
-              label="Новый пароль"
+              label={t(
+                "password.new",
+              )}
               type="password"
               value={password}
               onChange={(event) => {
-                setPassword(event.target.value);
+                setPassword(
+                  event.target.value,
+                );
               }}
               autoComplete="new-password"
-              helperText="Не менее 8 символов"
-              disabled={resetMutation.isPending}
+              helperText={t(
+                "password.minimumLengthHint",
+              )}
+              disabled={
+                resetMutation
+                  .isPending
+              }
               autoFocus
             />
+
             <TextField
-              label="Повторите новый пароль"
+              label={t(
+                "password.confirmNew",
+              )}
               type="password"
               value={confirmation}
               onChange={(event) => {
-                setConfirmation(event.target.value);
+                setConfirmation(
+                  event.target.value,
+                );
               }}
               autoComplete="new-password"
-              disabled={resetMutation.isPending}
+              disabled={
+                resetMutation
+                  .isPending
+              }
             />
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => setSelected(null)}
-            disabled={resetMutation.isPending}
+            onClick={() =>
+              setSelected(null)
+            }
+            disabled={
+              resetMutation
+                .isPending
+            }
           >
-            Отмена
+            {t("users.cancel")}
           </Button>
+
           <Button
             variant="contained"
             onClick={submitReset}
             disabled={
-              resetMutation.isPending
+              resetMutation
+                .isPending
               || !password
               || !confirmation
             }
           >
             {resetMutation.isPending
-              ? "Сохранение…"
-              : "Сменить пароль"}
+              ? t("users.saving")
+              : t(
+                "users.changePassword",
+              )}
           </Button>
         </DialogActions>
       </Dialog>

@@ -455,6 +455,74 @@ export const translations = {
     "streamDetails.logError": "Unable to load the log.",
     "common.yes": "Yes",
     "common.no": "No",
+    "users.title": "Users",
+    "users.subtitle":
+      "Password management and user session termination",
+    "users.backDashboard":
+      "Back to Dashboard",
+    "users.loadError":
+      "Unable to load users.",
+    "users.column.user":
+      "User",
+    "users.column.role":
+      "Role",
+    "users.column.status":
+      "Status",
+    "users.column.lastLogin":
+      "Last login",
+    "users.column.actions":
+      "Actions",
+    "users.active":
+      "Active",
+    "users.disabled":
+      "Disabled",
+    "users.changePassword":
+      "Change password",
+    "users.changePasswordFor":
+      "Change password for {{username}}",
+    "users.changePasswordTitle":
+      "Change password: {{username}}",
+    "users.selfPasswordHint":
+      "Change your own password in the Account section",
+    "users.sessionsWarning":
+      "All active user sessions will be terminated.",
+    "users.passwordChanged":
+      "The password for {{username}} has been changed. All active sessions have been terminated.",
+    "users.passwordChangeError":
+      "Unable to change the password.",
+    "users.cancel":
+      "Cancel",
+    "users.saving":
+      "Saving…",
+
+    "account.title":
+      "Account",
+    "account.backDashboard":
+      "Back to Dashboard",
+    "account.sessionsNotice":
+      "After changing the password, all previously issued sessions will be terminated. You will need to sign in again.",
+    "account.changePassword":
+      "Change password",
+    "account.changeError":
+      "Unable to change the password.",
+
+    "password.current":
+      "Current password",
+    "password.new":
+      "New password",
+    "password.confirmNew":
+      "Confirm new password",
+    "password.minimumLength":
+      "The password must contain at least 8 characters.",
+    "password.minimumLengthHint":
+      "At least 8 characters",
+    "password.mismatch":
+      "Passwords do not match.",
+    "password.newMinimumLength":
+      "The new password must contain at least 8 characters.",
+    "password.newMismatch":
+      "The new passwords do not match.",
+
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -916,6 +984,74 @@ export const translations = {
     "streamDetails.logError": "Unable to load the log.",
     "common.yes": "Да",
     "common.no": "Нет",
+    "users.title": "Пользователи",
+    "users.subtitle":
+      "Смена паролей и завершение пользовательских сеансов",
+    "users.backDashboard":
+      "На Dashboard",
+    "users.loadError":
+      "Не удалось загрузить пользователей.",
+    "users.column.user":
+      "Пользователь",
+    "users.column.role":
+      "Роль",
+    "users.column.status":
+      "Состояние",
+    "users.column.lastLogin":
+      "Последний вход",
+    "users.column.actions":
+      "Действия",
+    "users.active":
+      "Активен",
+    "users.disabled":
+      "Отключён",
+    "users.changePassword":
+      "Сменить пароль",
+    "users.changePasswordFor":
+      "Сменить пароль {{username}}",
+    "users.changePasswordTitle":
+      "Сменить пароль: {{username}}",
+    "users.selfPasswordHint":
+      "Свой пароль меняется в разделе Аккаунт",
+    "users.sessionsWarning":
+      "Все активные сеансы пользователя будут завершены.",
+    "users.passwordChanged":
+      "Пароль пользователя {{username}} изменён. Его активные сеансы завершены.",
+    "users.passwordChangeError":
+      "Не удалось сменить пароль.",
+    "users.cancel":
+      "Отмена",
+    "users.saving":
+      "Сохранение…",
+
+    "account.title":
+      "Аккаунт",
+    "account.backDashboard":
+      "На Dashboard",
+    "account.sessionsNotice":
+      "После смены пароля все ранее выданные сеансы будут завершены. Потребуется войти заново.",
+    "account.changePassword":
+      "Изменить пароль",
+    "account.changeError":
+      "Не удалось изменить пароль.",
+
+    "password.current":
+      "Текущий пароль",
+    "password.new":
+      "Новый пароль",
+    "password.confirmNew":
+      "Повторите новый пароль",
+    "password.minimumLength":
+      "Пароль должен содержать не менее 8 символов.",
+    "password.minimumLengthHint":
+      "Не менее 8 символов",
+    "password.mismatch":
+      "Пароли не совпадают.",
+    "password.newMinimumLength":
+      "Новый пароль должен содержать не менее 8 символов.",
+    "password.newMismatch":
+      "Новые пароли не совпадают.",
+
     "login.subtitle":
       "Вход в панель управления",
     "login.username": "Имя пользователя",

@@ -30,9 +30,14 @@ import { changePassword }
   from "../api/auth";
 import { useAuth }
   from "../auth/useAuth";
+import {
+  useI18n,
+} from "../i18n/useI18n";
 
-
-function errorText(error: unknown): string {
+function errorText(
+  error: unknown,
+  fallbackMessage: string,
+): string {
   if (axios.isAxiosError(error)) {
     const detail =
       error.response?.data?.detail;
@@ -40,56 +45,99 @@ function errorText(error: unknown): string {
       return detail;
     }
   }
-  return "Не удалось изменить пароль.";
+  return fallbackMessage;
 }
 
-
 export default function AccountPage() {
+  const {
+    t,
+  } = useI18n();
+
   const auth = useAuth();
   const navigate = useNavigate();
-  const [currentPassword, setCurrentPassword] =
-    useState("");
-  const [newPassword, setNewPassword] =
-    useState("");
-  const [confirmation, setConfirmation] =
-    useState("");
-  const [pending, setPending] =
-    useState(false);
-  const [error, setError] =
-    useState<string | null>(null);
+
+  const [
+    currentPassword,
+    setCurrentPassword,
+  ] = useState("");
+  const [
+    newPassword,
+    setNewPassword,
+  ] = useState("");
+  const [
+    confirmation,
+    setConfirmation,
+  ] = useState("");
+  const [
+    pending,
+    setPending,
+  ] = useState(false);
+  const [
+    error,
+    setError,
+  ] = useState<string | null>(
+    null,
+  );
 
   async function submit(
-    event: FormEvent<HTMLFormElement>,
+    event:
+      FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
     setError(null);
 
     if (newPassword.length < 8) {
       setError(
-        "Новый пароль должен содержать не менее 8 символов.",
+        t(
+          "password.newMinimumLength",
+        ),
       );
       return;
     }
-    if (newPassword !== confirmation) {
-      setError("Новые пароли не совпадают.");
+
+    if (
+      newPassword
+      !== confirmation
+    ) {
+      setError(
+        t(
+          "password.newMismatch",
+        ),
+      );
       return;
     }
 
     setPending(true);
+
     try {
       await changePassword({
-        current_password: currentPassword,
-        new_password: newPassword,
+        current_password:
+          currentPassword,
+        new_password:
+          newPassword,
       });
+
       auth.logout();
-      navigate("/login", {
-        replace: true,
-        state: {
-          passwordChanged: true,
+
+      navigate(
+        "/login",
+        {
+          replace: true,
+          state: {
+            passwordChanged:
+              true,
+          },
         },
-      });
+      );
     } catch (requestError) {
-      setError(errorText(requestError));
+      setError(
+        errorText(
+          requestError,
+          t(
+            "account.changeError",
+          ),
+        ),
+      );
     } finally {
       setPending(false);
     }
@@ -98,16 +146,26 @@ export default function AccountPage() {
   return (
     <Container
       maxWidth="sm"
-      sx={{ py: { xs: 3, md: 5 } }}
+      sx={{
+        py: {
+          xs: 3,
+          md: 5,
+        },
+      }}
     >
       <Stack spacing={3}>
         <Button
           component={Link}
           to="/"
-          startIcon={<ArrowBackIcon />}
-          sx={{ alignSelf: "flex-start" }}
+          startIcon={
+            <ArrowBackIcon />
+          }
+          sx={{
+            alignSelf:
+              "flex-start",
+          }}
         >
-          На Dashboard
+          {t("account.backDashboard")}
         </Button>
 
         <Card>
@@ -122,17 +180,23 @@ export default function AccountPage() {
                   variant="h5"
                   component="h1"
                 >
-                  Аккаунт
+                  {t(
+                    "account.title",
+                  )}
                 </Typography>
-                <Typography color="text.secondary">
+                <Typography
+                  color={
+                    "text.secondary"
+                  }
+                >
                   {auth.user?.username}
                 </Typography>
               </Stack>
 
               <Alert severity="info">
-                После смены пароля все ранее
-                выданные сеансы будут завершены.
-                Потребуется войти заново.
+                {t(
+                  "account.sessionsNotice",
+                )}
               </Alert>
 
               {error && (
@@ -142,7 +206,9 @@ export default function AccountPage() {
               )}
 
               <TextField
-                label="Текущий пароль"
+                label={t(
+                  "password.current",
+                )}
                 type="password"
                 value={currentPassword}
                 onChange={(event) => {
@@ -150,30 +216,48 @@ export default function AccountPage() {
                     event.target.value,
                   );
                 }}
-                autoComplete="current-password"
+                autoComplete={
+                  "current-password"
+                }
                 required
                 disabled={pending}
               />
+
               <TextField
-                label="Новый пароль"
+                label={t(
+                  "password.new",
+                )}
                 type="password"
                 value={newPassword}
                 onChange={(event) => {
-                  setNewPassword(event.target.value);
+                  setNewPassword(
+                    event.target.value,
+                  );
                 }}
-                autoComplete="new-password"
-                helperText="Не менее 8 символов"
+                autoComplete={
+                  "new-password"
+                }
+                helperText={t(
+                  "password.minimumLengthHint",
+                )}
                 required
                 disabled={pending}
               />
+
               <TextField
-                label="Повторите новый пароль"
+                label={t(
+                  "password.confirmNew",
+                )}
                 type="password"
                 value={confirmation}
                 onChange={(event) => {
-                  setConfirmation(event.target.value);
+                  setConfirmation(
+                    event.target.value,
+                  );
                 }}
-                autoComplete="new-password"
+                autoComplete={
+                  "new-password"
+                }
                 required
                 disabled={pending}
               />
@@ -184,10 +268,12 @@ export default function AccountPage() {
                 size="large"
                 startIcon={
                   pending
-                    ? <CircularProgress
+                    ? (
+                      <CircularProgress
                         size={18}
                         color="inherit"
                       />
+                    )
                     : <LockResetIcon />
                 }
                 disabled={
@@ -197,7 +283,9 @@ export default function AccountPage() {
                   || !confirmation
                 }
               >
-                Изменить пароль
+                {t(
+                  "account.changePassword",
+                )}
               </Button>
             </Stack>
           </CardContent>
