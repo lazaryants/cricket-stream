@@ -24,6 +24,8 @@ import { AuthProvider }
 
 import { theme }
   from "./theme/theme";
+import { I18nProvider }
+  from "./i18n/I18nContext";
 
 const queryClient =
   new QueryClient({
@@ -57,12 +59,14 @@ createRoot(
       <QueryClientProvider
         client={queryClient}
       >
-        <BrowserRouter>
-          <AuthProvider>
-            <RuntimeWebSocketBridge />
-            <App />
-          </AuthProvider>
-        </BrowserRouter>
+        <I18nProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <RuntimeWebSocketBridge />
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </I18nProvider>
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,
