@@ -4,7 +4,6 @@ import {
   useState,
   type FormEvent,
 } from "react";
-
 import AddIcon
   from "@mui/icons-material/Add";
 import ArrowBackIcon
@@ -17,7 +16,6 @@ import RefreshIcon
   from "@mui/icons-material/Refresh";
 import SearchIcon
   from "@mui/icons-material/Search";
-
 import {
   Alert,
   Box,
@@ -46,85 +44,81 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-
 import axios from "axios";
-
 import {
   Link,
 } from "react-router";
-
 import {
   createSavedDestination,
   deleteSavedDestination,
   getSavedDestinations,
   updateSavedDestination,
 } from "../api/savedDestinations";
-
 import {
   createSavedSource,
   deleteSavedSource,
   getSavedSources,
   updateSavedSource,
 } from "../api/savedSources";
-
 import {
   useAuth,
 } from "../auth/useAuth";
-
+import {
+  useI18n,
+} from "../i18n/useI18n";
 import type {
   SavedDestination,
   SavedDestinationCreateRequest,
 } from "../types/savedDestination";
-
 import type {
   SavedSource,
   SavedSourceCreateRequest,
 } from "../types/savedSource";
-
 import type {
   ProviderType,
 } from "../types/stream";
-
-
 type LibraryTab =
   | "sources"
   | "destinations";
+type Translate =
+  ReturnType<typeof useI18n>["t"];
 
-
-const providerLabels: Record<
-  ProviderType,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестная",
-};
-
+function getProviderLabels(
+  t: Translate,
+): Record<ProviderType, string> {
+  return {
+    youtube: "YouTube",
+    twitch: "Twitch",
+    kick: "Kick",
+    vimeo: "Vimeo",
+    custom: t(
+      "stream.provider.custom",
+    ),
+    unknown: t(
+      "stream.provider.unknown",
+    ),
+  };
+}
 
 function getErrorMessage(
   error: unknown,
+  t: Translate,
 ): string {
   if (
     axios.isAxiosError(error)
   ) {
     const detail =
       error.response?.data?.detail;
-
     if (
       typeof detail === "string"
     ) {
       return detail;
     }
-
     if (
       Array.isArray(detail)
     ) {
@@ -136,52 +130,46 @@ function getErrorMessage(
           ) {
             return item.msg;
           }
-
           return JSON.stringify(item);
         })
         .join("; ");
     }
-
     if (
       error.response?.status
     ) {
-      return (
-        "Сервер вернул HTTP "
-        + String(
-          error.response.status,
-        )
+      return t(
+        "libraries.serverHttp",
+        {
+          status:
+            error.response.status,
+        },
       );
     }
-
-    return (
-      "Сервер недоступен: "
-      + error.message
+    return t(
+      "libraries.serverUnavailable",
+      {
+        message: error.message,
+      },
     );
   }
-
   if (
     error instanceof Error
   ) {
     return error.message;
   }
-
-  return "Произошла неизвестная ошибка.";
+  return t(
+    "libraries.unknownError",
+  );
 }
-
-
 interface SourceDialogProps {
   open: boolean;
   source: SavedSource | null;
   isSubmitting: boolean;
-
   onClose(): void;
-
   onSubmit(
     data: SavedSourceCreateRequest,
   ): void;
 }
-
-
 function SourceDialog({
   open,
   source,
@@ -189,65 +177,58 @@ function SourceDialog({
   onClose,
   onSubmit,
 }: SourceDialogProps) {
+  const {
+    t,
+  } = useI18n();
+  const providerLabels =
+    getProviderLabels(t);
   const [
     name,
     setName,
   ] = useState("");
-
   const [
     description,
     setDescription,
   ] = useState("");
-
   const [
     provider,
     setProvider,
   ] = useState<ProviderType>(
     "youtube",
   );
-
   const [
     sourceUrl,
     setSourceUrl,
   ] = useState("");
-
   const [
     enabled,
     setEnabled,
   ] = useState(true);
-
   const [
     validationError,
     setValidationError,
   ] = useState<string | null>(
     null,
   );
-
   function resetForm(): void {
     setName(
       source?.name ?? "",
     );
-
     setDescription(
       source?.description ?? "",
     );
-
     setProvider(
       source?.provider
       ?? "youtube",
     );
-
     setSourceUrl(
       source?.source_url ?? "",
     );
-
     setEnabled(
       source?.enabled ?? true,
     );
-
     setValidationError(null);
   }
-
   useEffect(() => {
     if (open) {
       resetForm();
@@ -256,34 +237,30 @@ function SourceDialog({
     open,
     source,
   ]);
-
   function handleSubmit(
     event: FormEvent,
   ): void {
     event.preventDefault();
-
     const cleanName =
       name.trim();
-
     const cleanUrl =
       sourceUrl.trim();
-
     if (!cleanName) {
       setValidationError(
-        "Укажите название источника.",
+        t(
+          "libraries.source.nameRequired",
+        ),
       );
-
       return;
     }
-
     if (!cleanUrl) {
       setValidationError(
-        "Укажите URL источника.",
+        t(
+          "libraries.source.urlRequired",
+        ),
       );
-
       return;
     }
-
     onSubmit({
       name: cleanName,
       description:
@@ -294,7 +271,6 @@ function SourceDialog({
       enabled,
     });
   }
-
   return (
     <Dialog
       open={open}
@@ -312,10 +288,13 @@ function SourceDialog({
       >
         <DialogTitle>
           {source
-            ? "Редактировать источник"
-            : "Добавить источник"}
+            ? t(
+              "libraries.source.edit",
+            )
+            : t(
+              "libraries.source.add",
+            )}
         </DialogTitle>
-
         <DialogContent>
           <Stack
             spacing={2}
@@ -328,9 +307,10 @@ function SourceDialog({
                 {validationError}
               </Alert>
             )}
-
             <TextField
-              label="Название"
+              label={t(
+                "libraries.source.name",
+              )}
               value={name}
               onChange={(event) => {
                 setName(
@@ -342,10 +322,11 @@ function SourceDialog({
               fullWidth
               disabled={isSubmitting}
               placeholder={
-                "Основная трансляция YouTube"
+                t(
+                  "libraries.source.namePlaceholder",
+                )
               }
             />
-
             <FormControl
               fullWidth
               disabled={isSubmitting}
@@ -353,14 +334,17 @@ function SourceDialog({
               <InputLabel
                 id="source-provider-label"
               >
-                Платформа
+                {t(
+                  "libraries.source.platform",
+                )}
               </InputLabel>
-
               <Select
                 labelId={
                   "source-provider-label"
                 }
-                label="Платформа"
+                label={t(
+                  "libraries.source.platform",
+                )}
                 value={provider}
                 onChange={(event) => {
                   setProvider(
@@ -386,9 +370,10 @@ function SourceDialog({
                 )}
               </Select>
             </FormControl>
-
             <TextField
-              label="URL источника"
+              label={t(
+                "libraries.source.url",
+              )}
               value={sourceUrl}
               onChange={(event) => {
                 setSourceUrl(
@@ -402,9 +387,10 @@ function SourceDialog({
                 "https://youtube.com/watch?v=..."
               }
             />
-
             <TextField
-              label="Описание"
+              label={t(
+                "libraries.source.description",
+              )}
               value={description}
               onChange={(event) => {
                 setDescription(
@@ -416,10 +402,11 @@ function SourceDialog({
               minRows={3}
               disabled={isSubmitting}
               placeholder={
-                "Необязательное описание"
+                t(
+                  "libraries.source.descriptionPlaceholder",
+                )
               }
             />
-
             <FormControlLabel
               control={
                 <Switch
@@ -432,50 +419,48 @@ function SourceDialog({
                   disabled={isSubmitting}
                 />
               }
-              label="Источник активен"
+              label={t(
+                "libraries.source.enabled",
+              )}
             />
           </Stack>
         </DialogContent>
-
         <DialogActions>
           <Button
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Отмена
+            {t("libraries.cancel")}
           </Button>
-
           <Button
             type="submit"
             variant="contained"
             disabled={isSubmitting}
           >
             {isSubmitting
-              ? "Сохранение…"
-              : "Сохранить"}
+              ? t(
+                "libraries.saving",
+              )
+              : t(
+                "libraries.save",
+              )}
           </Button>
         </DialogActions>
       </Box>
     </Dialog>
   );
 }
-
-
 interface DestinationDialogProps {
   open: boolean;
   destination:
     SavedDestination | null;
   isSubmitting: boolean;
-
   onClose(): void;
-
   onSubmit(
     data:
       SavedDestinationCreateRequest,
   ): void;
 }
-
-
 function DestinationDialog({
   open,
   destination,
@@ -483,57 +468,50 @@ function DestinationDialog({
   onClose,
   onSubmit,
 }: DestinationDialogProps) {
+  const {
+    t,
+  } = useI18n();
   const [
     name,
     setName,
   ] = useState("");
-
   const [
     description,
     setDescription,
   ] = useState("");
-
   const [
     destinationUrl,
     setDestinationUrl,
   ] = useState("");
-
   const [
     enabled,
     setEnabled,
   ] = useState(true);
-
   const [
     validationError,
     setValidationError,
   ] = useState<string | null>(
     null,
   );
-
   function resetForm(): void {
     setName(
       destination?.name ?? "",
     );
-
     setDescription(
       destination?.description
       ?? "",
     );
-
     setDestinationUrl(
       destination
         ?.destination_rtmp_url
       ?? "",
     );
-
     setEnabled(
       destination?.enabled
       ?? true,
     );
-
     setValidationError(null);
   }
-
   useEffect(() => {
     if (open) {
       resetForm();
@@ -542,34 +520,30 @@ function DestinationDialog({
     open,
     destination,
   ]);
-
   function handleSubmit(
     event: FormEvent,
   ): void {
     event.preventDefault();
-
     const cleanName =
       name.trim();
-
     const cleanUrl =
       destinationUrl.trim();
-
     if (!cleanName) {
       setValidationError(
-        "Укажите название назначения.",
+        t(
+          "libraries.destination.nameRequired",
+        ),
       );
-
       return;
     }
-
     if (!cleanUrl) {
       setValidationError(
-        "Укажите RTMP-адрес.",
+        t(
+          "libraries.destination.urlRequired",
+        ),
       );
-
       return;
     }
-
     if (
       !cleanUrl.startsWith(
         "rtmp://",
@@ -579,13 +553,12 @@ function DestinationDialog({
       )
     ) {
       setValidationError(
-        "RTMP-адрес должен начинаться "
-        + "с rtmp:// или rtmps://.",
+        t(
+          "libraries.destination.urlInvalid",
+        ),
       );
-
       return;
     }
-
     onSubmit({
       name: cleanName,
       description:
@@ -596,7 +569,6 @@ function DestinationDialog({
       enabled,
     });
   }
-
   return (
     <Dialog
       open={open}
@@ -614,10 +586,13 @@ function DestinationDialog({
       >
         <DialogTitle>
           {destination
-            ? "Редактировать назначение"
-            : "Добавить назначение"}
+            ? t(
+              "libraries.destination.edit",
+            )
+            : t(
+              "libraries.destination.add",
+            )}
         </DialogTitle>
-
         <DialogContent>
           <Stack
             spacing={2}
@@ -630,9 +605,10 @@ function DestinationDialog({
                 {validationError}
               </Alert>
             )}
-
             <TextField
-              label="Название"
+              label={t(
+                "libraries.destination.name",
+              )}
               value={name}
               onChange={(event) => {
                 setName(
@@ -643,11 +619,14 @@ function DestinationDialog({
               autoFocus
               fullWidth
               disabled={isSubmitting}
-              placeholder="Площадка 1"
+              placeholder={t(
+                "libraries.destination.namePlaceholder",
+              )}
             />
-
             <TextField
-              label="RTMP-адрес"
+              label={t(
+                "libraries.destination.url",
+              )}
               value={destinationUrl}
               onChange={(event) => {
                 setDestinationUrl(
@@ -661,9 +640,10 @@ function DestinationDialog({
                 "rtmp://server/app/key"
               }
             />
-
             <TextField
-              label="Описание"
+              label={t(
+                "libraries.destination.description",
+              )}
               value={description}
               onChange={(event) => {
                 setDescription(
@@ -675,10 +655,11 @@ function DestinationDialog({
               minRows={3}
               disabled={isSubmitting}
               placeholder={
-                "Необязательное описание"
+                t(
+                  "libraries.destination.descriptionPlaceholder",
+                )
               }
             />
-
             <FormControlLabel
               control={
                 <Switch
@@ -691,46 +672,45 @@ function DestinationDialog({
                   disabled={isSubmitting}
                 />
               }
-              label="Назначение активно"
+              label={t(
+                "libraries.destination.enabled",
+              )}
             />
           </Stack>
         </DialogContent>
-
         <DialogActions>
           <Button
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Отмена
+            {t("libraries.cancel")}
           </Button>
-
           <Button
             type="submit"
             variant="contained"
             disabled={isSubmitting}
           >
             {isSubmitting
-              ? "Сохранение…"
-              : "Сохранить"}
+              ? t(
+                "libraries.saving",
+              )
+              : t(
+                "libraries.save",
+              )}
           </Button>
         </DialogActions>
       </Box>
     </Dialog>
   );
 }
-
-
 interface DeleteDialogProps {
   open: boolean;
   title: string;
   itemName: string;
   isDeleting: boolean;
-
   onClose(): void;
   onConfirm(): void;
 }
-
-
 function DeleteDialog({
   open,
   title,
@@ -739,6 +719,9 @@ function DeleteDialog({
   onClose,
   onConfirm,
 }: DeleteDialogProps) {
+  const {
+    t,
+  } = useI18n();
   return (
     <Dialog
       open={open}
@@ -753,36 +736,33 @@ function DeleteDialog({
       <DialogTitle>
         {title}
       </DialogTitle>
-
       <DialogContent>
         <Typography>
-          Удалить запись
-          {" "}
-          <strong>
-            {itemName}
-          </strong>
-          ?
+          {t(
+            "libraries.deleteRecord",
+            {
+              name: itemName,
+            },
+          )}
         </Typography>
-
         <Alert
           severity="warning"
           sx={{
             mt: 2,
           }}
         >
-          Уже созданные карточки трансляций
-          не изменятся.
+          {t(
+            "libraries.deleteWarning",
+          )}
         </Alert>
       </DialogContent>
-
       <DialogActions>
         <Button
           onClick={onClose}
           disabled={isDeleting}
         >
-          Отмена
+          {t("libraries.cancel")}
         </Button>
-
         <Button
           color="error"
           variant="contained"
@@ -790,92 +770,85 @@ function DeleteDialog({
           disabled={isDeleting}
         >
           {isDeleting
-            ? "Удаление…"
-            : "Удалить"}
+            ? t(
+              "libraries.deleting",
+            )
+            : t(
+              "libraries.delete",
+            )}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
-
-
 export default function LibrariesPage() {
+  const {
+    t,
+  } = useI18n();
+  const providerLabels =
+    getProviderLabels(t);
   const auth = useAuth();
   const queryClient =
     useQueryClient();
-
   const [
     activeTab,
     setActiveTab,
   ] = useState<LibraryTab>(
     "sources",
   );
-
   const [
     search,
     setSearch,
   ] = useState("");
-
   const [
     includeDisabled,
     setIncludeDisabled,
   ] = useState(false);
-
   const [
     sourceDialogOpen,
     setSourceDialogOpen,
   ] = useState(false);
-
   const [
     editingSource,
     setEditingSource,
   ] = useState<SavedSource | null>(
     null,
   );
-
   const [
     deletingSource,
     setDeletingSource,
   ] = useState<SavedSource | null>(
     null,
   );
-
   const [
     destinationDialogOpen,
     setDestinationDialogOpen,
   ] = useState(false);
-
   const [
     editingDestination,
     setEditingDestination,
   ] = useState<
     SavedDestination | null
   >(null);
-
   const [
     deletingDestination,
     setDeletingDestination,
   ] = useState<
     SavedDestination | null
   >(null);
-
   const [
     actionError,
     setActionError,
   ] = useState<string | null>(
     null,
   );
-
   const role =
     auth.user?.role;
-
   const canManageSources =
     role === "operator"
     || role === "admin";
-
   const canManageDestinations =
     role === "admin";
-
   const sourcesQuery = useQuery({
     queryKey: [
       "saved-sources",
@@ -888,7 +861,6 @@ export default function LibrariesPage() {
         includeDisabled,
       }),
   });
-
   const destinationsQuery =
     useQuery({
       queryKey: [
@@ -902,19 +874,15 @@ export default function LibrariesPage() {
           includeDisabled,
         }),
     });
-
   const filteredSources =
     useMemo(() => {
       const cleanSearch =
         search.trim().toLowerCase();
-
       const sources =
         sourcesQuery.data ?? [];
-
       if (!cleanSearch) {
         return sources;
       }
-
       return sources.filter(
         (source) =>
           source.name
@@ -934,20 +902,16 @@ export default function LibrariesPage() {
       search,
       sourcesQuery.data,
     ]);
-
   const filteredDestinations =
     useMemo(() => {
       const cleanSearch =
         search.trim().toLowerCase();
-
       const destinations =
         destinationsQuery.data
         ?? [];
-
       if (!cleanSearch) {
         return destinations;
       }
-
       return destinations.filter(
         (destination) =>
           destination.name
@@ -968,7 +932,6 @@ export default function LibrariesPage() {
       destinationsQuery.data,
       search,
     ]);
-
   async function invalidateSources():
   Promise<void> {
     await queryClient.invalidateQueries({
@@ -977,7 +940,6 @@ export default function LibrariesPage() {
       ],
     });
   }
-
   async function invalidateDestinations():
   Promise<void> {
     await queryClient.invalidateQueries({
@@ -986,7 +948,6 @@ export default function LibrariesPage() {
       ],
     });
   }
-
   const saveSourceMutation =
     useMutation({
       mutationFn: (
@@ -999,7 +960,6 @@ export default function LibrariesPage() {
             data,
           );
         }
-
         return createSavedSource(
           data,
         );
@@ -1010,16 +970,17 @@ export default function LibrariesPage() {
       onSuccess: async () => {
         setSourceDialogOpen(false);
         setEditingSource(null);
-
         await invalidateSources();
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t,
+          ),
         );
       },
     });
-
   const deleteSourceMutation =
     useMutation({
       mutationFn: (
@@ -1033,16 +994,17 @@ export default function LibrariesPage() {
       },
       onSuccess: async () => {
         setDeletingSource(null);
-
         await invalidateSources();
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t,
+          ),
         );
       },
     });
-
   const saveDestinationMutation =
     useMutation({
       mutationFn: (
@@ -1055,7 +1017,6 @@ export default function LibrariesPage() {
             data,
           );
         }
-
         return createSavedDestination(
           data,
         );
@@ -1068,16 +1029,17 @@ export default function LibrariesPage() {
           false,
         );
         setEditingDestination(null);
-
         await invalidateDestinations();
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t,
+          ),
         );
       },
     });
-
   const deleteDestinationMutation =
     useMutation({
       mutationFn: (
@@ -1093,33 +1055,31 @@ export default function LibrariesPage() {
         setDeletingDestination(
           null,
         );
-
         await invalidateDestinations();
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t,
+          ),
         );
       },
     });
-
   function openNewSource(): void {
     setEditingSource(null);
     setSourceDialogOpen(true);
   }
-
   function openEditSource(
     source: SavedSource,
   ): void {
     setEditingSource(source);
     setSourceDialogOpen(true);
   }
-
   function openNewDestination(): void {
     setEditingDestination(null);
     setDestinationDialogOpen(true);
   }
-
   function openEditDestination(
     destination: SavedDestination,
   ): void {
@@ -1128,17 +1088,14 @@ export default function LibrariesPage() {
     );
     setDestinationDialogOpen(true);
   }
-
   const activeQuery =
     activeTab === "sources"
       ? sourcesQuery
       : destinationsQuery;
-
   const canManageActiveTab =
     activeTab === "sources"
       ? canManageSources
       : canManageDestinations;
-
   return (
     <Box
       sx={{
@@ -1178,7 +1135,11 @@ export default function LibrariesPage() {
                 alignItems: "center",
               }}
             >
-              <Tooltip title="Назад">
+              <Tooltip
+                title={t(
+                  "libraries.back",
+                )}
+              >
                 <IconButton
                   component={Link}
                   to="/streams"
@@ -1186,7 +1147,6 @@ export default function LibrariesPage() {
                   <ArrowBackIcon />
                 </IconButton>
               </Tooltip>
-
               <Box>
                 <Typography
                   variant="h4"
@@ -1194,23 +1154,28 @@ export default function LibrariesPage() {
                     fontWeight: 800,
                   }}
                 >
-                  Библиотеки
+                  {t(
+                    "libraries.title",
+                  )}
                 </Typography>
-
                 <Typography
                   color="text.secondary"
                 >
-                  Сохранённые источники
-                  и RTMP-назначения
+                  {t(
+                    "libraries.subtitle",
+                  )}
                 </Typography>
               </Box>
             </Stack>
-
             <Stack
               direction="row"
               spacing={1}
             >
-              <Tooltip title="Обновить">
+              <Tooltip
+                title={t(
+                  "common.refresh",
+                )}
+              >
                 <IconButton
                   onClick={() => {
                     void activeQuery.refetch();
@@ -1222,7 +1187,6 @@ export default function LibrariesPage() {
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
-
               {canManageActiveTab && (
                 <Button
                   variant="contained"
@@ -1234,12 +1198,13 @@ export default function LibrariesPage() {
                       : openNewDestination
                   }
                 >
-                  Добавить
+                  {t(
+                    "libraries.add",
+                  )}
                 </Button>
               )}
             </Stack>
           </Stack>
-
           {actionError && (
             <Alert
               severity="error"
@@ -1250,7 +1215,6 @@ export default function LibrariesPage() {
               {actionError}
             </Alert>
           )}
-
           <Paper variant="outlined">
             <Tabs
               value={activeTab}
@@ -1266,17 +1230,18 @@ export default function LibrariesPage() {
             >
               <Tab
                 value="sources"
-                label="Источники"
+                label={t(
+                  "libraries.sources",
+                )}
               />
-
               <Tab
                 value="destinations"
-                label="Назначения"
+                label={t(
+                  "libraries.destinations",
+                )}
               />
             </Tabs>
-
             <Divider />
-
             <Stack
               spacing={2}
               sx={{
@@ -1309,13 +1274,11 @@ export default function LibrariesPage() {
                   fullWidth
                   placeholder={
                     activeTab === "sources"
-                      ? (
-                        "Поиск по названию "
-                        + "или URL источника"
+                      ? t(
+                        "libraries.searchSources",
                       )
-                      : (
-                        "Поиск по названию "
-                        + "или RTMP-адресу"
+                      : t(
+                        "libraries.searchDestinations",
                       )
                   }
                   slotProps={{
@@ -1330,7 +1293,6 @@ export default function LibrariesPage() {
                     },
                   }}
                 />
-
                 <FormControlLabel
                   sx={{
                     flexShrink: 0,
@@ -1348,11 +1310,12 @@ export default function LibrariesPage() {
                     />
                   }
                   label={
-                    "Показывать отключённые"
+                    t(
+                      "libraries.showDisabled",
+                    )
                   }
                 />
               </Stack>
-
               {activeQuery.isLoading && (
                 <Stack
                   direction="row"
@@ -1367,23 +1330,23 @@ export default function LibrariesPage() {
                   <CircularProgress
                     size={24}
                   />
-
                   <Typography
                     color="text.secondary"
                   >
-                    Загрузка библиотеки…
+                    {t(
+                      "libraries.loading",
+                    )}
                   </Typography>
                 </Stack>
               )}
-
               {activeQuery.isError && (
                 <Alert severity="error">
                   {getErrorMessage(
                     activeQuery.error,
+                    t,
                   )}
                 </Alert>
               )}
-
               {activeTab === "sources"
                 && !sourcesQuery.isLoading
                 && !sourcesQuery.isError
@@ -1393,10 +1356,11 @@ export default function LibrariesPage() {
                       .length === 0
                       && (
                         <Alert severity="info">
-                          Источники не найдены.
+                          {t(
+                            "libraries.sourcesEmpty",
+                          )}
                         </Alert>
                       )}
-
                     {filteredSources.map(
                       (source) => (
                         <Paper
@@ -1450,7 +1414,6 @@ export default function LibrariesPage() {
                                 >
                                   {source.name}
                                 </Typography>
-
                                 <Chip
                                   size="small"
                                   label={
@@ -1459,7 +1422,6 @@ export default function LibrariesPage() {
                                     ]
                                   }
                                 />
-
                                 <Chip
                                   size="small"
                                   color={
@@ -1470,12 +1432,15 @@ export default function LibrariesPage() {
                                   variant="outlined"
                                   label={
                                     source.enabled
-                                      ? "Активен"
-                                      : "Отключён"
+                                      ? t(
+                                        "libraries.active",
+                                      )
+                                      : t(
+                                        "libraries.disabled",
+                                      )
                                   }
                                 />
                               </Stack>
-
                               <Typography
                                 variant="body2"
                                 sx={{
@@ -1485,7 +1450,6 @@ export default function LibrariesPage() {
                               >
                                 {source.source_url}
                               </Typography>
-
                               {source.description && (
                                 <Typography
                                   variant="body2"
@@ -1499,7 +1463,6 @@ export default function LibrariesPage() {
                                 </Typography>
                               )}
                             </Stack>
-
                             {canManageSources && (
                               <Stack
                                 direction="row"
@@ -1510,7 +1473,9 @@ export default function LibrariesPage() {
                               >
                                 <Tooltip
                                   title={
-                                    "Редактировать"
+                                    t(
+                                      "libraries.edit",
+                                    )
                                   }
                                 >
                                   <IconButton
@@ -1523,9 +1488,10 @@ export default function LibrariesPage() {
                                     <EditIcon />
                                   </IconButton>
                                 </Tooltip>
-
                                 <Tooltip
-                                  title="Удалить"
+                                  title={t(
+                                    "libraries.delete",
+                                  )}
                                 >
                                   <IconButton
                                     color="error"
@@ -1546,7 +1512,6 @@ export default function LibrariesPage() {
                     )}
                   </Stack>
                 )}
-
               {activeTab
                 === "destinations"
                 && !destinationsQuery
@@ -1559,10 +1524,11 @@ export default function LibrariesPage() {
                       .length === 0
                       && (
                         <Alert severity="info">
-                          Назначения не найдены.
+                          {t(
+                            "libraries.destinationsEmpty",
+                          )}
                         </Alert>
                       )}
-
                     {filteredDestinations.map(
                       (destination) => (
                         <Paper
@@ -1618,7 +1584,6 @@ export default function LibrariesPage() {
                                     destination.name
                                   }
                                 </Typography>
-
                                 <Chip
                                   size="small"
                                   color={
@@ -1631,12 +1596,15 @@ export default function LibrariesPage() {
                                   label={
                                     destination
                                       .enabled
-                                      ? "Активно"
-                                      : "Отключено"
+                                      ? t(
+                                        "libraries.active",
+                                      )
+                                      : t(
+                                        "libraries.disabled",
+                                      )
                                   }
                                 />
                               </Stack>
-
                               <Typography
                                 variant="body2"
                                 sx={{
@@ -1649,7 +1617,6 @@ export default function LibrariesPage() {
                                     .destination_rtmp_url
                                 }
                               </Typography>
-
                               {destination
                                 .description
                                 && (
@@ -1666,7 +1633,6 @@ export default function LibrariesPage() {
                                   </Typography>
                                 )}
                             </Stack>
-
                             {canManageDestinations
                               && (
                                 <Stack
@@ -1678,7 +1644,9 @@ export default function LibrariesPage() {
                                 >
                                   <Tooltip
                                     title={
-                                      "Редактировать"
+                                      t(
+                                      "libraries.edit",
+                                    )
                                     }
                                   >
                                     <IconButton
@@ -1691,9 +1659,10 @@ export default function LibrariesPage() {
                                       <EditIcon />
                                     </IconButton>
                                   </Tooltip>
-
                                   <Tooltip
-                                    title="Удалить"
+                                    title={t(
+                                    "libraries.delete",
+                                  )}
                                   >
                                     <IconButton
                                       color="error"
@@ -1714,19 +1683,18 @@ export default function LibrariesPage() {
                     )}
                   </Stack>
                 )}
-
               {!canManageActiveTab && (
                 <Alert severity="info">
                   {activeTab === "sources"
                     ? (
-                      "Для изменения источников "
-                      + "нужны права оператора "
-                      + "или администратора."
+                      t(
+                        "libraries.sourcePermission",
+                      )
                     )
                     : (
-                      "Для изменения "
-                      + "RTMP-назначений нужны "
-                      + "права администратора."
+                      t(
+                        "libraries.destinationPermission",
+                      )
                     )}
                 </Alert>
               )}
@@ -1734,7 +1702,6 @@ export default function LibrariesPage() {
           </Paper>
         </Stack>
       </Container>
-
       <SourceDialog
         open={sourceDialogOpen}
         source={editingSource}
@@ -1751,7 +1718,6 @@ export default function LibrariesPage() {
           );
         }}
       />
-
       <DestinationDialog
         open={destinationDialogOpen}
         destination={
@@ -1773,10 +1739,11 @@ export default function LibrariesPage() {
           );
         }}
       />
-
       <DeleteDialog
         open={deletingSource !== null}
-        title="Удалить источник?"
+        title={t(
+          "libraries.deleteSourceTitle",
+        )}
         itemName={
           deletingSource?.name ?? ""
         }
@@ -1794,12 +1761,13 @@ export default function LibrariesPage() {
           }
         }}
       />
-
       <DeleteDialog
         open={
           deletingDestination !== null
         }
-        title="Удалить назначение?"
+        title={t(
+          "libraries.deleteDestinationTitle",
+        )}
         itemName={
           deletingDestination?.name
           ?? ""

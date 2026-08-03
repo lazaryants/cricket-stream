@@ -162,6 +162,113 @@ export const translations = {
     "monitor.sourceFps":
       "Source FPS {{value}}",
 
+    "libraries.title":
+      "Libraries",
+    "libraries.subtitle":
+      "Saved sources and RTMP destinations",
+    "libraries.back":
+      "Back",
+    "libraries.add":
+      "Add",
+    "libraries.sources":
+      "Sources",
+    "libraries.destinations":
+      "Destinations",
+    "libraries.searchSources":
+      "Search by name or source URL",
+    "libraries.searchDestinations":
+      "Search by name or RTMP address",
+    "libraries.showDisabled":
+      "Show disabled",
+    "libraries.loading":
+      "Loading library…",
+    "libraries.sourcesEmpty":
+      "No sources found.",
+    "libraries.destinationsEmpty":
+      "No destinations found.",
+    "libraries.active":
+      "Active",
+    "libraries.disabled":
+      "Disabled",
+    "libraries.edit":
+      "Edit",
+    "libraries.delete":
+      "Delete",
+    "libraries.sourcePermission":
+      "Operator or administrator permissions are required to modify sources.",
+    "libraries.destinationPermission":
+      "Administrator permissions are required to modify RTMP destinations.",
+
+    "libraries.serverHttp":
+      "The server returned HTTP {{status}}",
+    "libraries.serverUnavailable":
+      "The server is unavailable: {{message}}",
+    "libraries.unknownError":
+      "An unknown error occurred.",
+
+    "libraries.source.add":
+      "Add source",
+    "libraries.source.edit":
+      "Edit source",
+    "libraries.source.nameRequired":
+      "Enter a source name.",
+    "libraries.source.urlRequired":
+      "Enter a source URL.",
+    "libraries.source.name":
+      "Name",
+    "libraries.source.namePlaceholder":
+      "Main YouTube stream",
+    "libraries.source.platform":
+      "Platform",
+    "libraries.source.url":
+      "Source URL",
+    "libraries.source.description":
+      "Description",
+    "libraries.source.descriptionPlaceholder":
+      "Optional description",
+    "libraries.source.enabled":
+      "Source is active",
+
+    "libraries.destination.add":
+      "Add destination",
+    "libraries.destination.edit":
+      "Edit destination",
+    "libraries.destination.nameRequired":
+      "Enter a destination name.",
+    "libraries.destination.urlRequired":
+      "Enter an RTMP address.",
+    "libraries.destination.urlInvalid":
+      "The RTMP address must begin with rtmp:// or rtmps://.",
+    "libraries.destination.name":
+      "Name",
+    "libraries.destination.namePlaceholder":
+      "Venue 1",
+    "libraries.destination.url":
+      "RTMP address",
+    "libraries.destination.description":
+      "Description",
+    "libraries.destination.descriptionPlaceholder":
+      "Optional description",
+    "libraries.destination.enabled":
+      "Destination is active",
+
+    "libraries.cancel":
+      "Cancel",
+    "libraries.save":
+      "Save",
+    "libraries.saving":
+      "Saving…",
+    "libraries.deleting":
+      "Deleting…",
+    "libraries.deleteRecord":
+      "Delete record {{name}}?",
+    "libraries.deleteWarning":
+      "Existing stream cards will not be changed.",
+    "libraries.deleteSourceTitle":
+      "Delete source?",
+    "libraries.deleteDestinationTitle":
+      "Delete destination?",
+
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -329,6 +436,113 @@ export const translations = {
       "На Dashboard пока нет выбранных трансляций. Включите параметр «Показывать на Dashboard» в настройках потока.",
     "monitor.sourceFps":
       "FPS источника {{value}}",
+
+    "libraries.title":
+      "Библиотеки",
+    "libraries.subtitle":
+      "Сохранённые источники и RTMP-назначения",
+    "libraries.back":
+      "Назад",
+    "libraries.add":
+      "Добавить",
+    "libraries.sources":
+      "Источники",
+    "libraries.destinations":
+      "Назначения",
+    "libraries.searchSources":
+      "Поиск по названию или URL источника",
+    "libraries.searchDestinations":
+      "Поиск по названию или RTMP-адресу",
+    "libraries.showDisabled":
+      "Показывать отключённые",
+    "libraries.loading":
+      "Загрузка библиотеки…",
+    "libraries.sourcesEmpty":
+      "Источники не найдены.",
+    "libraries.destinationsEmpty":
+      "Назначения не найдены.",
+    "libraries.active":
+      "Активен",
+    "libraries.disabled":
+      "Отключён",
+    "libraries.edit":
+      "Редактировать",
+    "libraries.delete":
+      "Удалить",
+    "libraries.sourcePermission":
+      "Для изменения источников нужны права оператора или администратора.",
+    "libraries.destinationPermission":
+      "Для изменения RTMP-назначений нужны права администратора.",
+
+    "libraries.serverHttp":
+      "Сервер вернул HTTP {{status}}",
+    "libraries.serverUnavailable":
+      "Сервер недоступен: {{message}}",
+    "libraries.unknownError":
+      "Произошла неизвестная ошибка.",
+
+    "libraries.source.add":
+      "Добавить источник",
+    "libraries.source.edit":
+      "Редактировать источник",
+    "libraries.source.nameRequired":
+      "Укажите название источника.",
+    "libraries.source.urlRequired":
+      "Укажите URL источника.",
+    "libraries.source.name":
+      "Название",
+    "libraries.source.namePlaceholder":
+      "Основная трансляция YouTube",
+    "libraries.source.platform":
+      "Платформа",
+    "libraries.source.url":
+      "URL источника",
+    "libraries.source.description":
+      "Описание",
+    "libraries.source.descriptionPlaceholder":
+      "Необязательное описание",
+    "libraries.source.enabled":
+      "Источник активен",
+
+    "libraries.destination.add":
+      "Добавить назначение",
+    "libraries.destination.edit":
+      "Редактировать назначение",
+    "libraries.destination.nameRequired":
+      "Укажите название назначения.",
+    "libraries.destination.urlRequired":
+      "Укажите RTMP-адрес.",
+    "libraries.destination.urlInvalid":
+      "RTMP-адрес должен начинаться с rtmp:// или rtmps://.",
+    "libraries.destination.name":
+      "Название",
+    "libraries.destination.namePlaceholder":
+      "Площадка 1",
+    "libraries.destination.url":
+      "RTMP-адрес",
+    "libraries.destination.description":
+      "Описание",
+    "libraries.destination.descriptionPlaceholder":
+      "Необязательное описание",
+    "libraries.destination.enabled":
+      "Назначение активно",
+
+    "libraries.cancel":
+      "Отмена",
+    "libraries.save":
+      "Сохранить",
+    "libraries.saving":
+      "Сохранение…",
+    "libraries.deleting":
+      "Удаление…",
+    "libraries.deleteRecord":
+      "Удалить запись {{name}}?",
+    "libraries.deleteWarning":
+      "Уже созданные карточки трансляций не изменятся.",
+    "libraries.deleteSourceTitle":
+      "Удалить источник?",
+    "libraries.deleteDestinationTitle":
+      "Удалить назначение?",
 
     "login.subtitle":
       "Вход в панель управления",
