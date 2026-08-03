@@ -1,36 +1,41 @@
 # Cricket Stream Platform
 
-Веб-платформа для централизованного управления спортивными интернет-трансляциями.
-Система забирает live-видео с YouTube, Twitch, Kick и других источников,
-передаёт его на заданные RTMP-назначения и одновременно показывает защищённый
-HLS-предпросмотр в браузере.
+**Stable Release v1.0.0**
+
+[Русская версия](README.ru.md)
+
+Cricket Stream Platform is a self-hosted web application for managing live video ingestion, monitoring, and RTMP restreaming without transcoding.
+
+The platform was created for professional live sports production, where multiple incoming streams must be monitored, controlled, and delivered to external RTMP destinations with high reliability and low latency.
+
+Unlike a basic RTMP relay, Cricket Stream Platform combines stream management, live monitoring, diagnostics, reusable source and destination libraries, user access control, runtime metrics, and protected HLS preview in one web interface.
 
 Production: [https://de.cricket-stream.icu](https://de.cricket-stream.icu)
 
-> Проект не скачивает видеоролики и не хранит записи. Основной режим — прямая
-> ретрансляция без перекодирования.
+> The project does not download videos or store recordings. Its primary purpose is live restreaming without transcoding.
 
-## Возможности
+## Key Features
 
-- до 16 независимых трансляций на одном сервере;
-- источники YouTube, Twitch, Kick, Vimeo и прямые URL;
-- движки `Streamlink`, `yt-dlp` и автоматический выбор;
-- передача в RTMP и локальный HLS-preview одним процессом FFmpeg;
-- копирование аудио и видео без CPU-тяжёлого перекодирования;
-- Dashboard, список всех трансляций и многоканальный монитор 1/4/9/16;
-- live-метрики: разрешение, FPS, битрейт, скорость, время работы и dropped frames;
-- сохранённые библиотеки источников и RTMP-назначений;
-- журнал сессий, диагностика и автоматический перезапуск;
-- роли Viewer, Operator и Admin;
-- защищённый preview с короткоживущими токенами;
-- проверка установленных и доступных версий FFmpeg, Streamlink и yt-dlp;
-- HTTPS через Nginx и Let's Encrypt.
+- Up to 16 independent streams on one node
+- YouTube, Twitch, Kick, Vimeo, and direct URL sources
+- Streamlink, yt-dlp, and automatic source-engine selection
+- RTMP output and protected HLS preview from the same FFmpeg process
+- Video and audio stream copy without CPU-intensive transcoding
+- Dashboard, complete stream list, and 1/4/9/16 monitoring layouts
+- Live metrics: resolution, FPS, bitrate, processing speed, uptime, codecs, and dropped frames
+- Reusable source and RTMP destination libraries
+- Session history, diagnostics, and controlled automatic restart
+- Viewer, Operator, and Administrator roles
+- Protected preview with short-lived playback tokens
+- Installed and available component version checks
+- English and Russian user interface
+- HTTPS through Nginx and Let's Encrypt
 
-## Видеотракт
+## Video Pipeline
 
 ```mermaid
 flowchart LR
-    A[Streaming service] --> B{Source engine}
+    A[Streaming service or direct source] --> B{Source engine}
     B -->|Streamlink| C[Pipe]
     B -->|yt-dlp| D[Direct media URL]
     C --> E[FFmpeg]
@@ -40,71 +45,72 @@ flowchart LR
     G --> H[Browser player]
 ```
 
-FFmpeg получает вход один раз и создаёт два mux-выхода. Видео и аудио для обоих
-выходов используют `copy`, поэтому preview не запускает отдельное декодирование
-или перекодирование.
+FFmpeg reads the input once and produces two muxed outputs. Video and audio use stream copy for both RTMP delivery and HLS preview, so the preview does not require a separate decode or transcode process.
 
-## Технологии
+## Technology Stack
 
-| Компонент | Технология |
+| Component | Technology |
 |---|---|
 | Backend | Python 3.13, FastAPI, Uvicorn |
-| База данных | PostgreSQL, SQLAlchemy, Alembic |
-| Видеодвижок | FFmpeg, Streamlink, yt-dlp |
-| Frontend | React 19, TypeScript, MUI, TanStack Query |
-| Browser video | HLS.js |
+| Database | PostgreSQL, SQLAlchemy, Alembic |
+| Video pipeline | FFmpeg, Streamlink, yt-dlp |
+| Frontend | React 19, TypeScript, Material UI, TanStack Query |
+| Browser playback | HLS.js |
+| Runtime updates | WebSocket |
 | Reverse proxy | Nginx |
 | TLS | Let's Encrypt / Certbot |
-| Управление Python | uv |
+| Python environment | uv |
+| Service management | systemd |
 
-## Структура
+## Repository Layout
 
 ```text
 cricket-stream/
 ├── backend/
 │   ├── app/
 │   │   ├── api/          REST API
-│   │   ├── core/         конфигурация, БД, токены
-│   │   ├── engine/       FFmpeg и менеджер процессов
-│   │   ├── models/       SQLAlchemy-модели
-│   │   ├── providers/    Streamlink и yt-dlp
-│   │   ├── services/     прикладная логика
-│   │   └── websocket/    live-обновления интерфейса
-│   ├── migrations/       Alembic
-│   └── manage.py         пользователи и ноды
-├── frontend/             React-приложение
+│   │   ├── core/         configuration, database, authentication
+│   │   ├── engine/       FFmpeg and process management
+│   │   ├── models/       SQLAlchemy models
+│   │   ├── providers/    Streamlink and yt-dlp
+│   │   ├── services/     application services
+│   │   └── websocket/    live frontend updates
+│   ├── migrations/       Alembic migrations
+│   └── manage.py         user and node administration
+├── frontend/             React application
 ├── deploy/
-│   ├── nginx/            шаблон reverse proxy
-│   └── systemd/          unit backend
-├── docs/                 эксплуатационная документация
-└── var/hls/              временные HLS-сегменты (не в Git)
+│   ├── nginx/            reverse-proxy template
+│   └── systemd/          backend service unit
+├── docs/                 project documentation
+└── var/hls/              temporary HLS segments, excluded from Git
 ```
 
-## Роли и доступ
+## Roles and Access
 
-| Возможность | Viewer | Operator | Admin |
+| Capability | Viewer | Operator | Administrator |
 |---|:---:|:---:|:---:|
-| Просмотр статуса, метрик и preview | ✓ | ✓ | ✓ |
-| Просмотр URL источника | — | ✓ | ✓ |
-| Просмотр RTMP-назначения | — | ✓ | ✓ |
-| Запуск и остановка | — | ✓ | ✓ |
-| Изменение источника | — | ✓ | ✓ |
-| Изменение RTMP-назначения | — | — | ✓ |
-| Управление системными настройками | — | — | ✓ |
+| View status, metrics, diagnostics, and preview | ✓ | ✓ | ✓ |
+| View source URL | — | ✓ | ✓ |
+| View RTMP destination URL | — | ✓ | ✓ |
+| Start and stop streams | — | ✓ | ✓ |
+| Edit source and source engine | — | ✓ | ✓ |
+| Edit RTMP destination | — | — | ✓ |
+| Manage users and system settings | — | — | ✓ |
 
-Viewer не получает `source_url` и `destination_rtmp_url` даже в API-ответах.
-Это предотвращает преждевременный просмотр непубличного источника и раскрытие
-адреса публикации.
+Viewer API responses do not include `source_url` or `destination_rtmp_url`. This prevents disclosure of unpublished sources and destination addresses.
 
-## Документация
+## Main Interface
 
-- [Развёртывание](docs/DEPLOYMENT.md)
-- [Руководство пользователя и администратора](docs/USER_GUIDE.md)
-- [Эксплуатация и диагностика](docs/OPERATIONS.md)
-- [Видеотракт](docs/VIDEO_PIPELINE_UPGRADE.md)
-- [Дорожная карта](docs/ROADMAP.md)
+- **Dashboard** — live overview of selected streams
+- **Monitor** — multi-stream monitoring wall with HLS playback
+- **All Streams** — complete stream inventory, filters, diagnostics, and controls
+- **Libraries** — reusable source and RTMP destination records
+- **Stream Details** — preview, route, metrics, sessions, and logs
+- **Users** — user list and password administration
+- **Account** — current-user password management
+- **Components** — installed versions and update availability
 
-## Быстрая проверка production
+## Quick Production Check
 
 ```bash
 curl -fsS https://de.cricket-stream.icu/api/v1/health
@@ -117,17 +123,38 @@ cd /opt/cricket-stream/backend
 .venv/bin/alembic check
 ```
 
-## Безопасность
+## Documentation
 
-- `.env`, ключи JWT, пароль БД и сертификаты не должны попадать в Git;
-- HLS-каталог нельзя публиковать через открытый Nginx `alias`;
-- preview выдаётся только через авторизованный API;
-- перед обновлением выполняются backup БД, `.env` и Nginx;
-- обновления FFmpeg, Streamlink и yt-dlp выполняются явно администратором.
+English:
 
-## Состояние
+- [Release Notes 1.0.0](docs/en/RELEASE_NOTES_v1.0.0.md)
+- Deployment, operations, architecture, and user guides will be moved into `docs/en/`
 
-Проект находится на стадии рабочего production MVP. Основной цикл — создание,
-запуск, мониторинг, остановка и восстановление трансляций — реализован и
-эксплуатируется. План дальнейшего развития находится в
-[ROADMAP.md](docs/ROADMAP.md).
+Russian:
+
+- [README in Russian](README.ru.md)
+- [Release Notes 1.0.0 in Russian](docs/ru/RELEASE_NOTES_v1.0.0.md)
+- Deployment, operations, architecture, and user guides will be moved into `docs/ru/`
+
+Project history:
+
+- [Changelog](CHANGELOG.md)
+- [История изменений](CHANGELOG.ru.md)
+
+## Security Principles
+
+- `.env`, JWT secrets, database passwords, deploy keys, and TLS private keys must never be committed
+- The HLS directory must not be exposed through a public Nginx alias
+- Preview files are served only through the authenticated API
+- Database, environment, and Nginx backups are required before production updates
+- Component upgrades are explicit administrative actions and should be performed during a maintenance window
+
+## Current Status
+
+Version **1.0.0** is the first stable release. The complete operational cycle—create, start, monitor, diagnose, stop, and recover streams—is implemented and used in production.
+
+Planned development areas include scheduling, distributed nodes, historical analytics, high availability, alerts, and a public API.
+
+## License
+
+No open-source license has been selected yet. Until a license file is added, repository contents remain subject to the copyright holder's default rights.
