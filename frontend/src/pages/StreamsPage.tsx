@@ -465,17 +465,18 @@ export default function StreamsPage() {
       </AppBar>
 
       <Container
-        maxWidth="xl"
+        maxWidth={false}
         sx={{
           minWidth: 0,
           overflowX: "hidden",
           px: {
             xs: 1.5,
-            sm: 3,
+            sm: 2,
+            lg: 2.5,
           },
           py: {
             xs: 2,
-            md: 4,
+            md: 3,
           },
         }}
       >
@@ -727,10 +728,65 @@ export default function StreamsPage() {
                     component={Paper}
                   >
                     <Table
+                      size="small"
                       sx={{
-                        minWidth: 1450,
+                        minWidth: 1320,
+                        tableLayout: "fixed",
+                        "& .MuiTableCell-root": {
+                          px: 1,
+                          py: 1.25,
+                          verticalAlign: "top",
+                        },
                       }}
                     >
+                      <colgroup>
+                        <col
+                          style={{
+                            width: 82,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 245,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 105,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 145,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 190,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 95,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 75,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 105,
+                          }}
+                        />
+                        <col
+                          style={{
+                            width: 225,
+                          }}
+                        />
+                      </colgroup>
+
                       <TableHead>
                         <TableRow>
                           <TableCell

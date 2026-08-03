@@ -329,12 +329,15 @@ export function StreamRow({
           <Stack
             spacing={0.35}
             sx={{
-              minWidth: 180,
+              minWidth: 0,
+              width: "100%",
             }}
           >
             <Typography
               sx={{
                 fontWeight: 600,
+                lineHeight: 1.25,
+                overflowWrap: "anywhere",
               }}
             >
               {stream.name}
@@ -345,11 +348,13 @@ export function StreamRow({
                 variant="body2"
                 color="text.secondary"
                 sx={{
-                  maxWidth: 360,
+                  display: "-webkit-box",
                   overflow: "hidden",
-                  textOverflow:
-                    "ellipsis",
-                  whiteSpace: "nowrap",
+                  WebkitBoxOrient:
+                    "vertical",
+                  WebkitLineClamp: 2,
+                  lineHeight: 1.3,
+                  overflowWrap: "anywhere",
                 }}
                 title={
                   stream.description
@@ -363,14 +368,15 @@ export function StreamRow({
                 variant="caption"
                 color="text.secondary"
                 sx={{
-                  display: "block",
-                  maxWidth: 420,
+                  display: "-webkit-box",
                   overflow: "hidden",
-                  textOverflow:
-                    "ellipsis",
-                  whiteSpace: "nowrap",
+                  WebkitBoxOrient:
+                    "vertical",
+                  WebkitLineClamp: 3,
+                  overflowWrap: "anywhere",
                   fontFamily:
                     "monospace",
+                  lineHeight: 1.25,
                 }}
                 title={
                   stream
@@ -467,7 +473,8 @@ export function StreamRow({
             sx={{
               justifyContent:
                 "flex-end",
-              minWidth: 275,
+              width: 220,
+              minWidth: 220,
             }}
           >
             <Tooltip title="Подробнее">
@@ -530,6 +537,10 @@ export function StreamRow({
                     startMutation
                       .mutate();
                   }}
+                  sx={{
+                    minWidth: 72,
+                    px: 1,
+                  }}
                 >
                   Старт
                 </Button>
@@ -557,6 +568,10 @@ export function StreamRow({
                     stopMutation
                       .mutate();
                   }}
+                  sx={{
+                    minWidth: 72,
+                    px: 1,
+                  }}
                 >
                   Стоп
                 </Button>
@@ -569,7 +584,7 @@ export function StreamRow({
       {actionError && (
         <TableRow>
           <TableCell
-            colSpan={8}
+            colSpan={9}
             sx={{
               pt: 0,
             }}
