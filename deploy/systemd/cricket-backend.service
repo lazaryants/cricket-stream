@@ -8,13 +8,20 @@ Type=simple
 User=stream
 Group=stream
 WorkingDirectory=/opt/cricket-stream/backend
-Environment=PYTHONUNBUFFERED=1
+
+Environment="PATH=/opt/cricket-stream/backend/.venv/bin"
+Environment="PYTHONUNBUFFERED=1"
+
 ExecStart=/opt/cricket-stream/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+
 Restart=on-failure
 RestartSec=5
+
 KillMode=control-group
 TimeoutStopSec=30
 
+StandardOutput=journal
+StandardError=journal
+
 [Install]
 WantedBy=multi-user.target
-
