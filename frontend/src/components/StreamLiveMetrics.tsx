@@ -175,6 +175,7 @@ export function StreamLiveMetrics({
       value:
         formatDuration(
           metrics.uptime_seconds,
+          t("time.dayShort"),
         ),
     },
     {

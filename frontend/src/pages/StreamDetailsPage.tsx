@@ -88,32 +88,43 @@ function formatBitrate(
 
 function formatDuration(
   value: number | null | undefined,
+  dayShort: string,
 ): string {
   if (
     value === null
     || value === undefined
+    || !Number.isFinite(value)
+    || value < 0
   ) {
     return "—";
   }
 
-  const seconds =
-    Math.max(
-      0,
-      Math.floor(value),
+  const totalSeconds =
+    Math.floor(value);
+
+  const days =
+    Math.floor(
+      totalSeconds / 86_400,
     );
 
   const hours =
-    Math.floor(seconds / 3600);
+    Math.floor(
+      (
+        totalSeconds % 86_400
+      ) / 3600,
+    );
 
   const minutes =
     Math.floor(
-      (seconds % 3600) / 60,
+      (
+        totalSeconds % 3600
+      ) / 60,
     );
 
   const remainingSeconds =
-    seconds % 60;
+    totalSeconds % 60;
 
-  return [
+  const time = [
     hours,
     minutes,
     remainingSeconds,
@@ -125,8 +136,11 @@ function formatDuration(
       ),
     )
     .join(":");
-}
 
+  return days > 0
+    ? `${days}${dayShort} ${time}`
+    : time;
+}
 function formatDate(
   value: string | null | undefined,
 ): string {
@@ -555,6 +569,7 @@ export default function StreamDetailsPage() {
                         value={formatDuration(
                           metrics
                             ?.uptime_seconds,
+                          t("time.dayShort"),
                         )}
                       />
 

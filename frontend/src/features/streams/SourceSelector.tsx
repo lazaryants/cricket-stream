@@ -162,24 +162,28 @@ export function SourceSelector({
         }
 
         if (status) {
-          return (
-            `Backend вернул HTTP `
-            + String(status)
+          return t(
+            "selector.error.http",
+            {
+              status,
+            },
           );
         }
 
-        return (
-          "Backend недоступен: "
-          + error.message
+        return t(
+          "selector.error.unavailable",
+          {
+            message: error.message,
+          },
         );
       }
 
-      return (
-        "Не удалось загрузить "
-        + "библиотеку источников."
+      return t(
+        "sourceSelector.loadError",
       );
     }, [
       sourcesQuery.error,
+      t,
     ]);
 
   const savedSources =

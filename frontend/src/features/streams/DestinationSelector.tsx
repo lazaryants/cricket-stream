@@ -111,24 +111,28 @@ export function DestinationSelector({
         }
 
         if (status) {
-          return (
-            "Сервер вернул HTTP "
-            + String(status)
+          return t(
+            "selector.error.http",
+            {
+              status,
+            },
           );
         }
 
-        return (
-          "Сервер недоступен: "
-          + error.message
+        return t(
+          "selector.error.unavailable",
+          {
+            message: error.message,
+          },
         );
       }
 
-      return (
-        "Не удалось загрузить "
-        + "библиотеку назначений."
+      return t(
+        "destinationSelector.loadError",
       );
     }, [
       destinationsQuery.error,
+      t,
     ]);
 
   const savedDestinations =

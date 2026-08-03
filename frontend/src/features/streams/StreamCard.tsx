@@ -63,6 +63,7 @@ import { StreamStatusChip }
 
 import {
   formatAudioCodec,
+  formatDuration,
   formatVideoCodec,
 } from "../../utils/streamMetrics";
 
@@ -101,52 +102,6 @@ function formatBitrate(
   }
 
   return `${bitrateKbps.toFixed(0)} Kbps`;
-}
-
-function formatUptime(
-  seconds:
-    number | null | undefined,
-): string {
-  if (
-    seconds === null
-    || seconds === undefined
-  ) {
-    return "—";
-  }
-
-  const totalSeconds =
-    Math.max(
-      0,
-      Math.floor(seconds),
-    );
-
-  const hours =
-    Math.floor(
-      totalSeconds / 3600,
-    );
-
-  const minutes =
-    Math.floor(
-      (
-        totalSeconds % 3600
-      ) / 60,
-    );
-
-  const remainingSeconds =
-    totalSeconds % 60;
-
-  return [
-    hours,
-    minutes,
-    remainingSeconds,
-  ]
-    .map((value) =>
-      String(value).padStart(
-        2,
-        "0",
-      ),
-    )
-    .join(":");
 }
 
 function getErrorMessage(
@@ -675,9 +630,10 @@ export function StreamCard({
               label={t(
                 "metrics.uptime",
               )}
-              value={formatUptime(
+              value={formatDuration(
                 metrics
                   ?.uptime_seconds,
+                t("time.dayShort"),
               )}
             />
 

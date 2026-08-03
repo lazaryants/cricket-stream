@@ -169,6 +169,8 @@ export const translations = {
     "metrics.dropped":
       "Dropped by FFmpeg",
 
+    "time.dayShort": "d",
+
     "preview.alt":
       "Stream preview",
     "preview.loading":
@@ -523,6 +525,38 @@ export const translations = {
     "password.newMismatch":
       "The new passwords do not match.",
 
+    "components.back": "Back",
+    "components.title":
+      "Video pipeline components",
+    "components.subtitle":
+      "Installed and available versions",
+    "components.check": "Check updates",
+    "components.checking": "Checking…",
+    "components.updateNotice":
+      "This page only checks versions. Updates are installed manually by an administrator during a maintenance window so active streams are not interrupted.",
+    "components.loadError":
+      "Unable to check component versions.",
+    "components.status.updateAvailable":
+      "Update available",
+    "components.status.checkFailed":
+      "Check failed",
+    "components.status.checked": "Checked",
+    "components.status.upToDate":
+      "Up to date",
+    "components.installed": "Installed",
+    "components.available": "Available",
+    "components.lastChecked":
+      "Last checked",
+
+    "selector.error.http":
+      "Backend returned HTTP {{status}}",
+    "selector.error.unavailable":
+      "Backend unavailable: {{message}}",
+    "sourceSelector.loadError":
+      "Unable to load the source library.",
+    "destinationSelector.loadError":
+      "Unable to load the destination library.",
+
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -697,6 +731,8 @@ export const translations = {
       "Время работы",
     "metrics.dropped":
       "Пропущено FFmpeg",
+
+    "time.dayShort": "д",
 
     "preview.alt":
       "Кадр трансляции",
@@ -1051,6 +1087,38 @@ export const translations = {
       "Новый пароль должен содержать не менее 8 символов.",
     "password.newMismatch":
       "Новые пароли не совпадают.",
+
+    "components.back": "Назад",
+    "components.title":
+      "Компоненты видеотракта",
+    "components.subtitle":
+      "Установленные и доступные версии",
+    "components.check": "Проверить обновления",
+    "components.checking": "Проверка…",
+    "components.updateNotice":
+      "Страница только проверяет версии. Обновление выполняется администратором в плановое окно, чтобы не прерывать активные трансляции.",
+    "components.loadError":
+      "Не удалось проверить версии компонентов.",
+    "components.status.updateAvailable":
+      "Доступно обновление",
+    "components.status.checkFailed":
+      "Ошибка проверки",
+    "components.status.checked": "Проверено",
+    "components.status.upToDate":
+      "Актуально",
+    "components.installed": "Установлено",
+    "components.available": "Доступно",
+    "components.lastChecked":
+      "Проверено",
+
+    "selector.error.http":
+      "Backend вернул HTTP {{status}}",
+    "selector.error.unavailable":
+      "Backend недоступен: {{message}}",
+    "sourceSelector.loadError":
+      "Не удалось загрузить библиотеку источников.",
+    "destinationSelector.loadError":
+      "Не удалось загрузить библиотеку назначений.",
 
     "login.subtitle":
       "Вход в панель управления",
