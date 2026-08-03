@@ -83,6 +83,66 @@ export const translations = {
     "status.stopped": "Stopped",
     "status.error": "Error",
 
+    "diagnostic.running.title":
+      "Stream is running",
+    "diagnostic.running.message":
+      "The video transmission process is active. Errors from previous runs do not affect the current status.",
+
+    "diagnostic.sourceUnavailable.title":
+      "Source unavailable",
+    "diagnostic.sourceUnavailable.message":
+      "Unable to obtain video from the specified source.",
+
+    "diagnostic.destinationRefused.title":
+      "Destination server refused the connection",
+    "diagnostic.destinationRefused.message":
+      "Check the RTMP address, stream key, and destination server availability.",
+
+    "diagnostic.authenticationFailed.title":
+      "Authentication failed",
+    "diagnostic.authenticationFailed.message":
+      "The destination server rejected the stream key or credentials.",
+
+    "diagnostic.networkUnavailable.title":
+      "Network unavailable",
+    "diagnostic.networkUnavailable.message":
+      "The server cannot establish a network connection.",
+
+    "diagnostic.connectionTimeout.title":
+      "Server is not responding",
+    "diagnostic.connectionTimeout.message":
+      "The connection timed out. This may be a temporary network problem.",
+
+    "diagnostic.connectionLost.title":
+      "Connection lost",
+    "diagnostic.connectionLost.message":
+      "Video transmission was interrupted. The system may attempt to restore the stream.",
+
+    "diagnostic.sourceProcessFailed.title":
+      "Source process stopped",
+    "diagnostic.sourceProcessFailed.message":
+      "Unable to continue receiving video from the source.",
+
+    "diagnostic.ffmpegFailed.title":
+      "Stream processing stopped",
+    "diagnostic.ffmpegFailed.message":
+      "FFmpeg exited with an error.",
+
+    "diagnostic.sourceOffline.title":
+      "Source is not live",
+    "diagnostic.sourceOffline.message":
+      "There is currently no active live stream on the specified channel.",
+
+    "diagnostic.stopped.title":
+      "Stream stopped",
+    "diagnostic.stopped.message":
+      "The video transmission process is not currently running.",
+
+    "diagnostic.noData.title":
+      "No data",
+    "diagnostic.noData.message":
+      "The stream has not been started since the last backend restart.",
+
     "diagnostic.checking":
       "Checking…",
     "diagnostic.loadError":
@@ -324,6 +384,77 @@ export const translations = {
     "streams.startStream": "Start stream",
     "streams.stopStream": "Stop stream",
 
+    "sessionLog.empty": "The log is empty.",
+    "streamPreview.title": "Stream preview",
+    "streamPreview.subtitle": "Live HLS video without transcoding. Full screen is available in the player controls.",
+    "streamControl.title": "Stream control",
+    "streamControl.recovering": "The source is unavailable. The supervisor is trying to recover the stream. Click Stop attempts if the broadcast has ended.",
+    "streamControl.disabled": "The stream is disabled in settings. An administrator must enable it before it can be started.",
+    "selector.manageLibrary": "Manage library",
+    "selector.fromLibrary": "From library",
+    "selector.manual": "Enter manually",
+    "sourceSelector.title": "Stream source",
+    "sourceSelector.subtitle": "Select a source from the library or enter a temporary URL manually.",
+    "sourceSelector.empty": "There are no active sources in the library. Use manual mode.",
+    "sourceSelector.saved": "Saved source",
+    "sourceSelector.activeOnly": "Only active sources are shown.",
+    "sourceSelector.copyNotice": "The current URL is copied into the stream card. Later library changes do not update an existing card.",
+    "sourceSelector.manualNotice": "A manually entered URL is used only in this card and is not saved to the library.",
+    "destinationSelector.title": "Stream destination",
+    "destinationSelector.subtitle": "Select an RTMP destination from the library or enter an address manually.",
+    "destinationSelector.empty": "There are no active destinations in the library. Use manual mode.",
+    "destinationSelector.saved": "Saved destination",
+    "destinationSelector.activeOnly": "Only active destinations are shown.",
+    "destinationSelector.copyNotice": "The RTMP address is copied into the stream card. Later library changes do not update an existing stream.",
+    "destinationSelector.manualNotice": "A manually entered address is used only in this card and is not saved to the library.",
+    "streamForm.saveError": "Unable to save the stream card.",
+    "streamForm.nameRequired": "Enter a stream name.",
+    "streamForm.sourceRequired": "Enter a source URL.",
+    "streamForm.nodeInvalid": "Invalid node ID.",
+    "streamForm.destinationRequired": "Enter an RTMP destination.",
+    "streamForm.newTitle": "New stream",
+    "streamForm.editTitle": "Stream settings",
+    "streamForm.stopBeforeEdit": "Stop the stream before changing its settings.",
+    "streamForm.operatorNotice": "An operator may change the source, platform, name, and description. The RTMP destination is read-only.",
+    "streamForm.engine": "Source engine",
+    "streamForm.engineAuto": "Auto (Streamlink → yt-dlp)",
+    "streamForm.engineHelp": "In automatic mode Streamlink is tried first, followed by yt-dlp.",
+    "streamForm.showDashboard": "Show on Dashboard",
+    "streamForm.nodeId": "Node ID",
+    "streamForm.enabled": "Stream enabled",
+    "streamForm.autoStart": "Auto-start",
+    "streamForm.create": "Create",
+    "streamCreate.title": "Create stream",
+    "streamCreate.error": "Unable to create the stream card.",
+    "streamEdit.title": "Edit stream",
+    "streamEdit.loadError": "Unable to load the stream card.",
+    "streamEdit.saveError": "Unable to save changes. Stop a running stream first.",
+    "streamEdit.deleteError": "Unable to delete the stream. Stop it first.",
+    "streamEdit.deleteTitle": "Delete stream?",
+    "streamEdit.deleteWarning": "The card and its session history will be deleted. This cannot be undone.",
+    "streamDetails.loadError": "Unable to load stream data.",
+    "streamDetails.noDescription": "No description",
+    "streamDetails.state": "Stream state",
+    "streamDetails.processAlive": "Process alive",
+    "streamDetails.transferred": "Transferred",
+    "streamDetails.media": "Video and audio",
+    "streamDetails.profile": "Profile",
+    "streamDetails.audioRate": "Audio rate",
+    "streamDetails.channels": "Channels",
+    "streamDetails.duplicated": "Duplicated by FFmpeg",
+    "streamDetails.route": "Stream route",
+    "streamDetails.source": "Source",
+    "streamDetails.destination": "RTMP destination",
+    "streamDetails.sessions": "Recent sessions",
+    "streamDetails.sessionsError": "Unable to load session history.",
+    "streamDetails.noSessions": "No sessions yet.",
+    "streamDetails.started": "Started",
+    "streamDetails.ended": "Ended",
+    "streamDetails.latestLog": "Latest session log",
+    "streamDetails.noLatestSession": "No latest session.",
+    "streamDetails.logError": "Unable to load the log.",
+    "common.yes": "Yes",
+    "common.no": "No",
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -412,6 +543,66 @@ export const translations = {
       "Останавливается",
     "status.stopped": "Остановлен",
     "status.error": "Ошибка",
+
+    "diagnostic.running.title":
+      "Поток работает",
+    "diagnostic.running.message":
+      "Процесс передачи видео активен. Старые ошибки предыдущих запусков не влияют на текущий статус.",
+
+    "diagnostic.sourceUnavailable.title":
+      "Источник недоступен",
+    "diagnostic.sourceUnavailable.message":
+      "Не удалось получить видео с указанного источника.",
+
+    "diagnostic.destinationRefused.title":
+      "Сервер назначения отказал в подключении",
+    "diagnostic.destinationRefused.message":
+      "Проверьте RTMP-адрес, ключ трансляции и доступность сервера назначения.",
+
+    "diagnostic.authenticationFailed.title":
+      "Ошибка авторизации",
+    "diagnostic.authenticationFailed.message":
+      "Сервер назначения не принял ключ трансляции или учётные данные.",
+
+    "diagnostic.networkUnavailable.title":
+      "Сеть недоступна",
+    "diagnostic.networkUnavailable.message":
+      "Сервер не может установить сетевое соединение.",
+
+    "diagnostic.connectionTimeout.title":
+      "Сервер не отвечает",
+    "diagnostic.connectionTimeout.message":
+      "Время ожидания подключения истекло. Возможна временная проблема сети.",
+
+    "diagnostic.connectionLost.title":
+      "Соединение потеряно",
+    "diagnostic.connectionLost.message":
+      "Передача видео была прервана. Система могла попытаться восстановить поток.",
+
+    "diagnostic.sourceProcessFailed.title":
+      "Процесс источника завершился",
+    "diagnostic.sourceProcessFailed.message":
+      "Не удалось продолжить получение видео с источника.",
+
+    "diagnostic.ffmpegFailed.title":
+      "Обработка потока остановлена",
+    "diagnostic.ffmpegFailed.message":
+      "FFmpeg завершился с ошибкой.",
+
+    "diagnostic.sourceOffline.title":
+      "Источник не ведёт трансляцию",
+    "diagnostic.sourceOffline.message":
+      "На указанном канале сейчас нет активного эфира.",
+
+    "diagnostic.stopped.title":
+      "Поток остановлен",
+    "diagnostic.stopped.message":
+      "Сейчас процесс передачи видео не запущен.",
+
+    "diagnostic.noData.title":
+      "Нет данных",
+    "diagnostic.noData.message":
+      "Поток ещё не запускался после последнего перезапуска backend.",
 
     "diagnostic.checking":
       "Проверка…",
@@ -654,6 +845,77 @@ export const translations = {
     "streams.startStream": "Запустить трансляцию",
     "streams.stopStream": "Остановить трансляцию",
 
+    "sessionLog.empty": "Журнал пуст.",
+    "streamPreview.title": "Предпросмотр трансляции",
+    "streamPreview.subtitle": "Живое HLS-видео без перекодирования. Полный экран доступен в панели плеера.",
+    "streamControl.title": "Управление трансляцией",
+    "streamControl.recovering": "The source is unavailable. The supervisor is trying to recover the stream. Click Stop attempts if the broadcast has ended.",
+    "streamControl.disabled": "The stream is disabled in settings. An administrator must enable it before it can be started.",
+    "selector.manageLibrary": "Управление библиотекой",
+    "selector.fromLibrary": "Из библиотеки",
+    "selector.manual": "Ввести вручную",
+    "sourceSelector.title": "Источник трансляции",
+    "sourceSelector.subtitle": "Select a source from the library or enter a temporary URL manually.",
+    "sourceSelector.empty": "There are no active sources in the library. Use manual mode.",
+    "sourceSelector.saved": "Saved source",
+    "sourceSelector.activeOnly": "Only active sources are shown.",
+    "sourceSelector.copyNotice": "The current URL is copied into the stream card. Later library changes do not update an existing card.",
+    "sourceSelector.manualNotice": "A manually entered URL is used only in this card and is not saved to the library.",
+    "destinationSelector.title": "Назначение трансляции",
+    "destinationSelector.subtitle": "Select an RTMP destination from the library or enter an address manually.",
+    "destinationSelector.empty": "There are no active destinations in the library. Use manual mode.",
+    "destinationSelector.saved": "Saved destination",
+    "destinationSelector.activeOnly": "Only active destinations are shown.",
+    "destinationSelector.copyNotice": "The RTMP address is copied into the stream card. Later library changes do not update an existing stream.",
+    "destinationSelector.manualNotice": "A manually entered address is used only in this card and is not saved to the library.",
+    "streamForm.saveError": "Unable to save the stream card.",
+    "streamForm.nameRequired": "Enter a stream name.",
+    "streamForm.sourceRequired": "Enter a source URL.",
+    "streamForm.nodeInvalid": "Invalid node ID.",
+    "streamForm.destinationRequired": "Enter an RTMP destination.",
+    "streamForm.newTitle": "Новая трансляция",
+    "streamForm.editTitle": "Настройки трансляции",
+    "streamForm.stopBeforeEdit": "Stop the stream before changing its settings.",
+    "streamForm.operatorNotice": "An operator may change the source, platform, name, and description. The RTMP destination is read-only.",
+    "streamForm.engine": "Source engine",
+    "streamForm.engineAuto": "Auto (Streamlink → yt-dlp)",
+    "streamForm.engineHelp": "In automatic mode Streamlink is tried first, followed by yt-dlp.",
+    "streamForm.showDashboard": "Show on Dashboard",
+    "streamForm.nodeId": "Node ID",
+    "streamForm.enabled": "Stream enabled",
+    "streamForm.autoStart": "Auto-start",
+    "streamForm.create": "Create",
+    "streamCreate.title": "Создать трансляцию",
+    "streamCreate.error": "Unable to create the stream card.",
+    "streamEdit.title": "Редактировать трансляцию",
+    "streamEdit.loadError": "Unable to load the stream card.",
+    "streamEdit.saveError": "Unable to save changes. Stop a running stream first.",
+    "streamEdit.deleteError": "Unable to delete the stream. Stop it first.",
+    "streamEdit.deleteTitle": "Delete stream?",
+    "streamEdit.deleteWarning": "The card and its session history will be deleted. This cannot be undone.",
+    "streamDetails.loadError": "Unable to load stream data.",
+    "streamDetails.noDescription": "No description",
+    "streamDetails.state": "Состояние потока",
+    "streamDetails.processAlive": "Process alive",
+    "streamDetails.transferred": "Transferred",
+    "streamDetails.media": "Видео и аудио",
+    "streamDetails.profile": "Profile",
+    "streamDetails.audioRate": "Audio rate",
+    "streamDetails.channels": "Channels",
+    "streamDetails.duplicated": "Duplicated by FFmpeg",
+    "streamDetails.route": "Маршрут трансляции",
+    "streamDetails.source": "Source",
+    "streamDetails.destination": "RTMP destination",
+    "streamDetails.sessions": "Последние сессии",
+    "streamDetails.sessionsError": "Unable to load session history.",
+    "streamDetails.noSessions": "No sessions yet.",
+    "streamDetails.started": "Started",
+    "streamDetails.ended": "Ended",
+    "streamDetails.latestLog": "Latest session log",
+    "streamDetails.noLatestSession": "No latest session.",
+    "streamDetails.logError": "Unable to load the log.",
+    "common.yes": "Да",
+    "common.no": "Нет",
     "login.subtitle":
       "Вход в панель управления",
     "login.username": "Имя пользователя",

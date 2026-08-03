@@ -34,6 +34,8 @@ import {
 import {
   getSavedSources,
 } from "../../api/savedSources";
+import { useI18n } from "../../i18n/useI18n";
+
 import type {
   SavedSource,
 } from "../../types/savedSource";
@@ -57,46 +59,6 @@ interface SourceSelectorProps {
   ): void;
 }
 
-const providers: Array<{
-  value: ProviderType;
-  label: string;
-}> = [
-  {
-    value: "youtube",
-    label: "YouTube",
-  },
-  {
-    value: "twitch",
-    label: "Twitch",
-  },
-  {
-    value: "kick",
-    label: "Kick",
-  },
-  {
-    value: "vimeo",
-    label: "Vimeo",
-  },
-  {
-    value: "custom",
-    label: "Прямая ссылка",
-  },
-  {
-    value: "unknown",
-    label: "Неизвестный",
-  },
-];
-
-const providerLabels:
-Record<ProviderType, string> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестный",
-};
-
 export function SourceSelector({
   provider,
   sourceUrl,
@@ -104,6 +66,48 @@ export function SourceSelector({
   onProviderChange,
   onSourceUrlChange,
 }: SourceSelectorProps) {
+  const { t } = useI18n();
+
+  const providers: Array<{
+    value: ProviderType;
+    label: string;
+  }> = [
+    {
+      value: "youtube",
+      label: "YouTube",
+    },
+    {
+      value: "twitch",
+      label: "Twitch",
+    },
+    {
+      value: "kick",
+      label: "Kick",
+    },
+    {
+      value: "vimeo",
+      label: "Vimeo",
+    },
+    {
+      value: "custom",
+      label: t("stream.provider.custom"),
+    },
+    {
+      value: "unknown",
+      label: t("stream.provider.unknown"),
+    },
+  ];
+
+  const providerLabels:
+  Record<ProviderType, string> = {
+    youtube: "YouTube",
+    twitch: "Twitch",
+    kick: "Kick",
+    vimeo: "Vimeo",
+    custom: t("stream.provider.custom"),
+    unknown: t("stream.provider.unknown"),
+  };
+
   const [
     sourceMode,
     setSourceMode,
@@ -272,7 +276,7 @@ export function SourceSelector({
               fontWeight: 700,
             }}
           >
-            Источник трансляции
+            {t("sourceSelector.title")}
           </Typography>
 
           <Button
@@ -284,7 +288,7 @@ export function SourceSelector({
               px: 0,
             }}
           >
-            Управление библиотекой
+            {t("selector.manageLibrary")}
           </Button>
 
           <Typography
@@ -294,9 +298,7 @@ export function SourceSelector({
               mt: 0.5,
             }}
           >
-            Выберите источник из
-            библиотеки или введите
-            временную ссылку вручную.
+            {t("sourceSelector.subtitle")}
           </Typography>
         </Box>
 
@@ -328,13 +330,13 @@ export function SourceSelector({
             <FormControlLabel
               value="saved"
               control={<Radio />}
-              label="Из библиотеки"
+              label={t("selector.fromLibrary")}
             />
 
             <FormControlLabel
               value="manual"
               control={<Radio />}
-              label="Ввести вручную"
+              label={t("selector.manual")}
             />
           </RadioGroup>
         </FormControl>
@@ -358,7 +360,7 @@ export function SourceSelector({
                     variant="body2"
                     color="text.secondary"
                   >
-                    Загрузка библиотеки…
+                    {t("libraries.loading")}
                   </Typography>
                 </Stack>
               )}
@@ -375,9 +377,7 @@ export function SourceSelector({
                   === 0
                 && (
                   <Alert severity="info">
-                    В библиотеке пока нет
-                    активных источников.
-                    Используйте ручной режим.
+                    {t("sourceSelector.empty")}
                   </Alert>
                 )}
 
@@ -392,7 +392,7 @@ export function SourceSelector({
                         "saved-source-label"
                       }
                     >
-                      Сохранённый источник
+                      {t("sourceSelector.saved")}
                     </InputLabel>
 
                     <Select
@@ -400,7 +400,7 @@ export function SourceSelector({
                         "saved-source-label"
                       }
                       label={
-                        "Сохранённый источник"
+                        t("sourceSelector.saved")
                       }
                       value={
                         selectedSourceId
@@ -474,8 +474,7 @@ export function SourceSelector({
                     </Select>
 
                     <FormHelperText>
-                      Показываются только
-                      активные источники.
+                      {t("sourceSelector.activeOnly")}
                     </FormHelperText>
                   </FormControl>
                 )}
@@ -499,7 +498,7 @@ export function SourceSelector({
                     )}
 
                   <TextField
-                    label="Платформа"
+                    label={t("libraries.source.platform")}
                     value={
                       providerLabels[
                         selectedSource
@@ -512,7 +511,7 @@ export function SourceSelector({
 
                   <TextField
                     label={
-                      "URL источника"
+                      t("libraries.source.url")
                     }
                     value={
                       selectedSource
@@ -525,12 +524,7 @@ export function SourceSelector({
                   />
 
                   <Alert severity="info">
-                    В карточку трансляции
-                    будет скопирована текущая
-                    ссылка. Изменение элемента
-                    библиотеки позже не изменит
-                    уже созданную карточку
-                    автоматически.
+                    {t("sourceSelector.copyNotice")}
                   </Alert>
                 </Stack>
               )}
@@ -547,14 +541,14 @@ export function SourceSelector({
                     "manual-platform-label"
                   }
                 >
-                  Платформа
+                  {t("libraries.source.platform")}
                 </InputLabel>
 
                 <Select
                   labelId={
                     "manual-platform-label"
                   }
-                  label="Платформа"
+                  label={t("libraries.source.platform")}
                   value={provider}
                   onChange={(event) => {
                     const nextProvider:
@@ -581,7 +575,7 @@ export function SourceSelector({
 
               <>
               <TextField
-                label="URL источника"
+                label={t("libraries.source.url")}
                 value={sourceUrl}
                 onChange={(event) => {
                   onSourceUrlChange(
@@ -597,10 +591,7 @@ export function SourceSelector({
               />
 
               <Alert severity="info">
-                Введённая вручную ссылка
-                используется только в этой
-                карточке и не сохраняется
-                в библиотеку.
+                {t("sourceSelector.manualNotice")}
               </Alert>
               </>
 

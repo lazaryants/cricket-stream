@@ -56,6 +56,7 @@ import {
 import { SessionLogViewer }
   from "../components/SessionLogViewer";
 
+import { useI18n } from "../i18n/useI18n";
 import { StreamControlPanel }
   from "../features/streams/StreamControlPanel";
 
@@ -162,6 +163,7 @@ function metricValue(
 }
 
 export default function StreamDetailsPage() {
+  const { t } = useI18n();
   const auth = useAuth();
 
   const params = useParams<{
@@ -316,7 +318,7 @@ export default function StreamDetailsPage() {
               <ArrowBackIcon />
             }
           >
-            Назад
+            {t("libraries.back")}
           </Button>
 
           <Box
@@ -325,7 +327,7 @@ export default function StreamDetailsPage() {
             }}
           />
 
-          <Tooltip title="Обновить">
+          <Tooltip title={t("common.refresh")}>
             <span>
               <IconButton
                 disabled={
@@ -366,8 +368,7 @@ export default function StreamDetailsPage() {
           || statusQuery.isError
         ) && (
           <Alert severity="error">
-            Не удалось загрузить данные
-            потока.
+            {t("streamDetails.loadError")}
           </Alert>
         )}
 
@@ -405,7 +406,7 @@ export default function StreamDetailsPage() {
                   }}
                 >
                   {stream.description
-                    ?? "Описание отсутствует"}
+                    ?? t("streamDetails.noDescription")}
                 </Typography>
               </Box>
 
@@ -473,7 +474,7 @@ export default function StreamDetailsPage() {
                 <CardContent>
                   <Stack spacing={2}>
                     <Typography variant="h6">
-                      Состояние потока
+                      {t("streamDetails.state")}
                     </Typography>
 
                     <Divider />
@@ -494,11 +495,11 @@ export default function StreamDetailsPage() {
                       }}
                     >
                       <MetricItem
-                        label="Процесс жив"
+                        label={t("streamDetails.processAlive")}
                         value={
                           runtime.process_alive
-                            ? "Да"
-                            : "Нет"
+                            ? t("common.yes")
+                            : t("common.no")
                         }
                       />
 
@@ -518,7 +519,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Разрешение"
+                        label={t("metrics.resolution")}
                         value={
                           metrics?.resolution
                           ?? "—"
@@ -526,14 +527,14 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="FPS источника"
+                        label={t("metrics.sourceFps")}
                         value={formatFps(
                           metrics,
                         )}
                       />
 
                       <MetricItem
-                        label="Выходной битрейт"
+                        label={t("metrics.outputBitrate")}
                         value={formatBitrate(
                           metrics
                             ?.bitrate_kbps,
@@ -541,7 +542,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Скорость FFmpeg"
+                        label={t("metrics.ffmpegSpeed")}
                         value={
                           metrics?.speed
                             ?.trim()
@@ -550,7 +551,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Время работы"
+                        label={t("metrics.uptime")}
                         value={formatDuration(
                           metrics
                             ?.uptime_seconds,
@@ -558,7 +559,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Передано"
+                        label={t("streamDetails.transferred")}
                         value={
                           metrics
                             ?.total_size_mb
@@ -578,7 +579,7 @@ export default function StreamDetailsPage() {
                 <CardContent>
                   <Stack spacing={2}>
                     <Typography variant="h6">
-                      Видео и аудио
+                      {t("streamDetails.media")}
                     </Typography>
 
                     <Divider />
@@ -599,7 +600,7 @@ export default function StreamDetailsPage() {
                       }}
                     >
                       <MetricItem
-                        label="Видеокодек"
+                        label={t("metrics.videoCodec")}
                         value={metricValue(
                           metrics,
                           "video_codec",
@@ -607,7 +608,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Профиль"
+                        label={t("streamDetails.profile")}
                         value={metricValue(
                           metrics,
                           "video_profile",
@@ -623,7 +624,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Аудиокодек"
+                        label={t("metrics.audioCodec")}
                         value={metricValue(
                           metrics,
                           "audio_codec",
@@ -631,7 +632,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Частота аудио"
+                        label={t("streamDetails.audioRate")}
                         value={
                           metrics
                             ?.sample_rate
@@ -642,7 +643,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Каналы"
+                        label={t("streamDetails.channels")}
                         value={
                           metrics
                             ?.channel_layout
@@ -659,7 +660,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Пропущено FFmpeg"
+                        label={t("metrics.dropped")}
                         value={String(
                           metrics
                             ?.drop_frames
@@ -668,7 +669,7 @@ export default function StreamDetailsPage() {
                       />
 
                       <MetricItem
-                        label="Дублировано FFmpeg"
+                        label={t("streamDetails.duplicated")}
                         value={String(
                           metrics
                             ?.dup_frames
@@ -698,14 +699,14 @@ export default function StreamDetailsPage() {
                 <CardContent>
                   <Stack spacing={2}>
                     <Typography variant="h6">
-                      Маршрут трансляции
+                      {t("streamDetails.route")}
                     </Typography>
 
                     <Divider />
 
                     {stream.source_url && (
                       <MetricItem
-                        label="Источник"
+                        label={t("streamDetails.source")}
                         value={
                           stream.source_url
                         }
@@ -716,7 +717,7 @@ export default function StreamDetailsPage() {
                       .destination_rtmp_url
                       && (
                         <MetricItem
-                          label="RTMP назначение"
+                          label={t("streamDetails.destination")}
                           value={
                             stream
                               .destination_rtmp_url
@@ -732,7 +733,7 @@ export default function StreamDetailsPage() {
               <CardContent>
                 <Stack spacing={2}>
                   <Typography variant="h6">
-                    Последние сессии
+                    {t("streamDetails.sessions")}
                   </Typography>
 
                   <Divider />
@@ -745,8 +746,7 @@ export default function StreamDetailsPage() {
 
                   {sessionsQuery.isError && (
                     <Alert severity="error">
-                      Не удалось загрузить
-                      историю сессий.
+                      {t("streamDetails.sessionsError")}
                     </Alert>
                   )}
 
@@ -756,7 +756,7 @@ export default function StreamDetailsPage() {
                       <Typography
                         color="text.secondary"
                       >
-                        Сессий пока нет.
+                        {t("streamDetails.noSessions")}
                       </Typography>
                     )}
 
@@ -796,7 +796,7 @@ export default function StreamDetailsPage() {
                         <Typography
                           variant="body2"
                         >
-                          Начало:{" "}
+                          {t("streamDetails.started")}: {" "}
                           {formatDate(
                             session.started_at
                             ?? session.created_at,
@@ -812,7 +812,7 @@ export default function StreamDetailsPage() {
                           }
                         >
                           {session.error_message
-                            ?? `Окончание: ${
+                            ?? `${t("streamDetails.ended")}: ${
                               formatDate(
                                 session.stopped_at,
                               )
@@ -830,7 +830,7 @@ export default function StreamDetailsPage() {
                 <CardContent>
                   <Stack spacing={2}>
                     <Typography variant="h6">
-                      Журнал последней сессии
+                      {t("streamDetails.latestLog")}
                     </Typography>
 
                     <Divider />
@@ -839,8 +839,7 @@ export default function StreamDetailsPage() {
                       <Typography
                         color="text.secondary"
                       >
-                        Последняя сессия
-                        отсутствует.
+                        {t("streamDetails.noLatestSession")}
                       </Typography>
                     )}
 
@@ -852,8 +851,7 @@ export default function StreamDetailsPage() {
 
                     {logsQuery.isError && (
                       <Alert severity="error">
-                        Не удалось загрузить
-                        журнал.
+                        {t("streamDetails.logError")}
                       </Alert>
                     )}
 

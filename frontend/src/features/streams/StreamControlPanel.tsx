@@ -31,6 +31,8 @@ import {
 import { useAuth }
   from "../../auth/useAuth";
 
+import { useI18n } from "../../i18n/useI18n";
+
 import type {
   StreamStatus,
 } from "../../types/stream";
@@ -46,6 +48,7 @@ interface StreamControlPanelProps {
 
 function getErrorMessage(
   error: unknown,
+  fallback: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -74,10 +77,7 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Операция не выполнена. "
-    + "Проверьте состояние потока."
-  );
+  return fallback;
 }
 
 
@@ -87,6 +87,7 @@ export function StreamControlPanel({
   processAlive,
   databaseStatus,
 }: StreamControlPanelProps) {
+  const { t } = useI18n();
   const auth = useAuth();
 
   const queryClient =
@@ -175,7 +176,7 @@ export function StreamControlPanel({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(error, t("stream.operationError")),
         );
       },
     });
@@ -195,7 +196,7 @@ export function StreamControlPanel({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(error, t("stream.operationError")),
         );
       },
     });
@@ -220,7 +221,7 @@ export function StreamControlPanel({
       <CardContent>
         <Stack spacing={2}>
           <Typography variant="h6">
-            Управление трансляцией
+            {t("streamControl.title")}
           </Typography>
 
           {actionError && (
@@ -236,18 +237,13 @@ export function StreamControlPanel({
 
           {isRestarting && (
             <Alert severity="warning">
-              Источник недоступен. Supervisor
-              пытается восстановить трансляцию.
-              Нажмите «Остановить попытки»,
-              если эфир уже завершён.
+              {t("streamControl.recovering")}
             </Alert>
           )}
 
           {!enabled && (
             <Alert severity="warning">
-              Поток отключён в настройках.
-              Для запуска его должен включить
-              администратор.
+              {t("streamControl.disabled")}
             </Alert>
           )}
 
@@ -281,7 +277,7 @@ export function StreamControlPanel({
                 startMutation.mutate();
               }}
             >
-              Запустить
+              {t("stream.start")}
             </Button>
 
             <Button
@@ -307,8 +303,8 @@ export function StreamControlPanel({
               }}
             >
               {isRestarting
-                ? "Остановить попытки"
-                : "Остановить"}
+                ? t("stream.stopAttempts")
+                : t("stream.stop")}
             </Button>
           </Stack>
         </Stack>

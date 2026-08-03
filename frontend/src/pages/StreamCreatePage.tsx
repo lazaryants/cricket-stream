@@ -26,6 +26,7 @@ import { createStream }
 import { useAuth }
   from "../auth/useAuth";
 
+import { useI18n } from "../i18n/useI18n";
 import { StreamForm }
   from "../features/streams/StreamForm";
 
@@ -36,6 +37,7 @@ import type {
 
 
 export default function StreamCreatePage() {
+  const { t } = useI18n();
   const auth = useAuth();
   const navigate = useNavigate();
   const queryClient =
@@ -103,20 +105,19 @@ export default function StreamCreatePage() {
             alignSelf: "flex-start",
           }}
         >
-          Назад
+          {t("libraries.back")}
         </Button>
 
         <Typography
           variant="h4"
           component="h1"
         >
-          Создать трансляцию
+          {t("streamCreate.title")}
         </Typography>
 
         {mutation.isError && (
           <Alert severity="error">
-            Создать карточку
-            не удалось.
+            {t("streamCreate.error")}
           </Alert>
         )}
 

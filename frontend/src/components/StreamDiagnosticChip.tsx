@@ -10,6 +10,10 @@ import {
 } from "../i18n/useI18n";
 
 import type {
+  TranslationKey,
+} from "../i18n/translations";
+
+import type {
   StreamDiagnostic,
 } from "../types/stream";
 
@@ -19,6 +23,87 @@ interface StreamDiagnosticChipProps {
   loading?: boolean;
   error?: boolean;
 }
+
+interface DiagnosticTranslation {
+  title: TranslationKey;
+  message: TranslationKey;
+}
+
+const diagnosticTranslations:
+  Record<string, DiagnosticTranslation> = {
+    running: {
+      title:
+        "diagnostic.running.title",
+      message:
+        "diagnostic.running.message",
+    },
+    source_unavailable: {
+      title:
+        "diagnostic.sourceUnavailable.title",
+      message:
+        "diagnostic.sourceUnavailable.message",
+    },
+    destination_refused: {
+      title:
+        "diagnostic.destinationRefused.title",
+      message:
+        "diagnostic.destinationRefused.message",
+    },
+    authentication_failed: {
+      title:
+        "diagnostic.authenticationFailed.title",
+      message:
+        "diagnostic.authenticationFailed.message",
+    },
+    network_unavailable: {
+      title:
+        "diagnostic.networkUnavailable.title",
+      message:
+        "diagnostic.networkUnavailable.message",
+    },
+    connection_timeout: {
+      title:
+        "diagnostic.connectionTimeout.title",
+      message:
+        "diagnostic.connectionTimeout.message",
+    },
+    connection_lost: {
+      title:
+        "diagnostic.connectionLost.title",
+      message:
+        "diagnostic.connectionLost.message",
+    },
+    source_process_failed: {
+      title:
+        "diagnostic.sourceProcessFailed.title",
+      message:
+        "diagnostic.sourceProcessFailed.message",
+    },
+    ffmpeg_failed: {
+      title:
+        "diagnostic.ffmpegFailed.title",
+      message:
+        "diagnostic.ffmpegFailed.message",
+    },
+    source_offline: {
+      title:
+        "diagnostic.sourceOffline.title",
+      message:
+        "diagnostic.sourceOffline.message",
+    },
+    stopped: {
+      title:
+        "diagnostic.stopped.title",
+      message:
+        "diagnostic.stopped.message",
+    },
+    no_data: {
+      title:
+        "diagnostic.noData.title",
+      message:
+        "diagnostic.noData.message",
+    },
+  };
 
 function getChipColor(
   diagnostic:
@@ -96,14 +181,29 @@ export function StreamDiagnosticChip({
     );
   }
 
+  const translation =
+    diagnosticTranslations[
+      diagnostic.status
+    ];
+
   /*
-   * diagnostic.title и diagnostic.message
-   * приходят от backend. Их пока не меняем.
+   * Для известных status используем
+   * локальный словарь. Для новых будущих
+   * кодов сохраняем текст backend как
+   * безопасный fallback.
    */
+  const title = translation
+    ? t(translation.title)
+    : diagnostic.title;
+
+  const message = translation
+    ? t(translation.message)
+    : diagnostic.message;
+
   return (
     <Tooltip
       arrow
-      title={diagnostic.message}
+      title={message}
     >
       <Chip
         size="small"
@@ -118,7 +218,7 @@ export function StreamDiagnosticChip({
             ? "filled"
             : "outlined"
         }
-        label={diagnostic.title}
+        label={title}
         sx={{
           maxWidth: 220,
           "& .MuiChip-label": {

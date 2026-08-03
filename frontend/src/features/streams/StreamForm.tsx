@@ -28,6 +28,8 @@ import {
 import { SourceSelector }
   from "./SourceSelector";
 
+import { useI18n } from "../../i18n/useI18n";
+
 import type {
   ProviderType,
   SourceEngine,
@@ -53,6 +55,7 @@ interface StreamFormProps {
 
 function getErrorMessage(
   error: unknown,
+  fallback: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -72,9 +75,7 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Не удалось сохранить карточку."
-  );
+  return fallback;
 }
 
 
@@ -85,6 +86,8 @@ export function StreamForm({
   isSubmitting,
   onSubmit,
 }: StreamFormProps) {
+  const { t } = useI18n();
+
   const [
     name,
     setName,
@@ -208,14 +211,14 @@ export function StreamForm({
 
     if (!cleanedName) {
       setErrorMessage(
-        "Укажите название потока.",
+        t("streamForm.nameRequired"),
       );
       return;
     }
 
     if (!cleanedSource) {
       setErrorMessage(
-        "Укажите исходную ссылку.",
+        t("streamForm.sourceRequired"),
       );
       return;
     }
@@ -232,14 +235,14 @@ export function StreamForm({
           || parsedNodeId <= 0
         ) {
           setErrorMessage(
-            "Некорректный ID узла.",
+            t("streamForm.nodeInvalid"),
           );
           return;
         }
 
         if (!destinationUrl.trim()) {
           setErrorMessage(
-            "Укажите RTMP-назначение.",
+            t("streamForm.destinationRequired"),
           );
           return;
         }
@@ -279,7 +282,7 @@ export function StreamForm({
           || parsedNodeId <= 0
         ) {
           setErrorMessage(
-            "Некорректный ID узла.",
+            t("streamForm.nodeInvalid"),
           );
           return;
         }
@@ -323,7 +326,7 @@ export function StreamForm({
       });
     } catch (error) {
       setErrorMessage(
-        getErrorMessage(error),
+        getErrorMessage(error, t("streamForm.saveError")),
       );
     }
   }
@@ -338,8 +341,8 @@ export function StreamForm({
         >
           <Typography variant="h6">
             {mode === "create"
-              ? "Новая трансляция"
-              : "Настройки трансляции"}
+              ? t("streamForm.newTitle")
+              : t("streamForm.editTitle")}
           </Typography>
 
           {errorMessage && (
@@ -353,22 +356,18 @@ export function StreamForm({
               === "running"
             && (
               <Alert severity="warning">
-                Перед изменением настроек
-                остановите трансляцию.
+                {t("streamForm.stopBeforeEdit")}
               </Alert>
             )}
 
           {!isAdmin && (
             <Alert severity="info">
-              Оператор может изменить
-              источник, платформу, название
-              и описание. RTMP-назначение
-              доступно только для просмотра.
+              {t("streamForm.operatorNotice")}
             </Alert>
           )}
 
           <TextField
-            label="Название"
+            label={t("libraries.source.name")}
             value={name}
             onChange={(event) => {
               setName(event.target.value);
@@ -379,7 +378,7 @@ export function StreamForm({
           />
 
           <TextField
-            label="Описание"
+            label={t("libraries.source.description")}
             value={description}
             onChange={(event) => {
               setDescription(
@@ -409,11 +408,11 @@ export function StreamForm({
             disabled={isSubmitting}
           >
             <InputLabel id="source-engine-label">
-              Движок источника
+              {t("streamForm.engine")}
             </InputLabel>
             <Select
               labelId="source-engine-label"
-              label="Движок источника"
+              label={t("streamForm.engine")}
               value={sourceEngine}
               onChange={(event) => {
                 setSourceEngine(
@@ -422,7 +421,7 @@ export function StreamForm({
               }}
             >
               <MenuItem value="auto">
-                Авто (Streamlink → yt-dlp)
+                {t("streamForm.engineAuto")}
               </MenuItem>
               <MenuItem value="streamlink">
                 Streamlink
@@ -436,9 +435,7 @@ export function StreamForm({
               color="text.secondary"
               sx={{ mt: 0.75, ml: 1.75 }}
             >
-              В автоматическом режиме сначала
-              проверяется Streamlink, затем
-              используется yt-dlp.
+              {t("streamForm.engineHelp")}
             </Typography>
           </FormControl>
 
@@ -457,7 +454,7 @@ export function StreamForm({
               />
             }
             label={
-              "Показывать на Dashboard"
+              t("streamForm.showDashboard")
             }
           />
 
@@ -477,7 +474,7 @@ export function StreamForm({
           {isAdmin && (
             <>
               <TextField
-                label="ID узла"
+                label={t("streamForm.nodeId")}
                 value={nodeId}
                 onChange={(event) => {
                   setNodeId(
@@ -516,7 +513,7 @@ export function StreamForm({
                       disabled={isSubmitting}
                     />
                   }
-                  label="Поток включён"
+                  label={t("streamForm.enabled")}
                 />
 
                 <FormControlLabel
@@ -532,7 +529,7 @@ export function StreamForm({
                       disabled={isSubmitting}
                     />
                   }
-                  label="Автозапуск"
+                  label={t("streamForm.autoStart")}
                 />
               </Stack>
             </>
@@ -555,11 +552,11 @@ export function StreamForm({
             }
           >
             {isSubmitting
-              ? "Сохранение…"
+              ? t("libraries.saving")
               : (
                 mode === "create"
-                  ? "Создать"
-                  : "Сохранить"
+                  ? t("streamForm.create")
+                  : t("libraries.save")
               )}
           </Button>
         </Stack>

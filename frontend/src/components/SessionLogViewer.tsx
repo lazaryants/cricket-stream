@@ -5,6 +5,8 @@ import {
   Typography,
 } from "@mui/material";
 
+import { useI18n } from "../i18n/useI18n";
+
 import type {
   SessionLogEntry,
 } from "../types/session";
@@ -68,12 +70,14 @@ function getMessage(
 export function SessionLogViewer({
   logs,
 }: SessionLogViewerProps) {
+  const { t } = useI18n();
+
   if (logs.length === 0) {
     return (
       <Typography
         color="text.secondary"
       >
-        Журнал пуст.
+        {t("sessionLog.empty")}
       </Typography>
     );
   }

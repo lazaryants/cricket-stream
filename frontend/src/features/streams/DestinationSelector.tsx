@@ -32,6 +32,8 @@ import {
 import {
   getSavedDestinations,
 } from "../../api/savedDestinations";
+import { useI18n } from "../../i18n/useI18n";
+
 import type {
   SavedDestination,
 } from "../../types/savedDestination";
@@ -54,6 +56,8 @@ export function DestinationSelector({
   disabled = false,
   onDestinationUrlChange,
 }: DestinationSelectorProps) {
+  const { t } = useI18n();
+
   const [
     destinationMode,
     setDestinationMode,
@@ -236,7 +240,7 @@ export function DestinationSelector({
               fontWeight: 700,
             }}
           >
-            Назначение трансляции
+            {t("destinationSelector.title")}
           </Typography>
 
           <Typography
@@ -246,9 +250,7 @@ export function DestinationSelector({
               mt: 0.5,
             }}
           >
-            Выберите RTMP-назначение
-            из библиотеки или введите
-            адрес вручную.
+            {t("destinationSelector.subtitle")}
           </Typography>
 
           <Button
@@ -260,7 +262,7 @@ export function DestinationSelector({
               px: 0,
             }}
           >
-            Управление библиотекой
+            {t("selector.manageLibrary")}
           </Button>
         </Box>
 
@@ -292,13 +294,13 @@ export function DestinationSelector({
             <FormControlLabel
               value="saved"
               control={<Radio />}
-              label="Из библиотеки"
+              label={t("selector.fromLibrary")}
             />
 
             <FormControlLabel
               value="manual"
               control={<Radio />}
-              label="Ввести вручную"
+              label={t("selector.manual")}
             />
           </RadioGroup>
         </FormControl>
@@ -324,7 +326,7 @@ export function DestinationSelector({
                       variant="body2"
                       color="text.secondary"
                     >
-                      Загрузка библиотеки…
+                      {t("libraries.loading")}
                     </Typography>
                   </Stack>
                 )}
@@ -345,9 +347,7 @@ export function DestinationSelector({
                   .length === 0
                 && (
                   <Alert severity="info">
-                    В библиотеке пока нет
-                    активных назначений.
-                    Используйте ручной режим.
+                    {t("destinationSelector.empty")}
                   </Alert>
                 )}
 
@@ -363,7 +363,7 @@ export function DestinationSelector({
                         "saved-destination-label"
                       }
                     >
-                      Сохранённое назначение
+                      {t("destinationSelector.saved")}
                     </InputLabel>
 
                     <Select
@@ -371,7 +371,7 @@ export function DestinationSelector({
                         "saved-destination-label"
                       }
                       label={
-                        "Сохранённое назначение"
+                        t("destinationSelector.saved")
                       }
                       value={
                         selectedDestinationId
@@ -419,8 +419,7 @@ export function DestinationSelector({
                     </Select>
 
                     <FormHelperText>
-                      Показываются только
-                      активные назначения.
+                      {t("destinationSelector.activeOnly")}
                     </FormHelperText>
                   </FormControl>
                 )}
@@ -445,7 +444,7 @@ export function DestinationSelector({
 
                   <>
                   <TextField
-                    label="RTMP-адрес"
+                    label={t("libraries.destination.url")}
                     value={
                       selectedDestination
                         .destination_rtmp_url
@@ -457,11 +456,7 @@ export function DestinationSelector({
                   />
 
                   <Alert severity="info">
-                    RTMP-адрес копируется
-                    в карточку. Последующие
-                    изменения библиотеки
-                    уже созданную трансляцию
-                    не изменяют.
+                    {t("destinationSelector.copyNotice")}
                   </Alert>
                   </>
                 </Stack>
@@ -471,7 +466,7 @@ export function DestinationSelector({
           : (
             <>
             <TextField
-              label="RTMP-адрес"
+              label={t("libraries.destination.url")}
               value={destinationUrl}
               onChange={(event) => {
                 onDestinationUrlChange(
@@ -486,10 +481,7 @@ export function DestinationSelector({
               }
             />
             <Alert severity="info">
-              Введённый вручную адрес
-              используется только в этой
-              карточке и не сохраняется
-              в библиотеку.
+              {t("destinationSelector.manualNotice")}
             </Alert>
             </>
 

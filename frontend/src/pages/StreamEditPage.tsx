@@ -44,6 +44,7 @@ import {
 import { useAuth }
   from "../auth/useAuth";
 
+import { useI18n } from "../i18n/useI18n";
 import { StreamForm }
   from "../features/streams/StreamForm";
 
@@ -54,6 +55,7 @@ import type {
 
 
 export default function StreamEditPage() {
+  const { t } = useI18n();
   const auth = useAuth();
   const navigate = useNavigate();
   const queryClient =
@@ -208,7 +210,7 @@ export default function StreamEditPage() {
               <ArrowBackIcon />
             }
           >
-            Назад
+            {t("libraries.back")}
           </Button>
 
           <span
@@ -234,7 +236,7 @@ export default function StreamEditPage() {
                 );
               }}
             >
-              Удалить
+              {t("libraries.delete")}
             </Button>
           )}
         </Stack>
@@ -243,7 +245,7 @@ export default function StreamEditPage() {
           variant="h4"
           component="h1"
         >
-          Редактировать трансляцию
+          {t("streamEdit.title")}
         </Typography>
 
         {streamQuery.isLoading && (
@@ -252,24 +254,19 @@ export default function StreamEditPage() {
 
         {streamQuery.isError && (
           <Alert severity="error">
-            Загрузить карточку
-            не удалось.
+            {t("streamEdit.loadError")}
           </Alert>
         )}
 
         {updateMutation.isError && (
           <Alert severity="error">
-            Сохранить изменения
-            не удалось. Работающий
-            поток необходимо сначала
-            остановить.
+            {t("streamEdit.saveError")}
           </Alert>
         )}
 
         {deleteMutation.isError && (
           <Alert severity="error">
-            Удалить поток не удалось.
-            Сначала остановите его.
+            {t("streamEdit.deleteError")}
           </Alert>
         )}
 
@@ -299,14 +296,12 @@ export default function StreamEditPage() {
         }}
       >
         <DialogTitle>
-          Удалить трансляцию?
+          {t("streamEdit.deleteTitle")}
         </DialogTitle>
 
         <DialogContent>
           <DialogContentText>
-            Карточка и связанная история
-            сессий будут удалены. Это
-            действие нельзя отменить.
+            {t("streamEdit.deleteWarning")}
           </DialogContentText>
         </DialogContent>
 
@@ -321,7 +316,7 @@ export default function StreamEditPage() {
               );
             }}
           >
-            Отмена
+            {t("libraries.cancel")}
           </Button>
 
           <Button
@@ -335,8 +330,8 @@ export default function StreamEditPage() {
             }}
           >
             {deleteMutation.isPending
-              ? "Удаление…"
-              : "Удалить"}
+              ? t("libraries.deleting")
+              : t("libraries.delete")}
           </Button>
         </DialogActions>
       </Dialog>
