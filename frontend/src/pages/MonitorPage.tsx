@@ -54,6 +54,9 @@ import {
   getStreams,
   getStreamStatus,
 } from "../api/streams";
+import {
+  useI18n,
+} from "../i18n/useI18n";
 
 import { StreamLivePlayer }
   from "../features/streams/StreamLivePlayer";
@@ -101,17 +104,6 @@ Array<{
 ];
 
 
-const providerLabels: Record<
-  string,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестно",
-};
 
 
 function readSavedLayout():
@@ -231,6 +223,24 @@ function MonitorTile({
   denseMetrics,
   fillContainer,
 }: MonitorTileProps) {
+  const {
+    t,
+  } = useI18n();
+
+  const providerLabels:
+    Record<string, string> = {
+      youtube: "YouTube",
+      twitch: "Twitch",
+      kick: "Kick",
+      vimeo: "Vimeo",
+      custom: t(
+        "stream.provider.custom",
+      ),
+      unknown: t(
+        "stream.provider.unknown",
+      ),
+    };
+
   const effectiveStatus =
     getEffectiveStatus(
       stream,
@@ -317,9 +327,12 @@ function MonitorTile({
           <Box
             component={Link}
             to={`/streams/${stream.id}`}
-            aria-label={
-              `Открыть ${stream.name}`
-            }
+            aria-label={t(
+              "monitor.openStream",
+              {
+                name: stream.name,
+              },
+            )}
             sx={{
               position: "absolute",
               inset: 0,
@@ -338,7 +351,9 @@ function MonitorTile({
             }}
           >
             <Tooltip
-              title="Открыть подробности"
+              title={t(
+                "monitor.openDetails",
+              )}
             >
               <IconButton
                 component={Link}
@@ -365,7 +380,9 @@ function MonitorTile({
             <Chip
               size="small"
               color="error"
-              label="ПРОБЛЕМА"
+              label={t(
+                "monitor.problem",
+              )}
               sx={{
                 position: "absolute",
                 left: 8,
@@ -570,13 +587,18 @@ function MonitorTile({
                   variant="caption"
                   color="text.secondary"
                 >
-                  {"FPS источника "}
-                  {(
-                    runtime?.metrics
-                      ?.source_fps
-                    ?? runtime?.metrics?.fps
-                    ?? 0
-                  ).toFixed(1)}
+                  {t(
+                    "monitor.sourceFps",
+                    {
+                      value: (
+                        runtime?.metrics
+                          ?.source_fps
+                        ?? runtime?.metrics
+                          ?.fps
+                        ?? 0
+                      ).toFixed(1),
+                    },
+                  )}
                 </Typography>
               )}
           </Stack>
@@ -588,6 +610,10 @@ function MonitorTile({
 
 
 export default function MonitorPage() {
+  const {
+    t,
+  } = useI18n();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(
     theme.breakpoints.down("md"),
@@ -902,7 +928,9 @@ export default function MonitorPage() {
                 fontWeight: 700,
               }}
             >
-              Монитор трансляций
+              {t(
+                "monitor.title",
+              )}
             </Typography>
 
             <Button
@@ -913,7 +941,9 @@ export default function MonitorPage() {
                 <ArrowBackIcon />
               }
             >
-              Dashboard
+              {t(
+                "monitor.dashboard",
+              )}
             </Button>
           </Toolbar>
         </AppBar>
@@ -985,7 +1015,9 @@ export default function MonitorPage() {
                   variant="body2"
                   color="text.secondary"
                 >
-                  Сетка
+                  {t(
+                    "monitor.grid",
+                  )}
                 </Typography>
               )}
 
@@ -1027,10 +1059,12 @@ export default function MonitorPage() {
                 size="small"
                 color="success"
                 variant="outlined"
-                label={
-                  `Работает: `
-                  + runningCount
-                }
+                label={t(
+                  "monitor.running",
+                  {
+                    count: runningCount,
+                  },
+                )}
               />
 
               {!isMobile
@@ -1039,11 +1073,17 @@ export default function MonitorPage() {
                   <Chip
                     size="small"
                     variant="outlined"
-                    label={
-                      `Камеры ${firstVisibleNumber}`
-                      + `–${lastVisibleNumber}`
-                      + ` из ${streams.length}`
-                    }
+                    label={t(
+                      "monitor.cameras",
+                      {
+                        first:
+                          firstVisibleNumber,
+                        last:
+                          lastVisibleNumber,
+                        total:
+                          streams.length,
+                      },
+                    )}
                   />
                 )}
 
@@ -1057,7 +1097,11 @@ export default function MonitorPage() {
                       alignItems: "center",
                     }}
                   >
-                    <Tooltip title="Предыдущие камеры">
+                    <Tooltip
+                      title={t(
+                        "monitor.previousCameras",
+                      )}
+                    >
                       <span>
                         <IconButton
                           size="small"
@@ -1088,7 +1132,11 @@ export default function MonitorPage() {
                       {pageCount}
                     </Typography>
 
-                    <Tooltip title="Следующие камеры">
+                    <Tooltip
+                      title={t(
+                        "monitor.nextCameras",
+                      )}
+                    >
                       <span>
                         <IconButton
                           size="small"
@@ -1117,10 +1165,12 @@ export default function MonitorPage() {
                     : "default"
                 }
                 variant="outlined"
-                label={
-                  `Проблемы: `
-                  + problemCount
-                }
+                label={t(
+                  "monitor.problems",
+                  {
+                    count: problemCount,
+                  },
+                )}
               />
             </Stack>
 
@@ -1129,7 +1179,9 @@ export default function MonitorPage() {
               spacing={1}
             >
               <Tooltip
-                title="Обновить данные"
+                title={t(
+                  "monitor.refresh",
+                )}
               >
                 <span>
                   <IconButton
@@ -1165,16 +1217,21 @@ export default function MonitorPage() {
                 }}
               >
                 {fullscreen
-                  ? "Выйти"
-                  : "Во весь экран"}
+                  ? t(
+                    "monitor.exitFullscreen",
+                  )
+                  : t(
+                    "monitor.fullscreen",
+                  )}
               </Button>
             </Stack>
           </Stack>
 
           {streamsQuery.isError && (
             <Alert severity="error">
-              Не удалось получить список
-              трансляций.
+              {t(
+                "monitor.loadError",
+              )}
             </Alert>
           )}
 
@@ -1182,11 +1239,7 @@ export default function MonitorPage() {
             && streams.length === 0
             && (
               <Alert severity="info">
-                На Dashboard пока нет
-                выбранных трансляций.
-                Включите параметр
-                «Показывать на Dashboard»
-                в настройках потока.
+                {t("monitor.empty")}
               </Alert>
             )}
 

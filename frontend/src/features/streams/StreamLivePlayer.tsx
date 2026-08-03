@@ -22,6 +22,9 @@ import Hls from "hls.js";
 import {
   getStreamPlayback,
 } from "../../api/streams";
+import {
+  useI18n,
+} from "../../i18n/useI18n";
 
 
 interface StreamLivePlayerProps {
@@ -40,6 +43,10 @@ export function StreamLivePlayer({
   compact = false,
   fillContainer = false,
 }: StreamLivePlayerProps) {
+  const {
+    t,
+  } = useI18n();
+
   const videoRef =
     useRef<HTMLVideoElement | null>(null);
 
@@ -152,7 +159,9 @@ export function StreamLivePlayer({
             return;
           }
           setPlayerError(
-            "Видеопоток временно недоступен",
+            t(
+              "player.unavailable",
+            ),
           );
           hls.destroy();
         },
@@ -207,12 +216,15 @@ export function StreamLivePlayer({
     }
 
     setPlayerError(
-      "Браузер не поддерживает HLS",
+      t(
+        "player.unsupported",
+      ),
     );
   }, [
     playbackQuery.data?.playlist_url,
     processAlive,
     connectionAttempt,
+    t,
   ]);
 
   useEffect(() => {
@@ -294,13 +306,19 @@ export function StreamLivePlayer({
 
           <Typography variant={compact ? "caption" : "body2"}>
             {!processAlive
-              ? "Поток остановлен"
+              ? t(
+                "preview.stopped",
+              )
               : (
                 playerError
                 ?? (
                   playbackQuery.isError
-                    ? "HLS ещё не готов"
-                    : "Подключение к видео…"
+                    ? t(
+                      "player.hlsNotReady",
+                    )
+                    : t(
+                      "player.connecting",
+                    )
                 )
               )}
           </Typography>

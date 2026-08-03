@@ -53,6 +53,10 @@ import {
 } from "../api/streams";
 import { useAuth }
   from "../auth/useAuth";
+import { LanguageSwitcher }
+  from "../components/LanguageSwitcher";
+import { useI18n }
+  from "../i18n/useI18n";
 import { StreamRow }
   from "../features/streams/StreamRow";
 import { StreamMobileCard }
@@ -69,12 +73,6 @@ type StreamFilter =
   | "dashboard"
   | "hidden"
   | "disabled";
-
-const roleLabels = {
-  viewer: "Наблюдатель",
-  operator: "Оператор",
-  admin: "Администратор",
-} as const;
 
 function getEffectiveStatus(
   stream: StreamItem,
@@ -113,6 +111,16 @@ function isStreamRunning(
 }
 
 export default function StreamsPage() {
+  const {
+    t,
+  } = useI18n();
+
+  const roleLabels = {
+    viewer: t("role.viewer"),
+    operator: t("role.operator"),
+    admin: t("role.admin"),
+  } as const;
+
   const theme = useTheme();
 
   const isMobile =
@@ -377,7 +385,7 @@ export default function StreamsPage() {
               fontWeight: 700,
             }}
           >
-            Все трансляции
+            {t("streams.title")}
           </Typography>
 
           <Button
@@ -395,9 +403,9 @@ export default function StreamsPage() {
               mr: 1,
             }}
           >
-            Библиотеки
+            {t("streams.libraries")}
           </Button>
-          <Tooltip title="Библиотеки">
+          <Tooltip title={t("streams.libraries")}>
             <IconButton
               component={Link}
               to="/libraries"
@@ -444,10 +452,10 @@ export default function StreamsPage() {
               },
             }}
           >
-            Выйти
+            {t("streams.logout")}
           </Button>
 
-          <Tooltip title="Выйти">
+          <Tooltip title={t("streams.logout")}>
             <IconButton
               color="inherit"
               onClick={auth.logout}
@@ -461,6 +469,22 @@ export default function StreamsPage() {
               <LogoutIcon />
             </IconButton>
           </Tooltip>
+
+          <Box
+            sx={{
+              ml: {
+                xs: 0.5,
+                sm: 1,
+              },
+              display: "inline-flex",
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <LanguageSwitcher
+              compact
+            />
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -501,7 +525,7 @@ export default function StreamsPage() {
                 variant="h4"
                 component="h1"
               >
-                Все трансляции
+                {t("streams.title")}
               </Typography>
 
               <Typography
@@ -510,9 +534,7 @@ export default function StreamsPage() {
                   mt: 0.5,
                 }}
               >
-                Управление активными,
-                скрытыми и отключёнными
-                потоками
+                {t("streams.subtitle")}
               </Typography>
             </Box>
 
@@ -526,7 +548,7 @@ export default function StreamsPage() {
             >
               <Chip
                 label={
-                  `Всего: ${streams.length}`
+                  t("streams.total", { count: streams.length })
                 }
               />
 
@@ -534,7 +556,7 @@ export default function StreamsPage() {
                 color="success"
                 variant="outlined"
                 label={
-                  `Работает: ${runningCount}`
+                  t("streams.running", { count: runningCount })
                 }
               />
 
@@ -542,9 +564,7 @@ export default function StreamsPage() {
                 color="primary"
                 variant="outlined"
                 label={
-                  `На Dashboard: ${
-                    dashboardCount
-                  }`
+                  t("streams.onDashboard", { count: dashboardCount })
                 }
               />
 
@@ -554,11 +574,11 @@ export default function StreamsPage() {
                   to="/streams/new"
                   variant="contained"
                 >
-                  Новая трансляция
+                  {t("streams.new")}
                 </Button>
               )}
 
-              <Tooltip title="Обновить всё">
+              <Tooltip title={t("streams.refreshAll")}>
                 <span>
                   <IconButton
                     disabled={
@@ -598,9 +618,7 @@ export default function StreamsPage() {
                 size="small"
                 value={search}
                 placeholder={
-                  "Поиск по названию, "
-                  + "описанию, провайдеру "
-                  + "или ID"
+                  t("streams.search")
                 }
                 onChange={(event) => {
                   setSearch(
@@ -636,27 +654,27 @@ export default function StreamsPage() {
                   }}
                 >
                   <MenuItem value="all">
-                    Все
+                    {t("streams.filter.all")}
                   </MenuItem>
 
                   <MenuItem value="running">
-                    Работающие
+                    {t("streams.filter.running")}
                   </MenuItem>
 
                   <MenuItem value="stopped">
-                    Остановленные
+                    {t("streams.filter.stopped")}
                   </MenuItem>
 
                   <MenuItem value="dashboard">
-                    На Dashboard
+                    {t("streams.filter.dashboard")}
                   </MenuItem>
 
                   <MenuItem value="hidden">
-                    Скрытые
+                    {t("streams.filter.hidden")}
                   </MenuItem>
 
                   <MenuItem value="disabled">
-                    Отключённые
+                    {t("streams.filter.disabled")}
                   </MenuItem>
                 </Select>
               </FormControl>
@@ -665,8 +683,7 @@ export default function StreamsPage() {
 
           {streamsQuery.isError && (
             <Alert severity="error">
-              Не удалось получить список
-              трансляций.
+              {t("streams.loadError")}
             </Alert>
           )}
 
@@ -682,7 +699,7 @@ export default function StreamsPage() {
             >
               <CircularProgress />
               <Typography>
-                Загрузка трансляций…
+                {t("streams.loading")}
               </Typography>
             </Stack>
           )}
@@ -692,8 +709,7 @@ export default function StreamsPage() {
               === 0
             && (
               <Alert severity="info">
-                Трансляции по выбранным
-                условиям не найдены.
+                {t("streams.empty")}
               </Alert>
             )}
 
@@ -796,15 +812,15 @@ export default function StreamsPage() {
                           </TableCell>
 
                           <TableCell>
-                            Название
+                            {t("streams.column.name")}
                           </TableCell>
 
                           <TableCell>
-                            Статус
+                            {t("streams.column.status")}
                           </TableCell>
 
                           <TableCell>
-                            Диагностика
+                            {t("streams.column.diagnostic")}
                           </TableCell>
 
                             <TableCell>
@@ -812,21 +828,21 @@ export default function StreamsPage() {
                             </TableCell>
 
                           <TableCell>
-                            Провайдер
+                            {t("streams.column.provider")}
                           </TableCell>
 
                           <TableCell>
-                            Узел
+                            {t("streams.column.node")}
                           </TableCell>
 
                           <TableCell>
-                            Доступность
+                            {t("streams.column.availability")}
                           </TableCell>
 
                           <TableCell
                             align="right"
                           >
-                            Действия
+                            {t("streams.column.actions")}
                           </TableCell>
                         </TableRow>
                       </TableHead>

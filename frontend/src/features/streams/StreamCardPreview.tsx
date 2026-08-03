@@ -19,6 +19,9 @@ import {
 import {
   getStreamPreview,
 } from "../../api/streams";
+import {
+  useI18n,
+} from "../../i18n/useI18n";
 
 
 interface StreamCardPreviewProps {
@@ -31,6 +34,10 @@ export function StreamCardPreview({
   streamId,
   processAlive,
 }: StreamCardPreviewProps) {
+  const {
+    t,
+  } = useI18n();
+
   const [
     imageUrl,
     setImageUrl,
@@ -146,7 +153,7 @@ export function StreamCardPreview({
         <Box
           component="img"
           src={imageUrl}
-          alt="Кадр трансляции"
+          alt={t("preview.alt")}
           sx={{
             width: "100%",
             height: "100%",
@@ -185,10 +192,16 @@ export function StreamCardPreview({
             {processAlive
               ? (
                 previewQuery.isFetching
-                  ? "Получение кадра…"
-                  : "Кадр недоступен"
+                  ? t(
+                    "preview.loading",
+                  )
+                  : t(
+                    "preview.unavailable",
+                  )
               )
-              : "Поток остановлен"}
+              : t(
+                "preview.stopped",
+              )}
           </Typography>
         </Box>
       )}

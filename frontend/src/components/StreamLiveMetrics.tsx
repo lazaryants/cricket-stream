@@ -6,6 +6,10 @@ import {
 import type {
   StreamMetrics,
 } from "../types/stream";
+
+import {
+  useI18n,
+} from "../i18n/useI18n";
 import {
   formatAudioCodec,
   formatBitrate,
@@ -88,6 +92,10 @@ export function StreamLiveMetrics({
   compact = false,
   dense = false,
 }: StreamLiveMetricsProps) {
+  const {
+    t,
+  } = useI18n();
+
   if (
     !processAlive
     && !hasLiveMetrics(metrics)
@@ -97,7 +105,7 @@ export function StreamLiveMetrics({
         variant="caption"
         color="text.secondary"
       >
-        Нет live-метрик
+        {t("metrics.none")}
       </Typography>
     );
   }
@@ -108,53 +116,72 @@ export function StreamLiveMetrics({
         variant="caption"
         color="text.secondary"
       >
-        Ожидание метрик…
+        {t(
+          "metrics.waiting",
+        )}
       </Typography>
     );
   }
 
   const values = [
     {
-      label: "Разрешение",
+      label: t(
+        "metrics.resolution",
+      ),
       value:
         formatResolution(metrics),
     },
     {
-      label: "FPS источника",
+      label: t(
+        "metrics.sourceFps",
+      ),
       value:
         formatFps(metrics),
     },
     {
-      label: "Выходной битрейт",
+      label: t(
+        "metrics.outputBitrate",
+      ),
       value:
         formatBitrate(
           metrics.bitrate_kbps,
         ),
     },
     {
-      label: "Скорость FFmpeg",
+      label: t(
+        "metrics.ffmpegSpeed",
+      ),
       value:
         formatSpeed(metrics),
     },
     {
-      label: "Видеокодек",
+      label: t(
+        "metrics.videoCodec",
+      ),
       value:
         formatVideoCodec(metrics),
     },
     {
-      label: "Аудиокодек",
+      label: t(
+        "metrics.audioCodec",
+      ),
       value:
         formatAudioCodec(metrics),
     },
     {
-      label: "Время работы",
+      label: t(
+        "metrics.uptime",
+      ),
       value:
         formatDuration(
           metrics.uptime_seconds,
+          t("time.dayShort"),
         ),
     },
     {
-      label: "Пропущено FFmpeg",
+      label: t(
+        "metrics.dropped",
+      ),
       value: String(
         metrics.drop_frames ?? 0,
       ),

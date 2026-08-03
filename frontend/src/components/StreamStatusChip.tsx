@@ -3,6 +3,10 @@ import {
   type ChipProps,
 } from "@mui/material";
 
+import {
+  useI18n,
+} from "../i18n/useI18n";
+
 import type {
   StreamStatus,
 } from "../types/stream";
@@ -10,20 +14,6 @@ import type {
 interface StreamStatusChipProps {
   status: StreamStatus | string;
 }
-
-const statusLabels: Record<
-  string,
-  string
-> = {
-  draft: "Черновик",
-  ready: "Готов",
-  starting: "Запускается",
-  running: "Работает",
-  restarting: "Перезапускается",
-  stopping: "Останавливается",
-  stopped: "Остановлен",
-  error: "Ошибка",
-};
 
 function getStatusColor(
   status: string,
@@ -51,6 +41,32 @@ function getStatusColor(
 export function StreamStatusChip({
   status,
 }: StreamStatusChipProps) {
+  const {
+    t,
+  } = useI18n();
+
+  const statusLabels:
+    Record<string, string> = {
+      draft: t("status.draft"),
+      ready: t("status.ready"),
+      starting: t(
+        "status.starting",
+      ),
+      running: t(
+        "status.running",
+      ),
+      restarting: t(
+        "status.restarting",
+      ),
+      stopping: t(
+        "status.stopping",
+      ),
+      stopped: t(
+        "status.stopped",
+      ),
+      error: t("status.error"),
+    };
+
   return (
     <Chip
       size="small"

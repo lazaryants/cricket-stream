@@ -39,6 +39,7 @@ export function formatBitrate(
 
 export function formatDuration(
   seconds: NullableNumber,
+  dayShort: string = "d",
 ): string {
   if (
     seconds === null
@@ -88,7 +89,7 @@ export function formatDuration(
     .join(":");
 
   return days > 0
-    ? `${days}д ${time}`
+    ? `${days}${dayShort} ${time}`
     : time;
 }
 

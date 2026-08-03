@@ -12,6 +12,8 @@ import EditIcon
 import { Link }
   from "react-router";
 
+import { useI18n } from "../../i18n/useI18n";
+
 import {
   StreamLivePlayer,
 } from "./StreamLivePlayer";
@@ -29,6 +31,8 @@ export function StreamPreview({
   processAlive,
   editUrl,
 }: StreamPreviewProps) {
+  const { t } = useI18n();
+
   return (
     <Card
       sx={{
@@ -56,15 +60,13 @@ export function StreamPreview({
               sx={{ flexGrow: 1 }}
             >
               <Typography variant="h6">
-                Предпросмотр трансляции
+                {t("streamPreview.title")}
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
               >
-                Живое HLS-видео без
-                перекодирования. Полный экран
-                доступен в панели плеера.
+                {t("streamPreview.subtitle")}
               </Typography>
             </Stack>
 
@@ -76,7 +78,7 @@ export function StreamPreview({
                 startIcon={<EditIcon />}
                 sx={{ flexShrink: 0 }}
               >
-                Редактировать
+                {t("common.edit")}
               </Button>
             )}
           </Stack>

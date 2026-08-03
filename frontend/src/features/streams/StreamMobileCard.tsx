@@ -47,18 +47,8 @@ import type {
 import {
   useState,
 } from "react";
-
-const providerLabels: Record<
-  string,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестно",
-};
+import { useI18n }
+  from "../../i18n/useI18n";
 
 interface StreamMobileCardProps {
   stream: StreamItem;
@@ -69,6 +59,7 @@ interface StreamMobileCardProps {
 
 function getErrorMessage(
   error: unknown,
+  fallbackMessage: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -89,10 +80,7 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Операция не выполнена. "
-    + "Проверьте состояние трансляции."
-  );
+  return fallbackMessage;
 }
 
 function getEffectiveStatus(
@@ -159,6 +147,22 @@ export function StreamMobileCard({
   runtime,
   canManage,
 }: StreamMobileCardProps) {
+  const {
+    t,
+  } = useI18n();
+
+  const providerLabels: Record<
+    string,
+    string
+  > = {
+    youtube: "YouTube",
+    twitch: "Twitch",
+    kick: "Kick",
+    vimeo: "Vimeo",
+    custom: t("stream.provider.custom"),
+    unknown: t("stream.provider.unknown"),
+  };
+
   const queryClient =
     useQueryClient();
 
@@ -251,7 +255,10 @@ export function StreamMobileCard({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t("stream.operationError"),
+          ),
         );
       },
     });
@@ -296,7 +303,10 @@ export function StreamMobileCard({
 
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t("stream.operationError"),
+          ),
         );
       },
     });
@@ -427,8 +437,8 @@ export function StreamMobileCard({
               variant="outlined"
               label={
                 stream.enabled
-                  ? "Включена"
-                  : "Отключена"
+                  ? t("streams.enabled")
+                  : t("streams.disabled")
               }
             />
           </Stack>
@@ -443,7 +453,7 @@ export function StreamMobileCard({
                   mb: 0.5,
                 }}
               >
-                Назначение
+                {t("streams.destination")}
               </Typography>
               <Typography
                 variant="body2"
@@ -471,7 +481,7 @@ export function StreamMobileCard({
                 mb: 0.75,
               }}
             >
-              Live-метрики
+              {t("streams.liveMetrics")}
             </Typography>
 
             <StreamLiveMetrics
@@ -513,7 +523,7 @@ export function StreamMobileCard({
                 mb: 0.75,
               }}
             >
-              Диагностика
+              {t("streams.diagnostic")}
             </Typography>
 
             <StreamDiagnosticChip
@@ -550,14 +560,14 @@ export function StreamMobileCard({
                   fontWeight: 600,
                 }}
               >
-                На Dashboard
+                {t("streams.onDashboardLabel")}
               </Typography>
 
               <Typography
                 variant="caption"
                 color="text.secondary"
               >
-                Показывать карточку
+                {t("streams.showCard")}
               </Typography>
             </Box>
 
@@ -580,8 +590,7 @@ export function StreamMobileCard({
               }}
               slotProps={{
                 input: {
-                  "aria-label":
-                    "Показывать на Dashboard",
+                  "aria-label": t("streams.showOnDashboard"),
                 },
               }}
             />
@@ -630,8 +639,8 @@ export function StreamMobileCard({
               }}
             >
               {running
-                ? "Остановить трансляцию"
-                : "Запустить трансляцию"}
+                ? t("streams.stopStream")
+                : t("streams.startStream")}
             </Button>
           )}
 
@@ -650,7 +659,7 @@ export function StreamMobileCard({
                 <OpenInNewIcon />
               }
             >
-              Подробнее
+              {t("streams.details")}
             </Button>
 
             {canManage && (
@@ -660,7 +669,7 @@ export function StreamMobileCard({
                   `/streams/${stream.id}/edit`
                 }
                 variant="outlined"
-                aria-label="Редактировать"
+                aria-label={t("streams.edit")}
                 sx={{
                   minWidth: 48,
                   px: 1.5,

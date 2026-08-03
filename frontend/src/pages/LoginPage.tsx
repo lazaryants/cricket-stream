@@ -1,4 +1,6 @@
 import {
+  useEffect,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -28,7 +30,12 @@ import {
   useNavigate,
 } from "react-router";
 
-import { useAuth } from "../auth/useAuth";
+import { useAuth }
+  from "../auth/useAuth";
+import { LanguageSwitcher }
+  from "../components/LanguageSwitcher";
+import { useI18n }
+  from "../i18n/useI18n";
 
 interface LocationState {
   from?: string;
@@ -37,6 +44,7 @@ interface LocationState {
 
 function getErrorMessage(
   error: unknown,
+  fallbackMessage: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -47,17 +55,27 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Не удалось выполнить вход. "
-    + "Проверьте имя пользователя "
-    + "и пароль."
-  );
+  return fallbackMessage;
 }
 
 export default function LoginPage() {
+  const {
+    t,
+  } = useI18n();
+
   const auth = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const usernameInputRef =
+    useRef<HTMLInputElement | null>(
+      null,
+    );
+
+  const passwordInputRef =
+    useRef<HTMLInputElement | null>(
+      null,
+    );
 
   const [
     username,
@@ -80,6 +98,70 @@ export default function LoginPage() {
     isSubmitting,
     setIsSubmitting,
   ] = useState(false);
+
+  useEffect(() => {
+    let attempt = 0;
+    let timeoutId:
+      ReturnType<typeof setTimeout>
+      | undefined;
+
+    const syncAutofill = () => {
+      const autofilledUsername =
+        usernameInputRef
+          .current
+          ?.value
+          ?? "";
+
+      const autofilledPassword =
+        passwordInputRef
+          .current
+          ?.value
+          ?? "";
+
+      if (autofilledUsername) {
+        setUsername(
+          autofilledUsername,
+        );
+      }
+
+      if (autofilledPassword) {
+        setPassword(
+          autofilledPassword,
+        );
+      }
+
+      attempt += 1;
+
+      /*
+       * Firefox and Chromium may apply
+       * saved credentials shortly after
+       * the initial React render.
+       */
+      if (
+        attempt < 10
+        && (
+          !autofilledUsername
+          || !autofilledPassword
+        )
+      ) {
+        timeoutId = setTimeout(
+          syncAutofill,
+          100,
+        );
+      }
+    };
+
+    timeoutId = setTimeout(
+      syncAutofill,
+      0,
+    );
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   const locationState =
     location.state as
@@ -121,7 +203,10 @@ export default function LoginPage() {
       );
     } catch (error) {
       setErrorMessage(
-        getErrorMessage(error),
+        getErrorMessage(
+          error,
+          t("login.error"),
+        ),
       );
     } finally {
       setIsSubmitting(false);
@@ -136,6 +221,7 @@ export default function LoginPage() {
         placeItems: "center",
         px: 2,
         py: 4,
+        position: "relative",
         background:
           "radial-gradient("
           + "circle at top, "
@@ -144,6 +230,25 @@ export default function LoginPage() {
           + ")",
       }}
     >
+      <Box
+        sx={{
+          position: "absolute",
+          top: {
+            xs: 16,
+            sm: 24,
+          },
+          right: {
+            xs: 16,
+            sm: 24,
+          },
+          zIndex: 1,
+        }}
+      >
+        <LanguageSwitcher
+          compact
+        />
+      </Box>
+
       <Container maxWidth="xs">
         <Card
           elevation={12}
@@ -198,7 +303,9 @@ export default function LoginPage() {
                 <Typography
                   color="text.secondary"
                 >
-                  Вход в панель управления
+                  {t(
+                    "login.subtitle",
+                  )}
                 </Typography>
               </Stack>
 
@@ -213,13 +320,22 @@ export default function LoginPage() {
               {locationState
                 ?.passwordChanged
                 && (
-                  <Alert severity="success">
-                    Пароль изменён. Войдите с новым паролем.
+                  <Alert
+                    severity="success"
+                  >
+                    {t(
+                      "login.passwordChanged",
+                    )}
                   </Alert>
                 )}
 
               <TextField
-                label="Имя пользователя"
+                inputRef={
+                  usernameInputRef
+                }
+                label={t(
+                  "login.username",
+                )}
                 value={username}
                 onChange={(event) => {
                   setUsername(
@@ -227,6 +343,31 @@ export default function LoginPage() {
                   );
                 }}
                 autoComplete="username"
+                sx={{
+                  "& input:-webkit-autofill": {
+                    WebkitBoxShadow:
+                      "0 0 0 1000px "
+                      + "rgba(15,23,42,1) "
+                      + "inset",
+                    WebkitTextFillColor:
+                      "#ffffff",
+                    caretColor:
+                      "#ffffff",
+                    transition:
+                      "background-color "
+                      + "9999s ease-out 0s",
+                  },
+                  "& input:-moz-autofill": {
+                    boxShadow:
+                      "0 0 0 1000px "
+                      + "rgba(15,23,42,1) "
+                      + "inset",
+                    color:
+                      "#ffffff",
+                    caretColor:
+                      "#ffffff",
+                  },
+                }}
                 autoFocus
                 required
                 fullWidth
@@ -236,7 +377,12 @@ export default function LoginPage() {
               />
 
               <TextField
-                label="Пароль"
+                inputRef={
+                  passwordInputRef
+                }
+                label={t(
+                  "login.password",
+                )}
                 type="password"
                 value={password}
                 onChange={(event) => {
@@ -247,6 +393,31 @@ export default function LoginPage() {
                 autoComplete={
                   "current-password"
                 }
+                sx={{
+                  "& input:-webkit-autofill": {
+                    WebkitBoxShadow:
+                      "0 0 0 1000px "
+                      + "rgba(15,23,42,1) "
+                      + "inset",
+                    WebkitTextFillColor:
+                      "#ffffff",
+                    caretColor:
+                      "#ffffff",
+                    transition:
+                      "background-color "
+                      + "9999s ease-out 0s",
+                  },
+                  "& input:-moz-autofill": {
+                    boxShadow:
+                      "0 0 0 1000px "
+                      + "rgba(15,23,42,1) "
+                      + "inset",
+                    color:
+                      "#ffffff",
+                    caretColor:
+                      "#ffffff",
+                  },
+                }}
                 required
                 fullWidth
                 disabled={
@@ -276,8 +447,12 @@ export default function LoginPage() {
                 }
               >
                 {isSubmitting
-                  ? "Выполняется вход…"
-                  : "Войти"}
+                  ? t(
+                    "login.submitting",
+                  )
+                  : t(
+                    "login.submit",
+                  )}
               </Button>
             </Stack>
           </CardContent>
