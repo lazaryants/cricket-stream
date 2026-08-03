@@ -269,6 +269,61 @@ export const translations = {
     "libraries.deleteDestinationTitle":
       "Delete destination?",
 
+    "streams.title": "All streams",
+    "streams.libraries": "Libraries",
+    "streams.logout": "Log out",
+    "streams.subtitle":
+      "Manage active, hidden and disabled streams",
+    "streams.total": "Total: {{count}}",
+    "streams.running": "Running: {{count}}",
+    "streams.onDashboard":
+      "On Dashboard: {{count}}",
+    "streams.new": "New stream",
+    "streams.refreshAll": "Refresh all",
+    "streams.search":
+      "Search by name, description, provider or ID",
+    "streams.filter.all": "All",
+    "streams.filter.running": "Running",
+    "streams.filter.stopped": "Stopped",
+    "streams.filter.dashboard":
+      "On Dashboard",
+    "streams.filter.hidden": "Hidden",
+    "streams.filter.disabled": "Disabled",
+    "streams.loadError":
+      "Unable to load the stream list.",
+    "streams.loading": "Loading streams…",
+    "streams.empty":
+      "No streams match the selected filters.",
+    "streams.column.name": "Name",
+    "streams.column.status": "Status",
+    "streams.column.diagnostic":
+      "Diagnostic",
+    "streams.column.provider": "Provider",
+    "streams.column.node": "Node",
+    "streams.column.availability":
+      "Availability",
+    "streams.column.actions": "Actions",
+    "streams.visibleOnDashboard":
+      "Shown on Dashboard",
+    "streams.hiddenFromDashboard":
+      "Hidden from Dashboard",
+    "streams.showOnDashboard":
+      "Show on Dashboard",
+    "streams.destination": "Destination",
+    "streams.enabled": "Enabled",
+    "streams.disabled": "Disabled",
+    "streams.details": "Details",
+    "streams.edit": "Edit",
+    "streams.start": "Start",
+    "streams.stop": "Stop",
+    "streams.liveMetrics": "Live metrics",
+    "streams.diagnostic": "Diagnostic",
+    "streams.onDashboardLabel":
+      "On Dashboard",
+    "streams.showCard": "Show card",
+    "streams.startStream": "Start stream",
+    "streams.stopStream": "Stop stream",
+
     "login.subtitle":
       "Sign in to the control panel",
     "login.username": "Username",
@@ -543,6 +598,61 @@ export const translations = {
       "Удалить источник?",
     "libraries.deleteDestinationTitle":
       "Удалить назначение?",
+
+    "streams.title": "Все трансляции",
+    "streams.libraries": "Библиотеки",
+    "streams.logout": "Выйти",
+    "streams.subtitle":
+      "Управление активными, скрытыми и отключёнными потоками",
+    "streams.total": "Всего: {{count}}",
+    "streams.running": "Работает: {{count}}",
+    "streams.onDashboard":
+      "На Dashboard: {{count}}",
+    "streams.new": "Новая трансляция",
+    "streams.refreshAll": "Обновить всё",
+    "streams.search":
+      "Поиск по названию, описанию, провайдеру или ID",
+    "streams.filter.all": "Все",
+    "streams.filter.running": "Работающие",
+    "streams.filter.stopped": "Остановленные",
+    "streams.filter.dashboard":
+      "На Dashboard",
+    "streams.filter.hidden": "Скрытые",
+    "streams.filter.disabled": "Отключённые",
+    "streams.loadError":
+      "Не удалось получить список трансляций.",
+    "streams.loading": "Загрузка трансляций…",
+    "streams.empty":
+      "Трансляции по выбранным условиям не найдены.",
+    "streams.column.name": "Название",
+    "streams.column.status": "Статус",
+    "streams.column.diagnostic":
+      "Диагностика",
+    "streams.column.provider": "Провайдер",
+    "streams.column.node": "Узел",
+    "streams.column.availability":
+      "Доступность",
+    "streams.column.actions": "Действия",
+    "streams.visibleOnDashboard":
+      "Показывается на Dashboard",
+    "streams.hiddenFromDashboard":
+      "Скрыта с Dashboard",
+    "streams.showOnDashboard":
+      "Показывать на Dashboard",
+    "streams.destination": "Назначение",
+    "streams.enabled": "Включена",
+    "streams.disabled": "Отключена",
+    "streams.details": "Подробнее",
+    "streams.edit": "Редактировать",
+    "streams.start": "Старт",
+    "streams.stop": "Стоп",
+    "streams.liveMetrics": "Live-метрики",
+    "streams.diagnostic": "Диагностика",
+    "streams.onDashboardLabel":
+      "На Dashboard",
+    "streams.showCard": "Показывать карточку",
+    "streams.startStream": "Запустить трансляцию",
+    "streams.stopStream": "Остановить трансляцию",
 
     "login.subtitle":
       "Вход в панель управления",

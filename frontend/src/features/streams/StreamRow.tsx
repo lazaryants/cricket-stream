@@ -47,18 +47,8 @@ import type {
 import {
   useState,
 } from "react";
-
-const providerLabels: Record<
-  string,
-  string
-> = {
-  youtube: "YouTube",
-  twitch: "Twitch",
-  kick: "Kick",
-  vimeo: "Vimeo",
-  custom: "Прямая ссылка",
-  unknown: "Неизвестно",
-};
+import { useI18n }
+  from "../../i18n/useI18n";
 
 interface StreamRowProps {
   stream: StreamItem;
@@ -69,6 +59,7 @@ interface StreamRowProps {
 
 function getErrorMessage(
   error: unknown,
+  fallbackMessage: string,
 ): string {
   if (axios.isAxiosError(error)) {
     const detail =
@@ -89,10 +80,7 @@ function getErrorMessage(
     }
   }
 
-  return (
-    "Операция не выполнена. "
-    + "Проверьте состояние трансляции."
-  );
+  return fallbackMessage;
 }
 
 function getEffectiveStatus(
@@ -136,6 +124,22 @@ export function StreamRow({
   runtime,
   canManage,
 }: StreamRowProps) {
+  const {
+    t,
+  } = useI18n();
+
+  const providerLabels: Record<
+    string,
+    string
+  > = {
+    youtube: "YouTube",
+    twitch: "Twitch",
+    kick: "Kick",
+    vimeo: "Vimeo",
+    custom: t("stream.provider.custom"),
+    unknown: t("stream.provider.unknown"),
+  };
+
   const queryClient =
     useQueryClient();
 
@@ -223,7 +227,10 @@ export function StreamRow({
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t("stream.operationError"),
+          ),
         );
       },
     });
@@ -264,7 +271,10 @@ export function StreamRow({
       },
       onError: (error) => {
         setActionError(
-          getErrorMessage(error),
+          getErrorMessage(
+            error,
+            t("stream.operationError"),
+          ),
         );
       },
     });
@@ -290,9 +300,10 @@ export function StreamRow({
         >
           <Tooltip
             title={
+
               stream.show_on_dashboard
-                ? "Показывается на Dashboard"
-                : "Скрыта с Dashboard"
+                ? t("streams.visibleOnDashboard")
+                : t("streams.hiddenFromDashboard")
             }
           >
             <span>
@@ -316,8 +327,7 @@ export function StreamRow({
                 }}
                 slotProps={{
                   input: {
-                    "aria-label":
-                      "Показывать на Dashboard",
+                    "aria-label": t("streams.showOnDashboard"),
                   },
                 }}
               />
@@ -383,7 +393,7 @@ export function StreamRow({
                     .destination_rtmp_url
                 }
               >
-                Назначение:{" "}
+                {t("streams.destination")}: {" "}
                 {
                   stream
                     .destination_rtmp_url
@@ -460,8 +470,8 @@ export function StreamRow({
             variant="outlined"
             label={
               stream.enabled
-                ? "Включена"
-                : "Отключена"
+                ? t("streams.enabled")
+                : t("streams.disabled")
             }
           />
         </TableCell>
@@ -477,7 +487,7 @@ export function StreamRow({
               minWidth: 220,
             }}
           >
-            <Tooltip title="Подробнее">
+            <Tooltip title={t("streams.details")}>
               <IconButton
                 component={Link}
                 to={
@@ -493,7 +503,7 @@ export function StreamRow({
 
             {canManage && (
               <Tooltip
-                title="Редактировать"
+                title={t("streams.edit")}
               >
                 <IconButton
                   component={Link}
@@ -542,7 +552,7 @@ export function StreamRow({
                     px: 1,
                   }}
                 >
-                  Старт
+                  {t("streams.start")}
                 </Button>
 
                 <Button
@@ -573,7 +583,7 @@ export function StreamRow({
                     px: 1,
                   }}
                 >
-                  Стоп
+                  {t("streams.stop")}
                 </Button>
               </>
             )}
