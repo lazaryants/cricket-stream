@@ -125,19 +125,41 @@ cd /opt/cricket-stream/backend
 
 ## Документация
 
-На русском:
+Русская документация:
 
+- [Индекс документации](docs/ru/README.md)
+- [Руководство пользователя](docs/ru/USER_GUIDE.md)
+- [Развёртывание](docs/ru/DEPLOYMENT.md)
+- [Эксплуатация](docs/ru/OPERATIONS.md)
+- [Резервное копирование и восстановление](docs/ru/BACKUP_RESTORE.md)
+- [Обновление](docs/ru/UPGRADE.md)
+- [Архитектура](docs/ru/ARCHITECTURE.md)
+- [Видеотракт](docs/ru/VIDEO_PIPELINE.md)
+- [Руководство разработчика](docs/ru/DEVELOPER_GUIDE.md)
+- [План развития](docs/ru/ROADMAP.md)
 - [Примечания к релизу 1.0.0](docs/ru/RELEASE_NOTES_v1.0.0.md)
-- Руководства по развёртыванию, эксплуатации, архитектуре и работе пользователя будут перенесены в `docs/ru/`
 
-На английском:
+Английская документация:
 
 - [English README](README.md)
+- [Documentation index](docs/en/README.md)
+- [User Guide](docs/en/USER_GUIDE.md)
+- [Deployment Guide](docs/en/DEPLOYMENT.md)
+- [Operations Guide](docs/en/OPERATIONS.md)
+- [Backup and Restore](docs/en/BACKUP_RESTORE.md)
+- [Upgrade Guide](docs/en/UPGRADE.md)
+- [Architecture](docs/en/ARCHITECTURE.md)
+- [Video Pipeline](docs/en/VIDEO_PIPELINE.md)
+- [Developer Guide](docs/en/DEVELOPER_GUIDE.md)
+- [Roadmap](docs/en/ROADMAP.md)
 - [Release Notes 1.0.0](docs/en/RELEASE_NOTES_v1.0.0.md)
-- Руководства будут перенесены в `docs/en/`
 
-История проекта:
+Политики и история:
 
+- [Политика безопасности](SECURITY.ru.md)
+- [Security Policy](SECURITY.md)
+- [Участие в разработке](CONTRIBUTING.ru.md)
+- [Contributing](CONTRIBUTING.md)
 - [История изменений](CHANGELOG.ru.md)
 - [Changelog](CHANGELOG.md)
 
